@@ -1,0 +1,36 @@
+# Build output
+target/
+desktop/node_modules/
+desktop/dist/
+desktop/src-tauri/target/
+node_modules/
+
+# Environment secrets
+.env
+.env.*
+!.env.example
+
+# Local private OpenNivara configuration
+/profile.toml
+/preferences.toml
+/style.toml
+/contexts.toml
+/tools.toml
+/telegram.toml
+/map.toml
+/design.toml
+
+# Local private databases and SQLite sidecars
+*.sqlite
+*.sqlite-*
+*.db
+*.db-*
+
+# Logs and generated output that may contain private data
+*.log
+logs/
+artifacts/
+coverage/
+test-results/
+playwright-report/
+playwright/.cache/

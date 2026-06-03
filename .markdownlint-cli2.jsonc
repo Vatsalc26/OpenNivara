@@ -1,0 +1,22 @@
+{
+  "config": {
+    "default": true,
+    "MD013": false,
+    "MD033": false
+  },
+  "globs": [
+    "docs/README.md",
+    "docs/STATUS.md",
+    "docs/_meta/**/*.md",
+    "docs/adr/**/*.md",
+    "docs/current/**/*.md",
+    "docs-site/**/*.mdx"
+  ],
+  "ignores": [
+    "target/**",
+    "desktop/dist/**",
+    "desktop/src-tauri/target/**",
+    "desktop/node_modules/**",
+    "node_modules/**"
+  ]
+}

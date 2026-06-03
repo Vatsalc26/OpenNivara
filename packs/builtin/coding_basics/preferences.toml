@@ -1,0 +1,31 @@
+schema_version = 2
+
+[[sections]]
+id = "coding_basics_pref"
+enabled = true
+send_policy = "triggered_strict"
+description = "Coding Basics preferences for clean, functional and defensive design."
+triggers = ["code", "refactor", "programming", "clean", "structure"]
+required_any = []
+negative_triggers = []
+min_score = 1
+
+[[sections.likes]]
+item = "pure functions and clean functional architecture"
+strength = 4
+
+[[sections.likes]]
+item = "meaningful, highly descriptive variable and function names"
+strength = 5
+
+[[sections.dislikes]]
+item = "magic numbers and hardcoded variables"
+strength = 4
+
+[[sections.dislikes]]
+item = "excessively deep loop nesting"
+strength = 3
+
+[[sections.notes]]
+- "Emphasize writing self-documenting code with expressive types instead of heavy comment walls."
+- "Prefer simple functional constructs (e.g. map, filter) over mutable accumulator loops where clean."

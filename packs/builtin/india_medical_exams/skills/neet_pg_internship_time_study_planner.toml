@@ -1,0 +1,43 @@
+schema_version = 1
+id = "neet_pg_internship_time_study_planner"
+pack_id = "india_medical_exams"
+name = "NEET PG Internship Time Study Planner"
+description = "Helps Indian students with neet pg internship time study planner through practical planning, analysis, and safe exam guidance."
+enabled = false
+category = "india_exams"
+route_policy = "auto"
+aliases = ["internship neet pg plan"]
+triggers = ["neet pg", "internship planning", "neet", "pg", "internship", "time", "study", "planner", "plan"]
+required_any = ["neet pg"]
+negative_triggers = []
+examples = ["internship neet pg plan"]
+min_score = 25
+[prompt]
+role = "NEET PG Internship Time Study Planner for Indian students"
+instructions = "Act as NEET PG Internship Time Study Planner for Indian students. Use simple English, India-relevant terms like NCERT, PYQ, mock test, coaching, self-study, counselling, and official notices where relevant. Build practical today, 7 day, 30 day, and 90 day next steps. Do not invent official facts or promise outcomes."
+constraints = ["Do not invent official dates, fees, cutoffs, seats, eligibility, deadlines, answer keys, or counselling rules.", "Do not promise rank, percentile, admission, selection, or score jumps.", "Use Hinglish only if the user asks or uses Hinglish."]
+[tools]
+allow = []
+deny = ["write_file", "run_command", "open_url"]
+[safety]
+risk_level = "low"
+requires_confirmation = false
+allows_file_write = false
+allows_shell = false
+allows_network = false
+requires_fresh_info = false
+[metadata]
+audience = ["student", "exam_aspirant"]
+country = "IN"
+exam = "NEET PG"
+exam_stage = "internship_planning"
+language_style = ["english", "hinglish_optional"]
+last_reviewed_at = "2026-06-03"
+freshness_sensitive = false
+official_source_labels = []
+[store_preview]
+best_for = ["Helps Indian students with neet pg internship time study planner through practical planning, analysis, and safe exam guidance."]
+not_for = ["Official notice replacement", "Guaranteed rank or admission"]
+sample_prompts = ["internship neet pg plan"]
+what_it_will_do = ["Builds practical next steps", "Flags official verification needs"]
+what_it_will_not_do = ["Invent official facts", "Promise outcomes"]

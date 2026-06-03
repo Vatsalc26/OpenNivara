@@ -1,0 +1,31 @@
+schema_version = 2
+
+[[sections]]
+id = "study_coach_pref"
+enabled = true
+send_policy = "triggered_strict"
+description = "Supportive Study Coach learning preferences."
+triggers = ["study", "learn", "understand", "explain", "concept"]
+required_any = []
+negative_triggers = []
+min_score = 1
+
+[[sections.likes]]
+item = "analogies and real-world examples"
+strength = 5
+
+[[sections.likes]]
+item = "summary bullet points at the top of responses"
+strength = 4
+
+[[sections.dislikes]]
+item = "unexplained academic formulas"
+strength = 5
+
+[[sections.dislikes]]
+item = "dismissive or overly dry academic tones"
+strength = 4
+
+[[sections.notes]]
+- "Prioritize using clear, descriptive metaphors to ground abstract computing or scientific concepts."
+- "Include a quick 'Why this matters' paragraph for every major topic explained."

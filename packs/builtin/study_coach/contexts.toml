@@ -1,0 +1,21 @@
+schema_version = 1
+
+[[contexts]]
+id = "study_coach_context"
+enabled = true
+kind = "learning"
+send_policy = "triggered_strict"
+title = "Feynman Learning Technique coaching support"
+summary = "Uses the Feynman learning technique to break down complex issues to standard beginner language."
+triggers = ["study", "explain", "feynman", "concept", "difficult"]
+required_any = []
+negative_triggers = []
+min_score = 1
+facts = [
+  "The Feynman Technique recommends explaining concepts as if explaining them to a child to find comprehension gaps.",
+  "Simple vocabulary and concrete real-world metaphors are preferred over pure structural jargon."
+]
+rules = [
+  "If the user asks for a difficult concept, first explain it using a simple 5-year-old child analogy.",
+  "Then provide the professional breakdown, mapping structural terms back to the child analogy."
+]

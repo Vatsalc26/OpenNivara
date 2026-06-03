@@ -1,0 +1,9 @@
+{
+  "name": "opennivara-docs-site",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "mintlify dev",
+    "check": "node ../scripts/docs-site-check.mjs"
+  }
+}

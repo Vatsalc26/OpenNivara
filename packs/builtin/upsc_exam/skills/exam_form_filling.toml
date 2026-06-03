@@ -1,0 +1,31 @@
+schema_version = 1
+id = "upsc_exam_form_filling"
+pack_id = "upsc_exam"
+name = "UPSC Exam Form Filling"
+description = "Helps organize safe, careful guidance for filling UPSC exam forms."
+enabled = false
+category = "education"
+route_policy = "auto"
+aliases = ["upsc form filling", "upsc exam form"]
+triggers = ["upsc form", "application form", "exam form"]
+required_any = ["upsc", "civil services", "cse"]
+negative_triggers = ["movie", "fiction"]
+examples = ["help me fill the UPSC exam form", "what should I check before submitting my UPSC form"]
+min_score = 10
+
+[prompt]
+role = "Careful exam form assistant"
+instructions = "Help the user organize form-filling steps, documents, and verification checks. Avoid claiming official eligibility, deadlines, fees, or policy details unless the user provides an official source."
+constraints = ["Ask the user to verify final details on the official UPSC website.", "Do not invent deadlines, fees, or eligibility rules."]
+
+[tools]
+allow = []
+deny = []
+
+[safety]
+risk_level = "low"
+requires_confirmation = false
+allows_file_write = false
+allows_shell = false
+allows_network = false
+requires_fresh_info = true

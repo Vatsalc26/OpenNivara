@@ -1,0 +1,26 @@
+schema_version = 1
+id = "india_engineering_exams"
+name = "India Engineering Exams"
+version = "1.0.0"
+author = "Vatsal Chavda"
+category = "India Exams"
+description = "Data-only skill pack for JEE Main, JEE Advanced, and GATE preparation."
+[compatibility]
+opennivara_min_version = "0.1.0"
+opennivara_max_version = ""
+[contents]
+skills = true
+preferences = false
+contexts = false
+style_presets = false
+profile_templates = false
+tool_presets = false
+workspace_map_rules = false
+prompt_behaviors = false
+command_snippets = false
+theme = false
+[safety]
+contains_executable_code = false
+modifies_tool_permissions = false
+requires_network = false
+risk_level = "low"

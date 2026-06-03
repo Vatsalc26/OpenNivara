@@ -1,0 +1,30 @@
+schema_version = 1
+id = "study_coach"
+name = "Study Coach Pack"
+version = "1.0.0"
+author = "Vatsal Chavda"
+category = "education"
+description = "Adds supportive study-focused preferences, learning contexts, command snippets, and a calm theme."
+homepage = ""
+license = "MIT"
+
+[compatibility]
+opennivara_min_version = "0.1.0"
+opennivara_max_version = ""
+
+[contents]
+preferences = true
+contexts = true
+style_presets = true
+profile_templates = false
+tool_presets = false
+workspace_map_rules = false
+prompt_behaviors = true
+command_snippets = true
+theme = true
+
+[safety]
+contains_executable_code = false
+modifies_tool_permissions = false
+requires_network = false
+risk_level = "low"

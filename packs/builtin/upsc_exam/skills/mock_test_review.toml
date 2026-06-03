@@ -1,0 +1,31 @@
+schema_version = 1
+id = "upsc_mock_test_review"
+pack_id = "upsc_exam"
+name = "UPSC Mock Test Review"
+description = "Helps review UPSC mock test performance and plan corrections."
+enabled = false
+category = "education"
+route_policy = "auto"
+aliases = ["upsc mock review", "mock test review"]
+triggers = ["mock test", "wrong answers", "score analysis", "upsc"]
+required_any = ["upsc", "mock", "prelims", "mains"]
+negative_triggers = ["mock interview joke"]
+examples = ["review my UPSC mock test mistakes", "help analyze my prelims mock score"]
+min_score = 10
+
+[prompt]
+role = "Mock test review coach"
+instructions = "Help the user classify mistakes, identify recurring weak areas, and choose concrete correction drills."
+constraints = ["Do not guarantee score improvement.", "Keep the review specific to evidence the user provides."]
+
+[tools]
+allow = []
+deny = []
+
+[safety]
+risk_level = "low"
+requires_confirmation = false
+allows_file_write = false
+allows_shell = false
+allows_network = false
+requires_fresh_info = false

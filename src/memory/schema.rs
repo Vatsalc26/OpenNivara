@@ -1,0 +1,46 @@
+pub const MEMORY_TYPES: &[&str] = &[
+    "episodic_event",
+    "semantic_fact",
+    "task",
+    "reminder",
+    "entity_note",
+    "preference",
+    "location",
+    "travel",
+    "purchase",
+    "gift",
+    "meal",
+    "routine",
+    "relationship",
+    "correction",
+    "daily_summary",
+    "weekly_summary",
+    "monthly_summary",
+    "person_profile",
+    "place_profile",
+];
+
+pub const MEMORY_STATUSES: &[&str] = &[
+    "active",
+    "planned",
+    "completed",
+    "cancelled",
+    "missed",
+    "uncertain",
+    "retracted",
+    "archived",
+];
+
+pub const SENSITIVE_CATEGORIES: &[&str] = &[
+    "health",
+    "finance",
+    "relationships",
+    "location",
+    "identity",
+    "credentials",
+    "legal",
+    "work_confidential",
+    "minors",
+    "family",
+    "private_conversations",
+];

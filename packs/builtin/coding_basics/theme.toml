@@ -1,0 +1,21 @@
+schema_version = 1
+id = "coding_cyan"
+name = "Coding Cyan"
+description = "Dark coding theme with cyan accents."
+
+[colors]
+background = "#05070a"
+panel = "#0c1117"
+card = "#111827"
+primary = "#22d3ee"
+accent = "#38bdf8"
+success = "#22c55e"
+warning = "#f59e0b"
+danger = "#ef4444"
+foreground = "#f8fafc"
+muted = "#94a3b8"
+
+[effects]
+background_gradient = true
+glow = "subtle"
+density = "comfortable"

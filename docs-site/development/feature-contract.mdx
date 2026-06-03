@@ -1,0 +1,8 @@
+---
+title: "Feature Contract"
+description: "Rules for adding OpenNivara features."
+---
+
+New features must preserve local-first memory, safe non-executing Store behavior, Settings-owned assistant behavior, and desktop-first validation.
+
+Store may list and install data-only Skill Packs, but installation must not activate prompt behavior. Settings -> Skills owns behavior activation/configuration. Skill Packs must not include executable plugin runtimes, WASM runtimes, native scripts, remote skill execution, or arbitrary code execution. Skills may only expose safe allowlists of existing Tool Registry tools and must not modify tool permissions directly.

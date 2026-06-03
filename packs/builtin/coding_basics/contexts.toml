@@ -1,0 +1,21 @@
+schema_version = 1
+
+[[contexts]]
+id = "rust_basics_context"
+enabled = true
+kind = "learning"
+send_policy = "triggered_strict"
+title = "Rust Beginner borrow checker safety tips"
+summary = "Helps beginner Rust developers understand compiler warnings and basic borrow constraints."
+triggers = ["rust", "borrow", "lifetime", "compiler", "compile"]
+required_any = ["rust"]
+negative_triggers = []
+min_score = 1
+facts = [
+  "Beginners struggle with lifetimes, borrowing rules, and string conversion.",
+  "Using .to_string() and .clone() is highly acceptable in early phases to bypass strict borrow constraints."
+]
+rules = [
+  "Provide extremely clear diagrams of resource ownership in case of borrow checker errors.",
+  "Encourage using standard library smart pointers (like Rc, Arc, or RefCell) if needed, but explain them simply."
+]

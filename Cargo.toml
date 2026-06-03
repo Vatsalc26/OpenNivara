@@ -1,0 +1,74 @@
+[package]
+name = "opennivara"
+version = "0.1.0"
+edition = "2021"
+authors = ["Vatsal Chavda"]
+description = "Local-first personal AI agent with memory, skills, Telegram access and controlled local tools."
+license = "MIT"
+repository = "https://github.com/Vatsalc26/OpenNivara"
+readme = "README.md"
+
+[dependencies]
+clap = { version = "4", features = ["derive"] }
+tokio = { version = "1", features = ["full"] }
+reqwest = { version = "0.12", features = ["json"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+toml = "0.8"
+toml_edit = "0.22"
+directories = "6"
+dotenvy = "0.15"
+anyhow = "1"
+semver = "1"
+walkdir = "2"
+
+# Workspace Map dependencies
+ignore = "0.4"
+globset = "0.4"
+mime_guess = "2"
+infer = "0.19"
+rusqlite = { version = "0.32", features = ["bundled"] }
+chrono = { version = "0.4", features = ["serde"] }
+sha2 = "0.10"
+
+# Telegram Daemon & OS Service dependencies
+teloxide = { version = "0.17", features = ["macros", "ctrlc_handler", "rustls"] }
+service-manager = "0.11"
+tracing = "0.1"
+tracing-subscriber = "0.3"
+uuid = { version = "1", features = ["v4", "serde"] }
+
+# Output rendering dependencies
+termimad = "0.34"
+pulldown-cmark = "0.13"
+html-escape = "0.2"
+
+
+# Optional features dependencies
+notify = { version = "6.1.1", optional = true }
+tree-sitter = { version = "0.24", optional = true }
+tree-sitter-rust = { version = "0.23", optional = true }
+specta = { version = "1.0.5", features = ["typescript", "chrono", "uuid"] }
+refinery = "0.9.1"
+chrono-tz = "0.10.4"
+thiserror = "2.0.18"
+strsim = "0.11.1"
+moka = { version = "0.12.15", features = ["sync"] }
+sqlite-vec = { version = "0.1.9", optional = true }
+fastembed = { version = "5.15.0", optional = true }
+
+[features]
+default = []
+map-watch = ["dep:notify"]
+code-symbols = ["dep:tree-sitter", "dep:tree-sitter-rust"]
+memory-vector = ["dep:sqlite-vec"]
+local-embeddings = ["dep:fastembed", "memory-vector"]
+
+[dev-dependencies]
+tempfile = "3"
+assert_cmd = "2"
+predicates = "3"
+insta = { version = "1", features = ["toml"] }
+serial_test = "3"
+pretty_assertions = "1.4.1"
+proptest = "1.11.0"

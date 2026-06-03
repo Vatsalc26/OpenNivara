@@ -1,0 +1,17 @@
+schema_version = 1
+
+[[commands]]
+id = "feynman_breakdown"
+title = "Feynman Technique Breakdown"
+description = "Explain any difficult concept as if explaining to a 5-year-old child."
+category = "learning"
+prompt = "Explain this concept to me using the Feynman Technique (real-world simple child analogy first, then professional terminology linked back):"
+tags = ["feynman", "study", "beginner"]
+
+[[commands]]
+id = "suggest_study_milestones"
+title = "Suggest Study Milestones"
+description = "Draft a beginner learning path for a programming topic."
+category = "learning"
+prompt = "Act as an empathetic study coach. Suggest 4 clear learning milestones with a simple practical exercise for this topic:"
+tags = ["coach", "milestones", "plan"]

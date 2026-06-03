@@ -1,0 +1,72 @@
+name: Tauri WebDriver E2E
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  tauri-e2e:
+    name: Real Tauri Desktop E2E
+    runs-on: windows-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install Rust Toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Cache Cargo Dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+            desktop/src-tauri/target/
+          key: ${{ runner.os }}-cargo-tauri-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Cache Frontend Dependencies
+        uses: actions/cache@v4
+        with:
+          path: desktop/node_modules
+          key: ${{ runner.os }}-bun-desktop-${{ hashFiles('desktop/bun.lock') }}
+
+      - name: Install Frontend Dependencies
+        run: bun install --frozen-lockfile
+        working-directory: desktop
+
+      - name: Install tauri-driver
+        run: cargo install tauri-driver --locked
+
+      - name: Install matching EdgeDriver
+        shell: pwsh
+        run: |
+          $edge = Get-Item "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"
+          $edgeVersion = $edge.VersionInfo.ProductVersion
+          $driverUrl = "https://msedgedriver.microsoft.com/$edgeVersion/edgedriver_win64.zip"
+          $zipPath = Join-Path $env:RUNNER_TEMP "edgedriver.zip"
+          $extractDir = Join-Path $env:RUNNER_TEMP "edgedriver"
+          Invoke-WebRequest -Uri $driverUrl -OutFile $zipPath
+          Expand-Archive -Path $zipPath -DestinationPath $extractDir -Force
+          "EDGE_DRIVER_PATH=$extractDir\msedgedriver.exe" | Out-File -FilePath $env:GITHUB_ENV -Append
+
+      - name: Run Real Tauri WebDriver Suite
+        run: bun run tauri:e2e
+        working-directory: desktop
+
+      - name: Upload Tauri E2E Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tauri-e2e-artifacts
+          path: desktop/test-results/tauri-e2e
+          retention-days: 3

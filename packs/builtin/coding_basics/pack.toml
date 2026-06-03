@@ -1,0 +1,30 @@
+schema_version = 1
+id = "coding_basics"
+name = "Coding Basics Pack"
+version = "1.0.0"
+author = "Vatsal Chavda"
+category = "coding"
+description = "Adds coding-focused preferences, contexts, command snippets, and theme."
+homepage = ""
+license = "MIT"
+
+[compatibility]
+opennivara_min_version = "0.1.0"
+opennivara_max_version = ""
+
+[contents]
+preferences = true
+contexts = true
+style_presets = true
+profile_templates = false
+tool_presets = false
+workspace_map_rules = true
+prompt_behaviors = true
+command_snippets = true
+theme = true
+
+[safety]
+contains_executable_code = false
+modifies_tool_permissions = false
+requires_network = false
+risk_level = "low"

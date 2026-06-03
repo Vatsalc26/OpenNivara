@@ -1,0 +1,15 @@
+{
+  "name": "opennivara-docs",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "docs:lint": "markdownlint-cli2",
+    "docs:links": "node scripts/docs-link-check.mjs",
+    "docs:check": "bun run docs:lint && bun run docs:links",
+    "docs:site:dev": "cd docs-site && bun run dev",
+    "docs:site:check": "cd docs-site && bun run check"
+  },
+  "devDependencies": {
+    "markdownlint-cli2": "^0.18.1"
+  }
+}

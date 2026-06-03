@@ -1,0 +1,29 @@
+schema_version = 1
+id = "upsc_exam"
+name = "UPSC Exam Skills"
+version = "1.0.0"
+author = "Vatsal Chavda"
+category = "Education"
+description = "Data-only UPSC exam guidance skills. Install adds skills; enable them in Settings -> Skills."
+
+[compatibility]
+opennivara_min_version = "0.1.0"
+opennivara_max_version = ""
+
+[contents]
+preferences = false
+contexts = false
+style_presets = false
+profile_templates = false
+tool_presets = false
+workspace_map_rules = false
+prompt_behaviors = false
+command_snippets = false
+theme = false
+skills = true
+
+[safety]
+contains_executable_code = false
+modifies_tool_permissions = false
+requires_network = false
+risk_level = "low"

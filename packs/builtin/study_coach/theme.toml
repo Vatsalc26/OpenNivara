@@ -1,0 +1,21 @@
+schema_version = 1
+id = "calm_focus"
+name = "Calm Focus"
+description = "Warm dark green learning theme for calm concentration."
+
+[colors]
+background = "#060907"
+panel = "#0e1410"
+card = "#141e17"
+primary = "#4ade80"
+accent = "#22c55e"
+success = "#22c55e"
+warning = "#f59e0b"
+danger = "#ef4444"
+foreground = "#f0fdf4"
+muted = "#718096"
+
+[effects]
+background_gradient = true
+glow = "subtle"
+density = "comfortable"

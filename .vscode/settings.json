@@ -1,0 +1,17 @@
+{
+  "files.watcherExclude": {
+    "**/.git/objects/**": true,
+    "**/.git/subtree-cache/**": true,
+    "**/target/**": true,
+    "**/desktop/src-tauri/target/**": true,
+    "**/desktop/node_modules/**": true,
+    "**/desktop/dist/**": true
+  },
+  "search.exclude": {
+    "**/target": true,
+    "**/desktop/src-tauri/target": true,
+    "**/desktop/node_modules": true,
+    "**/desktop/dist": true,
+    "**/bun.lockb": true
+  }
+}

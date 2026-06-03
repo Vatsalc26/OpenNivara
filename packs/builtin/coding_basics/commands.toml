@@ -1,0 +1,17 @@
+schema_version = 1
+
+[[commands]]
+id = "explain_rust_error"
+title = "Explain Rust compiler error"
+description = "Ask OpenNivara to explain a Rust compiler error step by step."
+category = "coding"
+prompt = "Explain this Rust compiler error step by step and suggest the smallest fix:"
+tags = ["rust", "compiler", "beginner"]
+
+[[commands]]
+id = "review_my_code"
+title = "Review my code"
+description = "Ask for a beginner-friendly code review."
+category = "coding"
+prompt = "Review this code for correctness, simplicity, and beginner-friendly improvements:"
+tags = ["code", "review"]

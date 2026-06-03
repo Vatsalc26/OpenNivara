@@ -1,0 +1,76 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "name": "OpenNivara Documentation",
+  "theme": "mint",
+  "colors": {
+    "primary": "#2563eb",
+    "light": "#ffffff",
+    "dark": "#0f172a"
+  },
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Start",
+        "groups": [
+          {
+            "group": "Overview",
+            "pages": ["index", "quickstart"]
+          }
+        ]
+      },
+      {
+        "tab": "Desktop",
+        "groups": [
+          {
+            "group": "Desktop App",
+            "pages": [
+              "desktop/overview",
+              "desktop/settings",
+              "desktop/memory",
+              "desktop/store-themes",
+              "desktop/troubleshooting"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Concepts",
+        "groups": [
+          {
+            "group": "Core Concepts",
+            "pages": [
+              "concepts/profile",
+              "concepts/preferences",
+              "concepts/contexts-goals",
+              "concepts/life-memory",
+              "concepts/memory-graph",
+              "concepts/runtime-context",
+              "concepts/location-context",
+              "concepts/context-compiler",
+              "concepts/tools-safety"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Development",
+        "groups": [
+          {
+            "group": "Engineering",
+            "pages": [
+              "development/architecture",
+              "development/testing-strategy",
+              "development/feature-contract",
+              "development/docs-governance",
+              "development/tauri-e2e"
+            ]
+          },
+          {
+            "group": "Changelog",
+            "pages": ["changelog/index"]
+          }
+        ]
+      }
+    ]
+  }
+}

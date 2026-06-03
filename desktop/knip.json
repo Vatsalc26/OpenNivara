@@ -1,0 +1,47 @@
+{
+	"$schema": "https://unpkg.com/knip@6/schema.json",
+	"entry": [
+		"tests/e2e/**/*.ts",
+		"src/router.tsx",
+		"src/api/marketplaceClient.ts",
+		"src/api/marketplaceSchemas.ts",
+		"src/api/schemas.ts",
+		"src/api/tauriBridge.ts",
+		"src/api/tauriClient.ts",
+		"src/api/browserPreviewFixtures.ts",
+		"src/test/mockTauri.ts",
+		"wdio.tauri.conf.ts",
+		"tests/tauri-e2e/**/*.ts"
+	],
+	"project": [
+		"src/**/*.{ts,tsx}",
+		"tests/e2e/**/*.ts",
+		"tests/tauri-e2e/**/*.ts"
+	],
+	"ignore": [
+		"src/components/ui/**",
+		"src/generated/backendTypes.ts",
+		"src/features/marketplace/InstalledPacksList.tsx",
+		"src/features/marketplace/ModesPanel.tsx",
+		"src/features/marketplace/ModeSwitcher.tsx",
+		"src/features/marketplace/PackCard.tsx",
+		"src/features/marketplace/PackPreviewDialog.tsx",
+		"src/features/marketplace/ThemePreview.tsx",
+		"src/state/uiStore.ts",
+		"src/state/inspectorStore.ts"
+	],
+	"ignoreDependencies": [
+		"@tanstack/router-devtools",
+		"@tauri-apps/plugin-window-state",
+		"react-hook-form",
+		"@hookform/resolvers",
+		"@wdio/local-runner",
+		"@wdio/mocha-framework",
+		"@wdio/spec-reporter",
+		"@testing-library/user-event",
+		"shadcn",
+		"tailwindcss",
+		"tw-animate-css",
+		"zustand"
+	]
+}

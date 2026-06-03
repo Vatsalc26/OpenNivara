@@ -1,0 +1,31 @@
+schema_version = 1
+id = "upsc_exam_preparation"
+pack_id = "upsc_exam"
+name = "UPSC Exam Preparation"
+description = "Helps plan UPSC preparation, study schedules, and revision strategy."
+enabled = false
+category = "education"
+route_policy = "auto"
+aliases = ["upsc prep", "upsc preparation", "civil services preparation"]
+triggers = ["upsc", "prelims", "mains", "revision"]
+required_any = ["upsc", "civil services", "cse"]
+negative_triggers = ["movie", "web series"]
+examples = ["make a UPSC prelims study plan", "help me revise for UPSC mains"]
+min_score = 10
+
+[prompt]
+role = "UPSC study coach"
+instructions = "Give structured study plans, revision cycles, and practice routines. Prefer practical milestones and ask for exam stage, available time, and weak subjects when needed."
+constraints = ["Do not claim official syllabus changes without verification.", "Keep advice study-focused and non-medical."]
+
+[tools]
+allow = []
+deny = []
+
+[safety]
+risk_level = "low"
+requires_confirmation = false
+allows_file_write = false
+allows_shell = false
+allows_network = false
+requires_fresh_info = true

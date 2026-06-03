@@ -1,0 +1,31 @@
+schema_version = 1
+id = "upsc_syllabus_breakdown"
+pack_id = "upsc_exam"
+name = "UPSC Syllabus Breakdown"
+description = "Breaks UPSC syllabus topics into study chunks and revision checkpoints."
+enabled = false
+category = "education"
+route_policy = "auto"
+aliases = ["upsc syllabus", "syllabus breakdown"]
+triggers = ["syllabus", "topics", "upsc"]
+required_any = ["upsc", "civil services", "cse"]
+negative_triggers = ["school project"]
+examples = ["break down the UPSC polity syllabus", "make a topic checklist for UPSC geography"]
+min_score = 10
+
+[prompt]
+role = "Syllabus breakdown assistant"
+instructions = "Turn broad syllabus areas into clear study chunks, prerequisites, revision checkpoints, and practice prompts."
+constraints = ["Tell the user to compare against the latest official syllabus.", "Do not overstate completeness."]
+
+[tools]
+allow = []
+deny = []
+
+[safety]
+risk_level = "low"
+requires_confirmation = false
+allows_file_write = false
+allows_shell = false
+allows_network = false
+requires_fresh_info = true

@@ -1,0 +1,134 @@
+name: Code Quality Gate
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  contents: read
+
+jobs:
+  rust-check:
+    name: Rust Backend Checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install Rust Toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+
+      - name: Cache Cargo Dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Run Cargo Format Check
+        run: cargo fmt --all -- --check
+
+      - name: Run Cargo Clippy
+        run: cargo clippy --all-targets -- -D warnings
+
+      - name: Run Cargo Tests
+        run: cargo test
+
+  frontend-check:
+    name: Frontend Quality Checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install Frontend Dependencies
+        run: bun install --frozen-lockfile
+        working-directory: desktop
+
+      - name: Cache Playwright Browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('desktop/bun.lock') }}
+
+      - name: Run Typecheck
+        run: bun run typecheck
+        working-directory: desktop
+
+      - name: Run Biome Linter & Formatter Check
+        run: bun run check
+        working-directory: desktop
+
+      - name: Run Vitest Unit Tests with Coverage
+        run: bun run test:coverage
+        working-directory: desktop
+
+      - name: Run Knip Unused Code Audit
+        run: bun run knip
+        working-directory: desktop
+
+      - name: Run Frontend Production Build Check
+        run: bun run build
+        working-directory: desktop
+
+      - name: Run Storybook Build Check
+        run: bun run storybook:build
+        working-directory: desktop
+
+  e2e:
+    name: Playwright E2E Checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install Frontend Dependencies
+        run: bun install --frozen-lockfile
+        working-directory: desktop
+
+      - name: Cache Playwright Browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('desktop/bun.lock') }}
+
+      - name: Install Playwright Chromium
+        run: bunx playwright install --with-deps chromium
+        working-directory: desktop
+
+      - name: Run Playwright E2E Tests
+        run: bun run e2e
+        working-directory: desktop
+
+  docs-site-check:
+    name: Mintlify Docs Site Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Run docs-site structural check
+        run: bun run docs:site:check
