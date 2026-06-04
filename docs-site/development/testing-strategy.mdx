@@ -1,8 +1,47 @@
 ---
 title: "Testing Strategy"
-description: "Validation layers for OpenNivara."
+description: "Validation layers for OpenNivara Rust backend, React frontend, desktop app, Tauri smoke tests, and documentation."
 ---
 
 Use Rust tests for backend behavior, Bun checks for React, and Tauri E2E for desktop flows.
 
-Browser preview is useful, but it cannot replace desktop validation for Rust-backed features.
+## Backend
+
+```bash
+cargo fmt --check
+cargo test -p opennivara -- --nocapture
+```
+
+## Desktop Frontend
+
+```bash
+cd desktop
+bun run typecheck
+bun run check
+bun run test:run
+bun run build
+```
+
+## Tauri Desktop
+
+Use the prebuilt smoke path when you want to separate build failures from app-launch failures:
+
+```bash
+cd desktop
+bun run tauri:build:debug
+bun run tauri:e2e:smoke:prebuilt
+```
+
+Use the all-in-one smoke command when build timeouts are acceptable:
+
+```bash
+cd desktop
+bun run tauri:e2e:smoke
+```
+
+## Documentation
+
+```bash
+bun run docs:check
+bun run docs:site:check
+```

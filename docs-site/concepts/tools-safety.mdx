@@ -1,8 +1,19 @@
 ---
 title: "Tools Safety"
-description: "Local tools stay permissioned and auditable."
+description: "How OpenNivara local tools are constrained, what skill policies can do, and which safety hardening remains incomplete."
 ---
 
-OpenNivara tools must not read secrets, escape allowed roots, or gain dangerous permissions silently.
+OpenNivara includes controlled local tools and workspace-map tools. Tool availability is constrained by local configuration, request source, remote policy, and selected skill policy.
 
-Tool behavior is controlled by Settings and backend policy, not Store themes.
+## Important Boundaries
+
+- Store themes cannot change tool behavior.
+- Installing a skill pack cannot grant new tool permissions.
+- Skills may only constrain or describe allowed existing tools; they do not add executable runtimes.
+- Telegram remote access to high-risk local tools should remain disabled unless deliberately enabled.
+
+## Current Limitations
+
+Interactive approval enforcement for some local-tool actions is still under development. Canonical-path and symlink hardening for allowed filesystem roots is planned, not complete.
+
+Do not configure allowed roots that contain untrusted symbolic links. Review logs before sharing diagnostics.

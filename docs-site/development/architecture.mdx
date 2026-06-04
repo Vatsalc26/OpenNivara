@@ -1,8 +1,25 @@
 ---
 title: "Architecture"
-description: "How OpenNivara is structured."
+description: "High-level OpenNivara architecture across Rust backend, CLI, Tauri desktop app, React frontend, SQLite, TOML, Gemini, Telegram, skills, and marketplace packs."
 ---
 
-OpenNivara combines a Rust backend, SQLite local state, Tauri desktop commands, and a React frontend.
+OpenNivara combines:
 
-Internal engineering docs live in `docs/`; this Mintlify site summarizes public-facing stable concepts.
+- Rust backend crate and CLI binary named `opennivara`.
+- Tauri desktop application.
+- React frontend.
+- SQLite databases for sessions, memory, workspace-map data, graph-derived data, and audits.
+- TOML configuration for profile, style, preferences, contexts, tools, Telegram, skills, marketplace, and modes.
+- Gemini API integration for model responses.
+- Optional Telegram daemon.
+- Marketplace packs, visual themes, and data-only skill manifests.
+
+## Source Layout
+
+- `src/`: Rust backend, CLI, engine, memory, tools, skills, marketplace, sessions, Telegram, and workspace map.
+- `desktop/`: Tauri + React desktop app.
+- `packs/builtin/`: first-party built-in packs and themes.
+- `docs/`: internal engineering documentation.
+- `docs-site/`: public Mintlify documentation source.
+
+Internal docs can be more implementation-oriented. Public docs should stay accurate, user-facing, and conservative about alpha limitations.

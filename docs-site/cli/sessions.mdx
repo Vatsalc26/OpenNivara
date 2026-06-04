@@ -1,0 +1,29 @@
+---
+title: "Sessions"
+description: "How OpenNivara CLI sessions store and manage conversation history."
+---
+
+OpenNivara stores conversation sessions locally in SQLite.
+
+Common commands:
+
+```bash
+cargo run -- sessions list
+cargo run -- sessions active
+cargo run -- sessions show <session_id>
+cargo run -- sessions rename <session_id> "New title"
+cargo run -- sessions close <session_id>
+```
+
+Start chat sessions:
+
+```bash
+cargo run -- chat
+cargo run -- chat --new
+cargo run -- chat --resume latest
+cargo run -- chat --session <session_id>
+```
+
+## Privacy Note
+
+Session history can contain prompts, answers, selected context, and private user data. Treat the session database as sensitive local state.

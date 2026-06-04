@@ -1,6 +1,14 @@
 ---
 title: "Preferences"
-description: "Preferences guide assistant behavior from Settings."
+description: "How OpenNivara preferences guide assistant responses without being installed by Store themes."
 ---
 
-Preferences are explicit behavior hints. They are not Store content and are not installed by themes.
+Preferences are explicit user-authored guidance for assistant behavior. They live in local TOML configuration and are controlled by Settings or CLI setup commands.
+
+```bash
+cargo run -- init-preferences
+cargo run -- preferences-path
+cargo run -- show-preferences
+```
+
+OpenNivara can select relevant preference sections for a request. Preferences are not Store theme content, and visual themes must not modify them.

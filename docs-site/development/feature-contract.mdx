@@ -1,8 +1,17 @@
 ---
 title: "Feature Contract"
-description: "Rules for adding OpenNivara features."
+description: "Public-facing rules for preserving OpenNivara privacy, Store/Settings boundaries, and desktop validation when adding features."
 ---
 
-New features must preserve local-first memory, safe non-executing Store behavior, Settings-owned assistant behavior, and desktop-first validation.
+New features should preserve these boundaries:
 
-Store may list and install data-only Skill Packs, but installation must not activate prompt behavior. Settings -> Skills owns behavior activation/configuration. Skill Packs must not include executable plugin runtimes, WASM runtimes, native scripts, remote skill execution, or arbitrary code execution. Skills may only expose safe allowlists of existing Tool Registry tools and must not modify tool permissions directly.
+- Local-first state remains local by default, but selected context may be sent to Gemini.
+- Desktop is the primary validation surface for Rust-backed behavior.
+- Store themes are visual only.
+- Store may preview and install data-only skill packs.
+- Installing a skill pack must not activate prompt behavior.
+- Settings -> Skills controls skill enablement and inspection.
+- Skill packs must not include executable plugin runtimes, WASM runtimes, native scripts, remote skill execution, network tools, or arbitrary code execution.
+- Tool behavior remains constrained by local configuration, remote policy, and backend skill/tool policy.
+
+Do not claim encryption, complete approval enforcement, symlink escape protection, or Gemini header-based API-key transport until those are implemented and verified.

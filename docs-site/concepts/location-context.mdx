@@ -1,8 +1,10 @@
 ---
 title: "Location Context"
-description: "Permissioned and freshness-aware location."
+description: "Permissioned location context, saved places, freshness checks, and privacy implications."
 ---
 
 Location context can come from saved places, manual entries, coarse hints, or exact current location when allowed.
 
-OpenNivara never includes location in normal chat and never calls stale location current.
+OpenNivara should avoid sending stale or irrelevant location context. Location is sensitive, and selected location context may be sent to Gemini when included in a request.
+
+Users should review location and privacy settings before saving places or enabling location-aware workflows.

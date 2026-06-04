@@ -1,8 +1,25 @@
 ---
 title: "Memory"
-description: "Local-first memory with audited prompt inclusion."
+description: "How OpenNivara stores local memory and how memory can be selected for prompts."
 ---
 
-OpenNivara memory is stored locally in SQLite. Stored memories do not automatically reach the model.
+OpenNivara memory is local-first and stored in SQLite. Stored memory does not automatically reach Gemini on every request.
 
-The Context Compiler decides which memory, graph, time, location, task, route, and workspace sections fit the current request.
+Memory-related local state can include:
+
+- remembered facts and corrections
+- tasks and statuses
+- dynamic facets
+- memory graph nodes and edges
+- saved places and location observations
+- prompt audit records
+
+## Prompt Inclusion
+
+OpenNivara can select memory when the current request appears relevant, such as memory lookup, task planning, correction, or route-related questions. Normal chat should not include memory merely because memory exists.
+
+The current prompt path has Context Compiler components for runtime, location, memory, graph context, token budgeting, and audit output, but public docs should not treat every main-chat path as fully unified and final until that unification is explicitly documented as complete.
+
+## Privacy Note
+
+Memory may contain private information. OpenNivara does not claim local-state encryption. Selected memory context may be sent to Gemini when it is included in a request.

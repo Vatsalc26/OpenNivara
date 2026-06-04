@@ -1,14 +1,31 @@
 ---
 title: "OpenNivara"
-description: "Local-first desktop assistant with audited memory and safe customization."
+description: "Introduction to OpenNivara, an alpha-stage local-first personal AI agent with a desktop app, Rust CLI, memory, skills, packs, and controlled local tools."
 ---
 
-OpenNivara is a desktop-first personal assistant built with Rust, SQLite, React, and Tauri.
+OpenNivara is an alpha-stage, desktop-first personal AI agent. It combines a Rust backend, a Tauri + React desktop app, a Rust CLI named `opennivara`, SQLite/TOML local state, Gemini API integration, optional Telegram access, memory, skills, marketplace packs, visual themes, and controlled local tools.
 
-Core principles:
+OpenNivara is local-first, not offline-only. Your configuration, memories, sessions, workspace-map data, and runtime state are intended to live on your device by default, but selected context may be sent to Gemini. Telegram-based requests pass through Telegram.
 
-- Desktop is the primary product.
-- Store themes only change visuals.
-- Settings controls assistant behavior.
-- Memory is local-first and has no templates.
-- Time, location, memory, workspace, and graph context are included only when relevant and audited.
+## What To Read First
+
+- [Installation](installation.mdx): prerequisites, environment setup, and platform notes.
+- [Quickstart](quickstart.mdx): run the actual desktop app with `bun run tauri:dev`.
+- [Privacy And Data Flow](privacy/data-flow.mdx): what is stored locally and what can leave the device.
+- [Known Limitations](security/known-limitations.mdx): alpha security and hardening limitations.
+- [Store And Skill Packs](desktop/store-skill-packs.mdx): the boundary between Store installation and Settings-owned behavior.
+
+## Core Surfaces
+
+OpenNivara has two main user surfaces:
+
+- Desktop app: the primary product surface for chat, settings, memory, store, skills, and desktop validation.
+- CLI: a setup, diagnostics, chat, workspace-map, session, marketplace, skills, and Telegram surface.
+
+The browser Vite app is useful for frontend iteration only. It is not the full desktop application and should not be used as proof that Rust-backed behavior works.
+
+## Alpha Safety Notice
+
+OpenNivara can process sensitive local data, including profile fields, preferences, sessions, memories, saved locations, selected file contents, prompts, tool arguments, Telegram metadata, and logs. Local state is not claimed to be encrypted.
+
+Interactive approval enforcement for some local-tool actions is still under development. Canonical-path and symlink hardening is planned. Gemini API-key header transport is planned hardening. Treat this release as an early public alpha.

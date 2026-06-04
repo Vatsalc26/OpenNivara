@@ -1,14 +1,26 @@
 ---
 title: "Docs Governance"
-description: "How internal and public docs fit together."
+description: "How OpenNivara separates internal engineering docs from public Mintlify docs."
 ---
 
-`docs/` is the internal canonical engineering tree. `docs-site/` is the public-facing Mintlify site.
+`docs/` is the internal canonical engineering tree. `docs-site/` is the public-facing Mintlify documentation source.
 
-Mintlify CLI:
+Public docs should:
 
-- Official global install: `npm i -g mint`
-- Official no-global fallback: `npx mint dev`
-- Local preview command from this folder: `mint dev`
+- use user-facing prose
+- avoid internal planning text unless summarized for users
+- keep alpha limitations visible
+- avoid unsupported security claims
+- avoid unverified deployment URLs, analytics IDs, feedback integrations, or secrets
+- distinguish current behavior from planned hardening
 
-Do not commit Mintlify secrets or deployment credentials.
+## Local Commands
+
+```bash
+bun run docs:check
+bun run docs:site:check
+cd docs-site
+bun run dev
+```
+
+Do not commit Mintlify tokens, deployment credentials, or secrets.

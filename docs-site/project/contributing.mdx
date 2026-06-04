@@ -1,0 +1,33 @@
+---
+title: "Contributing"
+description: "How to contribute to OpenNivara and where to find development, security, privacy, and documentation expectations."
+---
+
+Read the repository [CONTRIBUTING.md](https://github.com/Vatsalc26/OpenNivara/blob/main/CONTRIBUTING.md) before opening changes.
+
+## Development Expectations
+
+- Keep public documentation honest about current behavior.
+- Do not commit credentials, local state, SQLite databases, logs, generated artifacts, or private user data.
+- Preserve the Store/Settings boundary.
+- Use the Tauri desktop app for Rust-backed desktop validation.
+- Run relevant checks before submitting changes.
+
+## Useful Checks
+
+```bash
+cargo fmt --check
+cargo test -p opennivara -- --nocapture
+cd desktop
+bun run typecheck
+bun run check
+bun run test:run
+bun run build
+```
+
+Documentation:
+
+```bash
+bun run docs:check
+bun run docs:site:check
+```

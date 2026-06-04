@@ -1,6 +1,28 @@
 ---
 title: "Desktop Overview"
-description: "The Tauri desktop app is the primary OpenNivara surface."
+description: "How the OpenNivara Tauri desktop app fits with the Rust backend, local state, Store, Settings, and Memory."
 ---
 
-OpenNivara desktop uses Tauri commands to call the Rust backend. Memory, settings, runtime context, location context, and Store behavior should be validated in desktop, not only browser preview.
+The desktop app is the primary OpenNivara surface. It uses Tauri commands to call the Rust backend, so desktop behavior must be validated in the Tauri app rather than only in browser preview.
+
+Use:
+
+```bash
+cd desktop
+bun install --frozen-lockfile
+bun run tauri:dev
+```
+
+`bun run dev` starts the Vite browser UI only. It is useful for frontend iteration, but it does not exercise Tauri commands, Rust-backed local state, or the real desktop shell.
+
+## Main Areas
+
+- Chat: sends requests through the OpenNivara engine and Gemini integration.
+- Settings: owns profile, style, preferences, contexts, privacy, tools, memory, and skill enablement.
+- Memory: inspects local memory state, graph-derived context, and prompt inclusion decisions.
+- Store: previews and installs themes and data-only skill packs.
+- Skills: enabled or disabled from Settings, not automatically activated by Store installation.
+
+## Local State
+
+The desktop app reads and writes local TOML configuration, SQLite databases, and logs through the Rust backend. These files may contain sensitive profile data, preferences, sessions, memory, saved locations, prompts, selected file content, tool arguments, and diagnostics.

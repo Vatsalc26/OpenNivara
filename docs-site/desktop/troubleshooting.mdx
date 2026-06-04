@@ -1,11 +1,44 @@
 ---
-title: "Troubleshooting"
-description: "Common desktop checks."
+title: "Desktop Troubleshooting"
+description: "Checks for common OpenNivara desktop setup, build, and Tauri smoke-test problems."
 ---
 
-Use these checks first:
+Start with the actual desktop app:
 
-- Run `bun run typecheck` from `desktop`.
-- Run `bun run check` from `desktop`.
-- Run `cargo check` from `desktop/src-tauri`.
-- Use Tauri E2E for Rust-backed desktop flows.
+```bash
+cd desktop
+bun run tauri:dev
+```
+
+If the browser UI opens but Rust-backed behavior does not work, confirm you are not only running `bun run dev`.
+
+## Dependency Checks
+
+```bash
+cargo fmt --check
+cargo test -p opennivara -- --nocapture
+cd desktop
+bun run typecheck
+bun run check
+bun run test:run
+bun run build
+```
+
+## Tauri Smoke Checks
+
+The all-in-one Tauri smoke command can perform a debug build before launching the smoke test:
+
+```bash
+cd desktop
+bun run tauri:e2e:smoke
+```
+
+To split build issues from app-launch issues:
+
+```bash
+cd desktop
+bun run tauri:build:debug
+bun run tauri:e2e:smoke:prebuilt
+```
+
+If a cold Windows build times out, do not treat the timeout alone as a product pass or fail. Check whether the debug binary was built and inspect `desktop/test-results/tauri-e2e/`.

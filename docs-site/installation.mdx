@@ -1,0 +1,79 @@
+---
+title: "Installation"
+description: "Install prerequisites and prepare OpenNivara for source-based desktop and CLI development."
+---
+
+OpenNivara is currently documented as a source-based alpha setup. Packaged installers are not documented here unless they are verified.
+
+## Prerequisites
+
+- Rust and Cargo from [rustup.rs](https://rustup.rs/).
+- Bun for desktop, frontend, and docs scripts.
+- A Gemini API key.
+- Optional: a Telegram bot token for Telegram access.
+- Platform prerequisites for Tauri 2 development. Use the official [Tauri prerequisites guide](https://v2.tauri.app/start/prerequisites/) for your operating system.
+
+## Clone And Install
+
+```bash
+git clone https://github.com/Vatsalc26/OpenNivara.git
+cd OpenNivara
+cd desktop
+bun install --frozen-lockfile
+```
+
+Return to the repository root before running CLI examples:
+
+```bash
+cd ..
+```
+
+## Environment File
+
+Create a local `.env` file:
+
+```bash
+cp .env.example .env
+```
+
+Required for model responses:
+
+```env
+GEMINI_API_KEY=replace_this_with_your_key
+```
+
+Optional for Telegram:
+
+```env
+TELEGRAM_BOT_TOKEN=replace_this_with_your_bot_token
+```
+
+OpenNivara loads `.env` locally. Do not commit real credentials.
+
+## Run Targets
+
+Actual desktop app:
+
+```bash
+cd desktop
+bun run tauri:dev
+```
+
+Frontend-only browser iteration:
+
+```bash
+cd desktop
+bun run dev
+```
+
+CLI from source:
+
+```bash
+cargo run -- --help
+```
+
+Release CLI binary:
+
+```bash
+cargo build --release
+```

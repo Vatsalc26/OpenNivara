@@ -1,6 +1,22 @@
 ---
 title: "Contexts And Goals"
-description: "Reusable context is controlled by Settings."
+description: "Reusable OpenNivara contexts, goals, pinned contexts, and how they differ from Store-installed visual themes."
 ---
 
-Contexts and goals are Settings-owned prompt inputs. They should be relevant, auditable, and separate from visual Store themes.
+Contexts and goals are reusable prompt inputs controlled by Settings and local configuration. They can describe projects, constraints, active goals, or other reusable information.
+
+```bash
+cargo run -- init-contexts
+cargo run -- contexts-path
+cargo run -- show-contexts
+```
+
+Contexts may be selected when relevant to the current request. Contexts can also be pinned to sessions:
+
+```bash
+cargo run -- context-pin <session_id> <context_id>
+cargo run -- context-list <session_id>
+cargo run -- context-unpin <session_id> <context_id>
+```
+
+Store themes must not change contexts or goals. Skill packs may provide skill data, but installing a pack must not activate behavior.

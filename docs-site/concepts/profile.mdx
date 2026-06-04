@@ -1,6 +1,16 @@
 ---
 title: "Profile"
-description: "User profile context controlled by Settings."
+description: "How OpenNivara profile fields provide user-controlled context and why profile data should be treated as private."
 ---
 
-Profile context describes stable user facts. Privacy controls decide what may be sent to the model.
+The profile stores stable user-controlled context such as identity, timezone, and privacy-related fields. It is configured locally and can be inspected through Settings or the CLI.
+
+Useful CLI commands:
+
+```bash
+cargo run -- init-profile
+cargo run -- profile-path
+cargo run -- show-profile
+```
+
+Profile fields may be included in selected context sent to Gemini. Do not store information in the profile that you would not be comfortable sending to the model when relevant.

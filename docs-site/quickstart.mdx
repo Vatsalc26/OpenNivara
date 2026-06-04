@@ -1,14 +1,60 @@
 ---
 title: "Quickstart"
-description: "Start OpenNivara and verify the desktop app."
+description: "Run OpenNivara locally, start the actual desktop app, and verify the safest first workflows."
 ---
 
-Use the desktop app for real validation. Browser preview is only for fast React iteration.
+This quickstart runs OpenNivara from source. The actual desktop app uses Tauri and must be started with `bun run tauri:dev`.
 
-```powershell
+## 1. Configure Environment
+
+Create a local `.env` file from the example:
+
+```bash
+cp .env.example .env
+```
+
+Set at least:
+
+```env
+GEMINI_API_KEY=replace_this_with_your_key
+```
+
+Set `TELEGRAM_BOT_TOKEN` only if you are configuring Telegram.
+
+Never commit `.env`, local TOML state, SQLite databases, or logs.
+
+## 2. Start The Desktop App
+
+```bash
 cd desktop
-bun install
+bun install --frozen-lockfile
 bun run tauri:dev
 ```
 
-Open Memory from the app sidebar, run a context audit, and verify normal chat does not include memory or location.
+`bun run dev` starts only the Vite browser frontend. It is useful for UI iteration, but it does not validate the full desktop app, Tauri commands, local databases, or Rust-backed behavior.
+
+## 3. First Safe Checks
+
+In the desktop app:
+
+- Open Settings and inspect profile, preferences, tools, privacy, and skills before enabling behavior.
+- Open Memory and review local memory settings before storing sensitive information.
+- Open Store and confirm that themes are visual-only and skill packs are not enabled automatically after installation.
+
+In the CLI:
+
+```bash
+cargo run -- init-profile
+cargo run -- init-preferences
+cargo run -- init-style
+cargo run -- init-tools
+cargo run -- ask "Summarize my active context."
+```
+
+## 4. Read Before Using Private Data
+
+Before using OpenNivara with private data, read:
+
+- [Privacy And Data Flow](privacy/data-flow.mdx)
+- [Security Model](security/model.mdx)
+- [Known Limitations](security/known-limitations.mdx)

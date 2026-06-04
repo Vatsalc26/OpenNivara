@@ -1,8 +1,10 @@
 ---
 title: "Runtime Context"
-description: "Internal time and model context for each request."
+description: "Time, timezone, model context, and request-level runtime facts used by OpenNivara."
 ---
 
-Runtime context gives OpenNivara current time, local date ranges, timezone, location context, and model context info.
+Runtime context can include current time, local date ranges, timezone, model context-window information, and location context metadata.
 
-Runtime is included in prompts only when useful.
+Runtime context is intended to help with requests that need time-aware or environment-aware answers. It should not be treated as a promise that every prompt includes every runtime field.
+
+If runtime context is included in a model request, that selected context may be sent to Gemini.

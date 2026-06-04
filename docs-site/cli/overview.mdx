@@ -1,0 +1,35 @@
+---
+title: "CLI Overview"
+description: "Overview of the opennivara command-line interface for setup, chat, diagnostics, workspace maps, sessions, skills, marketplace packs, and Telegram."
+---
+
+The OpenNivara CLI binary is named `opennivara`. From source, use `cargo run --` before the command:
+
+```bash
+cargo run -- --help
+```
+
+After building a release binary, use:
+
+```bash
+target/release/opennivara --help
+```
+
+On Windows, the release binary is `target/release/opennivara.exe`.
+
+## What The CLI Is For
+
+The CLI can:
+
+- initialize local configuration files
+- ask one-off questions
+- run an interactive chat session
+- inspect context that may be sent to Gemini
+- manage sessions
+- configure and scan workspace maps
+- inspect and test local tools
+- install and inspect marketplace packs
+- list, inspect, enable, disable, and route-test skills
+- initialize Telegram configuration
+
+The desktop app remains the primary user surface.

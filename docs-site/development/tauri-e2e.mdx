@@ -1,11 +1,23 @@
 ---
 title: "Tauri E2E"
-description: "Desktop validation for Rust-backed workflows."
+description: "How to run OpenNivara desktop smoke tests with and without a prebuilt debug app."
 ---
 
-Tauri E2E should cover Memory route loading, runtime audit decisions, location disabled behavior, saved places, graph status, and Store themes-only behavior.
+Tauri E2E validates Rust-backed desktop behavior that browser preview cannot cover.
 
-```powershell
+All-in-one smoke test:
+
+```bash
 cd desktop
 bun run tauri:e2e:smoke
 ```
+
+Prebuilt smoke test:
+
+```bash
+cd desktop
+bun run tauri:build:debug
+bun run tauri:e2e:smoke:prebuilt
+```
+
+The prebuilt path is useful on Windows or cold build environments because it separates Rust/Tauri build time from app-launch and WebDriver failures.

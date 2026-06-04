@@ -1,8 +1,35 @@
 ---
 title: "Context Compiler"
-description: "Deterministic audited prompt assembly."
+description: "Current and planned prompt-context assembly in OpenNivara, including what is implemented and what is not yet final."
 ---
 
-The Context Compiler decides what the model receives in one fresh request.
+OpenNivara has Context Compiler components for assembling request context from sources such as profile, preferences, contexts, skills, runtime, location, memory, graph data, workspace information, and token-budget decisions.
 
-It routes by intent, applies privacy gates, checks runtime/location relevance, retrieves memory, trims by token budget, and records an audit.
+The public status is intentionally cautious: do not assume every main-chat path is fully unified, final, deterministic, or completely audited. The project has compiler output and audit-oriented structures, but main-chat unification is still documented as an active area of work in the internal docs.
+
+## Current Behavior
+
+OpenNivara can preview selected context and can include selected sections in the prompt sent to Gemini. Selected context may include:
+
+- profile fields
+- style and preferences
+- contexts and pinned contexts
+- skill instructions
+- memory retrieval results
+- runtime and location context when relevant
+- workspace-map context
+- selected local tool results
+
+## Planned Direction
+
+The intended direction is to make the Context Compiler the single source of prompt assembly for preview and main chat, while preserving:
+
+- profile privacy behavior
+- Settings-owned style and preferences
+- Store themes as visual-only
+- triggered contexts and pinned contexts
+- skill selection and warnings
+- memory/runtime/location relevance checks
+- token budgeting and audit records
+
+Until that work is explicitly completed and validated, public docs should describe Context Compiler as an evolving subsystem rather than a finished guarantee.

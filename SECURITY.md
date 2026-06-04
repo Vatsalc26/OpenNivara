@@ -2,7 +2,9 @@
 
 ## Reporting A Vulnerability
 
-Please report security vulnerabilities privately to Vatsal Chavda rather than opening a public issue.
+Please report security vulnerabilities privately instead of opening a public issue.
+
+Current verified contact: send a direct message on X to [@choco_chip2m](https://x.com/choco_chip2m).
 
 Especially sensitive issues include:
 
@@ -12,6 +14,8 @@ Especially sensitive issues include:
 - Exposure of profiles, preferences, memories, sessions or saved locations.
 - Unsafe tool execution.
 - Sensitive data included in logs or generated artifacts.
+
+Do not include secrets, raw credentials, `.env` files, private local databases, or full sensitive logs in an initial report. Start with a concise summary and a safe reproduction outline.
 
 ## Known Security Limitations
 

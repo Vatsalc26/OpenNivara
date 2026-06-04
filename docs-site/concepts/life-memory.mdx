@@ -1,8 +1,10 @@
 ---
 title: "Life Memory"
-description: "Dynamic local memory with no templates."
+description: "OpenNivara local memory, dynamic facets, and the privacy implications of storing personal facts and tasks."
 ---
 
-Life Memory stores local facts, tasks, events, corrections, and relationships in SQLite.
+Life Memory stores local facts, tasks, events, corrections, and relationships in SQLite. OpenNivara does not use fixed role templates to decide what memory can store. Dynamic facets can label memory by domain and type.
 
-OpenNivara does not use role templates. Dynamic facets label memory by domain and type without limiting what can be stored.
+Memory may contain private information. It is local-first, but not automatically encrypted.
+
+Stored memory does not automatically reach Gemini. When memory is selected for a request, the selected memory context may be sent to Gemini.

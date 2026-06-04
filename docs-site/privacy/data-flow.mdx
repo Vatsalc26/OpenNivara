@@ -1,0 +1,37 @@
+---
+title: "Privacy And Data Flow"
+description: "What OpenNivara stores locally, what may be sent to Gemini, and how optional Telegram integration changes data flow."
+---
+
+OpenNivara intentionally processes private personal information so it can act as a local-first personal AI agent.
+
+Sensitive data can include profiles, preferences, contexts, goals, sessions, conversation history, memories, memory graph data, saved locations, Telegram messages, selected local file contents, prompts, queries, tool arguments, and logs.
+
+## Local State
+
+OpenNivara stores local state in TOML configuration files, SQLite databases, and logs under the OpenNivara local data namespace. Treat these files as sensitive local data.
+
+OpenNivara does not claim local-state encryption.
+
+Useful path commands:
+
+```bash
+cargo run -- profile-path
+cargo run -- preferences-path
+cargo run -- style-path
+cargo run -- contexts-path
+cargo run -- telegram-path
+cargo run -- state-db-path
+```
+
+To delete local state, quit OpenNivara and remove the relevant files or the OpenNivara config directory returned by these commands.
+
+## Gemini Data Flow
+
+When answering a request, OpenNivara may send selected context to Gemini. Selected context can include profile fields, preferences, style instructions, contexts, goals, skill instructions, memory retrieval results, runtime context, location context, conversation history, and selected local tool results.
+
+## Telegram Data Flow
+
+Telegram-based requests pass through Telegram. A Telegram request may cause selected OpenNivara context to be sent to Gemini.
+
+Telegram tool-execution logs may contain private context, including file paths, queries, selected context, and tool arguments. Treat logs as sensitive local data and never commit them.

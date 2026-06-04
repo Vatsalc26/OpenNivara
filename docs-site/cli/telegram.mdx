@@ -1,0 +1,29 @@
+---
+title: "Telegram"
+description: "Optional Telegram integration, allow-list authentication, data flow, and safety limitations."
+---
+
+OpenNivara can run an optional Telegram bot integration. Telegram is an external service. Telegram messages pass through Telegram before reaching OpenNivara, and a Telegram request may cause selected OpenNivara context to be sent to Gemini.
+
+Initialize configuration:
+
+```bash
+cargo run -- init-telegram
+cargo run -- telegram-path
+```
+
+Run the daemon:
+
+```bash
+cargo run -- daemon
+```
+
+## Allow-List Access
+
+Telegram access uses allow-list authentication. Add only trusted chat IDs to the Telegram configuration before accepting remote requests.
+
+Remote access to high-risk local tools should remain disabled unless you deliberately enable it and understand the risk.
+
+## Logs
+
+Telegram tool-execution logs intentionally include tool arguments for diagnostics. These logs may contain sensitive paths, queries, selected context, and tool inputs. Treat them as private local data.

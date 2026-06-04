@@ -1,0 +1,32 @@
+---
+title: "Security Model"
+description: "OpenNivara trust model, local tool boundaries, Telegram access, logging, and current hardening limits."
+---
+
+OpenNivara is local-first software. User configuration, memories, sessions, workspace-map data, and runtime state are intended to remain on the user's device by default.
+
+Gemini and Telegram are external services. Any context sent to them leaves the local device.
+
+## Trust Model
+
+Users are trusted to configure local tools, workspace roots, Telegram access, and model credentials carefully.
+
+OpenNivara should be used with the assumption that local TOML files, SQLite databases, logs, and generated diagnostics can contain sensitive information. Security reports should be sent privately through the verified contact on the [reporting page](reporting.mdx).
+
+## Telegram Access
+
+Telegram access uses allow-list authentication. Users must add trusted chat IDs before remote requests are accepted.
+
+Remote Telegram access to high-risk local tools should remain disabled unless deliberately enabled.
+
+## Tool Permissions
+
+OpenNivara includes controlled local tools and workspace-map tools. Tool availability is constrained by local configuration, source of request, remote policy, and skill/tool policy.
+
+Interactive approval enforcement for some local-tool actions is under development. Until it is complete, keep remote high-risk local-tool permissions disabled unless you understand the risk.
+
+## Known Hardening Gaps
+
+- Allowed filesystem directories must not contain untrusted symbolic links. Canonical-path enforcement is planned.
+- Moving Gemini API-key transport from URL query parameters to request headers is planned hardening.
+- Telegram tool-execution logs may contain sensitive local context.

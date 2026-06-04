@@ -1,0 +1,23 @@
+---
+title: "Known Limitations"
+description: "Current alpha-stage limitations for OpenNivara privacy, security, local tools, paths, Gemini key transport, and Telegram logs."
+---
+
+OpenNivara `v0.1.0-alpha` is an early public release. Use it carefully with private data.
+
+## Current Limitations
+
+- Interactive approval enforcement for some local-tool actions is under development.
+- Allowed filesystem directories must not contain untrusted symbolic links.
+- Canonical-path and symlink hardening is planned, not complete.
+- Moving Gemini API-key transport from URL query parameters to request headers is planned hardening.
+- Telegram tool-execution logs may contain private file paths, queries, selected context, and tool arguments.
+- Local TOML, SQLite, and log state is not claimed to be encrypted.
+- Context Compiler unification is an active area; public docs should not describe every main-chat prompt path as fully unified and final.
+
+## Operational Guidance
+
+- Keep `.env`, Telegram configuration, TOML state, SQLite databases, and logs private.
+- Keep high-risk local tools disabled for Telegram unless needed.
+- Do not enable local-file tools on directories containing untrusted symbolic links.
+- Review logs before sharing diagnostics.

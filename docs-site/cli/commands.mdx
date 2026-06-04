@@ -1,0 +1,69 @@
+---
+title: "CLI Commands"
+description: "Compact reference for verified OpenNivara CLI command families."
+---
+
+Use `cargo run -- <command>` from source, or `opennivara <command>` after installing or building the binary.
+
+## Setup
+
+```bash
+cargo run -- init-profile
+cargo run -- init-preferences
+cargo run -- init-style
+cargo run -- init-contexts
+cargo run -- init-tools
+cargo run -- init-map
+cargo run -- init-telegram
+```
+
+## Paths
+
+```bash
+cargo run -- profile-path
+cargo run -- preferences-path
+cargo run -- style-path
+cargo run -- contexts-path
+cargo run -- tools-path
+cargo run -- telegram-path
+cargo run -- state-db-path
+cargo run -- map-path
+cargo run -- map-db-path
+```
+
+These paths may point to files containing private data. Do not share them without reviewing contents.
+
+## Chat And Context
+
+```bash
+cargo run -- ask "Summarize my active context."
+cargo run -- chat
+cargo run -- chat --new
+cargo run -- chat --resume latest
+cargo run -- debug-context "What context would this request send?"
+```
+
+## Tools
+
+```bash
+cargo run -- tools-list
+cargo run -- tool-test get-current-dir
+cargo run -- tool-test list-dir .
+cargo run -- tool-test file-exists Cargo.toml
+cargo run -- tool-test read-file README.md
+```
+
+Local tools are governed by local configuration and backend safety policy.
+
+## Marketplace And Skills
+
+```bash
+cargo run -- marketplace list
+cargo run -- marketplace preview packs/builtin/india_student_essentials
+cargo run -- marketplace install packs/builtin/india_student_essentials
+cargo run -- skills list
+cargo run -- skills show india_study_plan_builder
+cargo run -- skills route-test "make a 30 day study plan"
+```
+
+Installing a skill pack does not enable skill behavior. Use `skills enable <skill_id>` or Settings -> Skills to enable a skill.

@@ -1,0 +1,28 @@
+---
+title: "Workspace Map"
+description: "How OpenNivara indexes and queries local workspace metadata through the CLI."
+---
+
+Workspace Map is a local indexing feature for allowed workspace roots. It stores metadata in SQLite so OpenNivara can summarize, search, and inspect mapped files without scanning everything on every request.
+
+Initialize and scan:
+
+```bash
+cargo run -- init-map
+cargo run -- map-scan
+```
+
+Inspect:
+
+```bash
+cargo run -- map-summary
+cargo run -- map-tree --depth 2
+cargo run -- map-search "Cargo"
+cargo run -- map-info Cargo.toml
+```
+
+## Privacy And Safety
+
+Workspace-map state is local, but mapped paths, file categories, metadata, and selected snippets may be sensitive. If selected workspace context is included in a model request, that selected context may be sent to Gemini.
+
+Do not configure allowed roots that contain untrusted symbolic links. Canonical-path and symlink hardening is planned, not complete.

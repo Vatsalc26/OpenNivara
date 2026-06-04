@@ -1,0 +1,44 @@
+---
+title: "Store And Skill Packs"
+description: "How OpenNivara Store handles visual themes and data-only skill packs without silently changing assistant behavior."
+---
+
+OpenNivara keeps Store installation separate from Settings-owned behavior.
+
+## Themes
+
+Themes are visual only. A theme may change colors or presentation, but must not change:
+
+- prompts
+- tools
+- memory
+- preferences
+- contexts
+- skills
+- assistant behavior
+
+## Skill Packs
+
+Store can preview and install data-only skill packs. Skill-pack cards and details can show included skills, exam coverage, safety badges, sample prompts, freshness warnings, official source labels, route triggers, allowed tools, and denied tools.
+
+Installing a skill pack copies data into the marketplace. It does not enable prompt behavior.
+
+## Activation Boundary
+
+Use Settings -> Skills to enable or disable skills. This boundary is intentional:
+
+- Store = discover, inspect, and install skill packs.
+- Settings -> Skills = enable, disable, inspect, and configure skill behavior.
+
+## Skill-Pack Safety Rules
+
+Skill packs must remain data-only:
+
+- no executable code
+- no plugin runtime
+- no WASM, Python, or JavaScript execution
+- no install-time activation
+- no tool-permission changes
+- no network tools granted by the pack
+
+Freshness-sensitive skills should tell users what must be verified from official sources. They should not invent dates, fees, cutoffs, seats, eligibility, counselling rules, or official notices.

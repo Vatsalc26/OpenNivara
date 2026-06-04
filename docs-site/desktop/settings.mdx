@@ -1,8 +1,34 @@
 ---
 title: "Settings"
-description: "Settings controls assistant behavior."
+description: "Settings is where OpenNivara behavior is configured, including profile, preferences, contexts, tools, memory, privacy, and skills."
 ---
 
-Settings owns behavior: profile, response style, preferences, contexts, privacy, tools, and memory controls.
+Settings owns assistant behavior. Store content may install data, but Settings controls whether behavior is enabled.
 
-Themes never change behavior or prompt content.
+## Settings-Owned Behavior
+
+Settings covers:
+
+- Profile and privacy-related identity fields.
+- Response style.
+- Preferences.
+- Reusable contexts and goals.
+- Tool configuration and tool availability.
+- Memory settings.
+- Skill enablement and inspection.
+
+## Skills In Settings
+
+Installed skill packs appear in Settings -> Skills. A skill remains inactive until the user enables it there.
+
+Settings -> Skills should be used to:
+
+- Search and filter skills by pack, exam, category, or metadata.
+- Inspect route triggers and negative triggers.
+- Inspect allowed and denied tools.
+- Review freshness warnings and official source labels.
+- Enable or disable individual skills.
+
+## What Settings Does Not Mean
+
+Changing a visual theme should not change assistant behavior. Installing a Store pack should not silently activate prompt behavior. Tool permissions should not be modified by a skill pack install.

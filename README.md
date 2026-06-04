@@ -1,39 +1,50 @@
 # OpenNivara
 
-A local-first personal AI agent by Vatsal Chavda.
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-OpenNivara provides a desktop interface and CLI with personal context, persistent memory, skills, Telegram access and controlled local-tool integration. It is designed to work with private user data while keeping local state on the user's device by default.
+OpenNivara is an alpha-stage, desktop-first personal AI agent with a Rust CLI, local state, memory, skills, marketplace packs, and controlled local tools.
 
-OpenNivara is an alpha-stage project. The public release version is `v0.1.0-alpha`.
+OpenNivara is currently `v0.1.0-alpha`. Expect rough edges, incomplete hardening, and changing interfaces.
 
-## Overview
+## What OpenNivara Is
 
-OpenNivara combines a Rust backend, a Tauri desktop application, a CLI, SQLite-backed local state, configurable personal context, bundled skills and packs, Telegram access and controlled local tools. It is intended for users who want a personal assistant that can work with local context while keeping configuration, memories, sessions and runtime state local by default.
+OpenNivara is a local-first personal AI agent. The main product surface is a Tauri + React desktop app backed by a Rust backend and SQLite/TOML local state. The `opennivara` CLI is an additional surface for setup, diagnostics, chat, workspace indexing, marketplace operations, skills, sessions, and Telegram configuration.
 
-Public repository: [Vatsalc26/OpenNivara](https://github.com/Vatsalc26/OpenNivara)
+Local-first does not mean that data never leaves your device. OpenNivara uses the Gemini API for model responses, and optional Telegram integration routes messages through Telegram. Selected context can be sent to Gemini when answering a request.
 
 ## Features
 
-- Desktop application built with Tauri and React.
-- CLI executable named `opennivara`.
-- Personal profiles, preferences, contexts and goals.
-- Persistent memory, memory graph and retrieval functionality.
-- Sessions and conversation history.
-- Runtime and location context, including saved places.
-- Skills and bundled first-party packs.
-- Marketplace/store functionality for packs and themes.
-- Telegram bot integration with allow-list authentication.
-- Controlled local-file, workspace-map and other local tools.
-- Intentional Telegram tool-argument logging for diagnostics.
+- Desktop app built with Tauri and React.
+- Rust CLI binary named `opennivara`.
+- Personal profile, preferences, response style, reusable contexts, and goals.
+- SQLite-backed sessions, conversation history, memory, and memory graph data.
+- Workspace map and controlled local tools.
+- Optional Telegram bot integration with allow-list authentication.
+- Marketplace themes for visual customization only.
+- Data-only skill packs that can be previewed and installed from Store, then enabled or disabled in Settings -> Skills.
 
-## Installation Prerequisites
+## Safety Notice
+
+OpenNivara is alpha software that can process sensitive local data. Local state may include private profile data, preferences, sessions, memories, saved locations, selected file contents, prompts, tool arguments, Telegram metadata, and logs.
+
+Important current limitations:
+
+- Interactive approval enforcement for some local-tool actions is still under development.
+- Canonical-path and symlink hardening for allowed filesystem roots is planned, not complete.
+- Moving Gemini API-key transport from URL query parameters to request headers is planned hardening, not complete.
+- Telegram tool-execution logs may contain sensitive data.
+
+Read the repository docs for [privacy and data flow](docs/privacy-and-data-flow.md), [security model](docs/security-model.md), and [known limitations](docs/known-limitations.md) before using OpenNivara with private data.
+
+## Prerequisites
 
 - Rust and Cargo from [rustup.rs](https://rustup.rs/).
-- Bun for desktop and documentation tooling.
+- Bun for desktop, frontend, and documentation scripts.
 - A Gemini API key.
-- Optional: a Telegram bot token if you want Telegram access.
+- Optional: a Telegram bot token for Telegram access.
+- Platform prerequisites for Tauri 2 development. See the official [Tauri prerequisites guide](https://v2.tauri.app/start/prerequisites/).
 
-## Environment Variables
+## Environment
 
 Copy `.env.example` to `.env` and replace the placeholders:
 
@@ -42,22 +53,39 @@ GEMINI_API_KEY=replace_this_with_your_key
 TELEGRAM_BOT_TOKEN=replace_this_with_your_bot_token
 ```
 
-Never commit `.env` or any real credential.
+Never commit `.env`, local TOML state, SQLite databases, logs, generated artifacts, or files containing private prompts, memory data, tool arguments, or credentials.
 
-## CLI Usage
+## Desktop Quickstart
 
-Initialize local configuration:
+Run the actual desktop application in development:
+
+```bash
+cd desktop
+bun install --frozen-lockfile
+bun run tauri:dev
+```
+
+`bun run dev` starts Vite for browser/frontend iteration only. It does not run the full desktop app and should not be used to validate Rust-backed desktop behavior.
+
+For a production frontend build:
+
+```bash
+cd desktop
+bun run build
+```
+
+## CLI Quickstart
+
+Initialize the basic local configuration:
 
 ```bash
 cargo run -- init-profile
 cargo run -- init-preferences
 cargo run -- init-style
 cargo run -- init-tools
-cargo run -- init-map
-cargo run -- init-telegram
 ```
 
-Ask a question:
+Ask one question through the CLI:
 
 ```bash
 cargo run -- ask "Summarize my active context."
@@ -69,59 +97,30 @@ Build the release binary:
 cargo build --release
 ```
 
-The executable is `target/release/opennivara` on Unix-like systems and `target/release/opennivara.exe` on Windows.
+The executable is `target/release/opennivara` on Unix-like systems and `target/release/opennivara.exe` on Windows. See the public docs source in [docs-site/cli/commands.mdx](docs-site/cli/commands.mdx) for a compact command reference.
 
-## Desktop App
+## Store, Themes, And Skills
 
-Run the desktop app in development:
+Themes are visual only. They must not change prompts, memory, preferences, contexts, tools, or assistant behavior.
 
-```bash
-cd desktop
-bun install --frozen-lockfile
-bun run dev
-```
+Store can preview and install data-only skill packs. Installing a skill pack does not activate prompt behavior. Settings -> Skills controls enabling, disabling, and inspecting skill behavior. Skill packs do not add executable code, install-time activation, network tools, or tool-permission changes.
 
-Build the desktop frontend:
+## Data And Privacy Summary
 
-```bash
-cd desktop
-bun run build
-```
+OpenNivara stores user-owned state locally in TOML files, SQLite databases, and logs under the OpenNivara local data namespace. Local state is not claimed to be encrypted.
 
-## Local Private Data Storage
-
-OpenNivara stores user-owned state locally, including TOML configuration files, SQLite databases and logs. These may contain private profile data, preferences, sessions, memories, saved locations, Telegram metadata, selected local file contents, tool arguments, prompts and queries.
-
-OpenNivara uses a new local data namespace and does not automatically import local data from earlier private Jarvis development builds.
-
-Treat all local state as sensitive. See [Privacy and Data Flow](docs/privacy-and-data-flow.md), [Security Model](docs/security-model.md) and [Known Limitations](docs/known-limitations.md).
-
-## Security Notes
-
-Interactive approval enforcement for some local-tool actions is under development. Until it is complete, users should keep remote high-risk local-tool permissions disabled unless they understand the risk.
-
-Known limitation: allowed filesystem directories must not contain untrusted symbolic links. Canonical-path enforcement is planned for a future security hardening pass.
-
-Planned hardening: move Gemini API-key transport from URL query parameters to request headers.
-
-Telegram tool-execution logs may contain private context, including file paths, queries and tool arguments. Users must treat logs as sensitive local data and must never commit them to source control.
+When answering a request, OpenNivara may send selected context to Gemini. Selected context can include profile fields, preferences, style instructions, contexts, goals, skill instructions, memory retrieval results, runtime context, location context, conversation history, and selected local tool results. Telegram-based requests pass through Telegram and may cause selected context to be sent to Gemini.
 
 ## Development And Testing
 
-Rust checks:
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup and quality expectations.
+
+Common checks:
 
 ```bash
 cargo fmt --all -- --check
-cargo clippy --all-targets -- -D warnings
 cargo test
-cargo build
-```
-
-Desktop checks:
-
-```bash
 cd desktop
-bun install --frozen-lockfile
 bun run typecheck
 bun run check
 bun run test:run
@@ -135,12 +134,11 @@ bun run docs:check
 bun run docs:site:check
 ```
 
-## License
+## Documentation, Support, Security, And License
 
-OpenNivara is released under the MIT License. See [LICENSE](LICENSE).
+- Public docs source: [docs-site/](docs-site/).
+- Bugs and feature requests: [GitHub Issues](https://github.com/Vatsalc26/OpenNivara/issues).
+- Vulnerability reporting: read [SECURITY.md](SECURITY.md). Do not open public issues for sensitive vulnerabilities. The current verified private contact is [@choco_chip2m on X](https://x.com/choco_chip2m).
+- License: [MIT](LICENSE).
 
 First-party bundled packs are distributed under this repository's MIT License unless otherwise noted.
-
-## Author
-
-Vatsal Chavda

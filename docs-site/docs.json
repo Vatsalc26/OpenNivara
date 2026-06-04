@@ -1,20 +1,77 @@
 {
   "$schema": "https://mintlify.com/docs.json",
-  "name": "OpenNivara Documentation",
+  "name": "OpenNivara",
+  "description": "Public documentation for OpenNivara, an alpha-stage local-first personal AI agent with a Rust CLI, Tauri desktop app, memory, skills, marketplace packs, and controlled local tools.",
   "theme": "mint",
   "colors": {
-    "primary": "#2563eb",
+    "primary": "#06b6d4",
     "light": "#ffffff",
     "dark": "#0f172a"
   },
+  "logo": {
+    "light": "/logo.svg",
+    "dark": "/logo.svg"
+  },
+  "favicon": "/favicon.svg",
+  "integrations": {
+    "telemetry": {
+      "enabled": true
+    }
+  },
+  "navbar": {
+    "links": [
+      {
+        "label": "GitHub",
+        "href": "https://github.com/Vatsalc26/OpenNivara"
+      }
+    ]
+  },
+  "footer": {
+    "socials": {
+      "github": "https://github.com/Vatsalc26/OpenNivara"
+    },
+    "links": [
+      {
+        "header": "Project",
+        "items": [
+          {
+            "label": "License",
+            "href": "https://github.com/Vatsalc26/OpenNivara/blob/main/LICENSE"
+          },
+          {
+            "label": "Security",
+            "href": "https://github.com/Vatsalc26/OpenNivara/blob/main/SECURITY.md"
+          },
+          {
+            "label": "Issues",
+            "href": "https://github.com/Vatsalc26/OpenNivara/issues"
+          }
+        ]
+      }
+    ]
+  },
+  "errors": {
+    "404": {
+      "redirect": false,
+      "title": "Page not found",
+      "description": "This OpenNivara documentation page does not exist. Use the navigation or return to the introduction."
+    }
+  },
+  "redirects": [
+    {
+      "source": "/desktop/store-themes",
+      "destination": "/desktop/store-skill-packs",
+      "permanent": true
+    }
+  ],
   "navigation": {
     "tabs": [
       {
         "tab": "Start",
         "groups": [
           {
-            "group": "Overview",
-            "pages": ["index", "quickstart"]
+            "group": "Start Here",
+            "pages": ["index", "installation", "quickstart"]
           }
         ]
       },
@@ -27,8 +84,23 @@
               "desktop/overview",
               "desktop/settings",
               "desktop/memory",
-              "desktop/store-themes",
+              "desktop/store-skill-packs",
               "desktop/troubleshooting"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "CLI",
+        "groups": [
+          {
+            "group": "Command Line",
+            "pages": [
+              "cli/overview",
+              "cli/commands",
+              "cli/workspace-map",
+              "cli/sessions",
+              "cli/telegram"
             ]
           }
         ]
@@ -53,6 +125,20 @@
         ]
       },
       {
+        "tab": "Privacy & Security",
+        "groups": [
+          {
+            "group": "Privacy & Security",
+            "pages": [
+              "privacy/data-flow",
+              "security/model",
+              "security/known-limitations",
+              "security/reporting"
+            ]
+          }
+        ]
+      },
+      {
         "tab": "Development",
         "groups": [
           {
@@ -66,8 +152,8 @@
             ]
           },
           {
-            "group": "Changelog",
-            "pages": ["changelog/index"]
+            "group": "Project",
+            "pages": ["project/contributing", "changelog/index"]
           }
         ]
       }
