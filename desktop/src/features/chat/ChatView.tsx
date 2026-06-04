@@ -2,15 +2,18 @@ import {
 	Copy,
 	CopyCheck,
 	Eye,
+	Pin,
 	Send,
 	Sparkles,
 	Terminal,
 	User,
+	X,
 } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { askOpenNivara } from "@/api/opennivaraClient";
+import { askOpenNivara, listPinnedSkills } from "@/api/opennivaraClient";
+import { listSkills, type SkillSummary } from "@/api/skillClient";
 import { Button } from "@/components/ui/button";
 import { LoadingState } from "@/components/ui/LoadingState";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -89,7 +92,17 @@ export function ChatView({
 	const [input, setInput] = useState("");
 	const [isLoading, setIsLoading] = useState(false);
 	const [copiedId, setCopiedId] = useState<number | null>(null);
+	const [enabledSkills, setEnabledSkills] = useState<SkillSummary[]>([]);
+	const [selectedSkillId, setSelectedSkillId] = useState("");
+	const [keepSelectedSkill, setKeepSelectedSkill] = useState(false);
+	const [pinnedSkillIds, setPinnedSkillIds] = useState<string[]>([]);
 	const messagesEndRef = useRef<HTMLDivElement>(null);
+	const selectedSkill = enabledSkills.find(
+		(skill) => skill.id === selectedSkillId,
+	);
+	const pinnedSkills = enabledSkills.filter((skill) =>
+		pinnedSkillIds.includes(skill.id),
+	);
 
 	const handleQuickAction = (text: string) => {
 		setInput(text);
@@ -102,6 +115,42 @@ export function ChatView({
 	useEffect(() => {
 		messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
 	}, []);
+
+	useEffect(() => {
+		let active = true;
+		listSkills()
+			.then((skills) => {
+				if (active) {
+					setEnabledSkills(skills.filter((skill) => skill.enabled));
+				}
+			})
+			.catch((err) => {
+				console.error("Failed to load enabled skills for chat composer", err);
+			});
+		return () => {
+			active = false;
+		};
+	}, []);
+
+	useEffect(() => {
+		let active = true;
+		if (!currentSessionId) {
+			setPinnedSkillIds([]);
+			return;
+		}
+		listPinnedSkills(currentSessionId)
+			.then((ids) => {
+				if (active) {
+					setPinnedSkillIds(ids);
+				}
+			})
+			.catch((err) => {
+				console.error("Failed to load pinned skills for chat composer", err);
+			});
+		return () => {
+			active = false;
+		};
+	}, [currentSessionId]);
 
 	const handleSend = async () => {
 		if (!input.trim() || isLoading) return;
@@ -121,6 +170,8 @@ export function ChatView({
 			const res = await askOpenNivara(
 				userMessage.content,
 				currentSessionId || undefined,
+				selectedSkillId || undefined,
+				keepSelectedSkill,
 			);
 
 			if (!currentSessionId && res.session_id) {
@@ -134,6 +185,14 @@ export function ChatView({
 			};
 
 			setMessages((prev) => [...prev, modelMessage]);
+			if (!keepSelectedSkill) {
+				setSelectedSkillId("");
+			}
+			if (keepSelectedSkill && selectedSkillId) {
+				setPinnedSkillIds((prev) =>
+					prev.includes(selectedSkillId) ? prev : [...prev, selectedSkillId],
+				);
+			}
 		} catch (err: any) {
 			const errorMessage: Message = {
 				role: "model",
@@ -413,6 +472,67 @@ export function ChatView({
 				{/* Input composer box */}
 				<div className="px-6 py-4 bg-background/25 border-t border-border/30">
 					<div className="max-w-4xl mx-auto flex items-end gap-3 glass-panel p-2 rounded-xl focus-within:ring-1 focus-within:ring-primary/50 focus-within:border-primary/50 transition-all duration-300">
+						<div className="flex min-w-[180px] max-w-[240px] flex-col gap-1.5 px-1 pb-0.5">
+							<label htmlFor="chat-skill-select" className="sr-only">
+								Select skill for message
+							</label>
+							<select
+								id="chat-skill-select"
+								aria-label="Select skill for message"
+								value={selectedSkillId}
+								onChange={(event) => setSelectedSkillId(event.target.value)}
+								disabled={isLoading || enabledSkills.length === 0}
+								className="h-8 rounded-lg border border-border/50 bg-background/70 px-2 text-[11px] font-semibold text-foreground outline-none disabled:opacity-50"
+							>
+								<option value="">Auto skills</option>
+								{enabledSkills.map((skill) => (
+									<option key={skill.id} value={skill.id}>
+										{skill.name}
+									</option>
+								))}
+							</select>
+							{selectedSkill && (
+								<div className="flex items-center gap-1 rounded-lg border border-primary/20 bg-primary/10 px-2 py-1 text-[10px] text-primary">
+									<Sparkles className="h-3 w-3 shrink-0" />
+									<span className="min-w-0 flex-1 truncate font-bold">
+										{selectedSkill.name}
+									</span>
+									<button
+										type="button"
+										aria-label="Clear selected skill"
+										onClick={() => {
+											setSelectedSkillId("");
+											setKeepSelectedSkill(false);
+										}}
+										className="rounded p-0.5 hover:bg-primary/10"
+									>
+										<X className="h-3 w-3" />
+									</button>
+								</div>
+							)}
+							{selectedSkill && (
+								<label className="flex items-center gap-1.5 text-[10px] font-semibold text-muted-foreground">
+									<input
+										type="checkbox"
+										aria-label="Keep using selected skill in this chat"
+										checked={keepSelectedSkill}
+										onChange={(event) =>
+											setKeepSelectedSkill(event.target.checked)
+										}
+										className="h-3 w-3"
+									/>
+									<span>Keep using</span>
+								</label>
+							)}
+							{pinnedSkills.length > 0 && !selectedSkill && (
+								<div className="flex items-center gap-1 rounded-lg border border-border/40 px-2 py-1 text-[10px] text-muted-foreground">
+									<Pin className="h-3 w-3 shrink-0 rotate-45" />
+									<span className="truncate">
+										{pinnedSkills.map((skill) => skill.name).join(", ")}
+									</span>
+								</div>
+							)}
+						</div>
 						<Textarea
 							value={input}
 							onChange={(e) => setInput(e.target.value)}

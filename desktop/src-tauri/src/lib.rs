@@ -10,6 +10,8 @@ pub struct AskResponse {
 async fn ask_opennivara(
     message: String,
     session_id: Option<String>,
+    ui_selected_skill_id: Option<String>,
+    pin_selected_skill: Option<bool>,
 ) -> Result<AskResponse, String> {
     if std::env::var("GEMINI_API_KEY").is_err() {
         return Err(
@@ -27,6 +29,8 @@ async fn ask_opennivara(
             source: opennivara::engine::RequestSource::Cli,
             session_id,
             message,
+            ui_selected_skill_id,
+            pin_selected_skill: pin_selected_skill.unwrap_or(false),
         })
         .await
         .map_err(|e| e.to_string())?;
@@ -147,10 +151,15 @@ async fn save_contexts(contexts: opennivara::context::ContextsFile) -> Result<()
 async fn preview_context_for_message(
     message: String,
     session_id: Option<String>,
+    ui_selected_skill_id: Option<String>,
 ) -> Result<opennivara::engine::ContextPreview, String> {
     let engine = opennivara::engine::OpenNivaraEngine::new();
     engine
-        .preview_context_for_message(&message, session_id.as_deref())
+        .preview_context_for_message_with_skill(
+            &message,
+            session_id.as_deref(),
+            ui_selected_skill_id.as_deref(),
+        )
         .map_err(|e| e.to_string())
 }
 
@@ -184,6 +193,24 @@ async fn pin_context(session_id: String, context_id: String) -> Result<(), Strin
 async fn unpin_context(session_id: String, context_id: String) -> Result<(), String> {
     let conn = opennivara::sessions::init_db().map_err(|e| e.to_string())?;
     opennivara::sessions::unpin_context(&conn, &session_id, &context_id).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+async fn pin_skill(session_id: String, skill_id: String) -> Result<(), String> {
+    let conn = opennivara::sessions::init_db().map_err(|e| e.to_string())?;
+    opennivara::sessions::pin_skill(&conn, &session_id, &skill_id).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+async fn unpin_skill(session_id: String, skill_id: String) -> Result<(), String> {
+    let conn = opennivara::sessions::init_db().map_err(|e| e.to_string())?;
+    opennivara::sessions::unpin_skill(&conn, &session_id, &skill_id).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+async fn list_pinned_skills(session_id: String) -> Result<Vec<String>, String> {
+    let conn = opennivara::sessions::init_db().map_err(|e| e.to_string())?;
+    opennivara::sessions::list_pinned_skills(&conn, &session_id).map_err(|e| e.to_string())
 }
 
 #[tauri::command]
@@ -883,6 +910,9 @@ pub fn run() {
             skills_test_route,
             pin_context,
             unpin_context,
+            pin_skill,
+            unpin_skill,
+            list_pinned_skills,
             check_api_key,
             memory_init,
             memory_status,

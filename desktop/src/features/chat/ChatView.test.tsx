@@ -110,6 +110,82 @@ describe("ChatView Unit Tests", () => {
 		});
 	});
 
+	test("selects an enabled skill for one message and can keep it pinned", async () => {
+		mockTauriCommand("skills_list", [
+			{
+				id: "india_study_plan_builder",
+				pack_id: "india_student_essentials",
+				name: "India Study Plan Builder",
+				description: "Build realistic weekly study plans.",
+				category: "india_student",
+				enabled: true,
+				route_policy: "auto",
+				risk_level: "low",
+				allowed_tools: [],
+				denied_tools: ["write_file", "run_command", "open_url"],
+				exam: "General Study",
+				exam_stage: "planning",
+				audience: ["student"],
+				language_style: ["english"],
+				freshness_sensitive: false,
+				official_source_labels: [],
+				best_for: ["Study planning"],
+				not_for: ["Guaranteed marks"],
+			},
+		]);
+		mockTauriCommand("list_pinned_skills", []);
+		let askArgs: any = null;
+		mockTauriCommand("ask_opennivara", (args: any) => {
+			askArgs = args;
+			return {
+				session_id: "session_123",
+				answer: "Here is your study plan.",
+			};
+		});
+
+		render(
+			<ThemeProvider>
+				<ChatView currentSessionId="session_123" onSessionCreated={() => {}} />
+			</ThemeProvider>,
+		);
+
+		const skillSelect = await screen.findByLabelText(
+			"Select skill for message",
+		);
+		fireEvent.change(skillSelect, {
+			target: { value: "india_study_plan_builder" },
+		});
+		fireEvent.click(
+			screen.getByLabelText("Keep using selected skill in this chat"),
+		);
+		expect(
+			screen.getAllByText("India Study Plan Builder").length,
+		).toBeGreaterThan(1);
+
+		const textarea = screen.getByPlaceholderText(
+			"Ask OpenNivara a question about your files or workspace...",
+		);
+		fireEvent.change(textarea, {
+			target: { value: "Make a realistic weekly plan" },
+		});
+		const sendButton = screen
+			.getAllByRole("button")
+			.find((btn) => btn.querySelector(".lucide-send"));
+		if (sendButton) {
+			fireEvent.click(sendButton);
+		}
+
+		await waitFor(() => {
+			expect(askArgs).toMatchObject({
+				message: "Make a realistic weekly plan",
+				sessionId: "session_123",
+				uiSelectedSkillId: "india_study_plan_builder",
+				pinSelectedSkill: true,
+			});
+			expect(screen.getByText("Here is your study plan.")).toBeInTheDocument();
+		});
+	});
+
 	test("3. Missing API key alerts user appropriately", async () => {
 		mockTauriCommand("check_api_key", false);
 		mockTauriCommand("ask_opennivara", () => {

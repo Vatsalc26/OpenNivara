@@ -291,6 +291,10 @@ function setupDefaultTauriMocks() {
 		final_context_text: "Settings-only context preview.",
 		active_theme: null,
 	});
+	mockTauriCommand("skills_list", []);
+	mockTauriCommand("list_pinned_skills", []);
+	mockTauriCommand("pin_skill", {});
+	mockTauriCommand("unpin_skill", {});
 	mockTauriCommand("memory_status", {
 		db_path: "mock/opennivara_memory.sqlite",
 		initialized: true,

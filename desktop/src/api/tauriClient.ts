@@ -51,10 +51,14 @@ export interface ToolsConfig {
 export async function tauriAskOpenNivara(
 	message: string,
 	sessionId?: string,
+	uiSelectedSkillId?: string,
+	pinSelectedSkill?: boolean,
 ): Promise<AskResponse> {
 	return invoke<AskResponse>("ask_opennivara", {
 		message,
 		sessionId: sessionId ?? null,
+		uiSelectedSkillId: uiSelectedSkillId ?? null,
+		pinSelectedSkill: pinSelectedSkill ?? false,
 	});
 }
 
@@ -293,10 +297,12 @@ export async function tauriSaveContexts(contexts: Contexts): Promise<void> {
 export async function tauriPreviewContextForMessage(
 	message: string,
 	sessionId?: string,
+	uiSelectedSkillId?: string,
 ): Promise<ContextPreview> {
 	return invoke<ContextPreview>("preview_context_for_message", {
 		message,
 		sessionId: sessionId ?? null,
+		uiSelectedSkillId: uiSelectedSkillId ?? null,
 	});
 }
 
@@ -312,6 +318,26 @@ export async function tauriUnpinContext(
 	contextId: string,
 ): Promise<void> {
 	return invoke<void>("unpin_context", { sessionId, contextId });
+}
+
+export async function tauriPinSkill(
+	sessionId: string,
+	skillId: string,
+): Promise<void> {
+	return invoke<void>("pin_skill", { sessionId, skillId });
+}
+
+export async function tauriUnpinSkill(
+	sessionId: string,
+	skillId: string,
+): Promise<void> {
+	return invoke<void>("unpin_skill", { sessionId, skillId });
+}
+
+export async function tauriListPinnedSkills(
+	sessionId: string,
+): Promise<string[]> {
+	return invoke<string[]>("list_pinned_skills", { sessionId });
 }
 
 export async function tauriCheckApiKey(): Promise<boolean> {
