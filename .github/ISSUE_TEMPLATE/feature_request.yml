@@ -1,0 +1,68 @@
+name: Feature request
+description: Suggest an improvement or new capability.
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting an improvement.
+
+        Please do not include secrets, private prompts, local file contents, API keys, bot tokens, or personal data. Security vulnerabilities belong in the private reporting path described in SECURITY.md.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or user need
+      description: What problem should OpenNivara solve?
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed solution
+      description: What would a useful solution look like?
+    validations:
+      required: true
+  - type: textarea
+    id: workflow
+    attributes:
+      label: Target user or workflow
+      description: Who benefits, and in what workflow?
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Optional. What other approaches did you consider?
+    validations:
+      required: false
+  - type: checkboxes
+    id: impact
+    attributes:
+      label: Areas affected
+      options:
+        - label: Local data or privacy
+        - label: Tools or tool permissions
+        - label: Skills or skill routing
+        - label: External services
+        - label: Desktop UI
+        - label: CLI
+        - label: Documentation only
+  - type: dropdown
+    id: contribute
+    attributes:
+      label: Are you willing to contribute?
+      options:
+        - "Yes"
+        - "Maybe"
+        - "No"
+    validations:
+      required: false
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Privacy check
+      options:
+        - label: I have not included API keys, bot tokens, private memories, local databases, `.env` files, private file contents, personal data, or sensitive logs.
+          required: true

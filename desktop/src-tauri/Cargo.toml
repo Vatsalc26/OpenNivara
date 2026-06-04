@@ -1,6 +1,6 @@
 [package]
 name = "desktop"
-version = "0.1.0"
+version = "0.1.0-alpha.1"
 description = "OpenNivara desktop application"
 authors = ["Vatsal Chavda"]
 edition = "2021"

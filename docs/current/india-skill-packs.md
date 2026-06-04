@@ -39,19 +39,25 @@ notices, and current affairs are marked freshness-sensitive. Those skills includ
 official source labels so OpenNivara can tell the user when current official data is
 needed.
 
-## Regeneration
+## Direct Curation
 
-The generated exam-pack manifests live under `packs/builtin`. Run
-`python scripts/generate_india_skill_packs.py` from the repository root to
-regenerate the generated India exam packs.
+Built-in skill manifests are maintained directly in their pack directories under
+`packs/builtin`. Do not use a generator to rewrite skill manifests.
 
-India Student Essentials is curated by hand and is skipped by the generator by
-default. Only overwrite it intentionally by setting
-`OPENNIVARA_REGENERATE_CURATED_STUDENT_ESSENTIALS=1`.
+Pack upgrades are performed individually with prompt review, routing review,
+freshness/source-boundary review, and deterministic evaluation fixtures where the
+pack has been upgraded for them.
 
-After any India skill-pack change, run:
+India Student Essentials is the first curated high-coverage pack. Other built-in
+India packs may still contain alpha-quality content awaiting individual upgrade;
+India Engineering Exams is the next planned pack for comprehensive review.
+
+After changing a built-in India skill pack, run:
 
 ```bash
-cargo run -- skillctl validate-pack india_student_essentials
-cargo run -- skillctl eval india_student_essentials
+cargo run -- skillctl validate-pack <pack_id>
+cargo run -- skillctl report <pack_id>
 ```
+
+For packs with deterministic fixtures, also run `cargo run -- skillctl eval
+<pack_id>`.

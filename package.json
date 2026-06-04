@@ -5,6 +5,7 @@
   "scripts": {
     "docs:lint": "markdownlint-cli2",
     "docs:links": "node scripts/docs-link-check.mjs",
+    "check:obsolete-skill-generator": "node scripts/check-no-obsolete-skill-generator.mjs",
     "docs:check": "bun run docs:lint && bun run docs:links",
     "docs:site:dev": "cd docs-site && bun run dev",
     "docs:site:check": "cd docs-site && bun run check"

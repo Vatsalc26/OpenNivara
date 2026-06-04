@@ -1021,7 +1021,7 @@ dependencies = [
 
 [[package]]
 name = "desktop"
-version = "0.1.0"
+version = "0.1.0-alpha.1"
 dependencies = [
  "anyhow",
  "chrono",
@@ -3098,7 +3098,7 @@ dependencies = [
 
 [[package]]
 name = "opennivara"
-version = "0.1.0"
+version = "0.1.0-alpha.1"
 dependencies = [
  "anyhow",
  "chrono",
@@ -3116,6 +3116,7 @@ dependencies = [
  "refinery",
  "reqwest 0.12.28",
  "rusqlite",
+ "schemars 0.8.22",
  "semver",
  "serde",
  "serde_json",

@@ -1,6 +1,6 @@
 [package]
 name = "opennivara"
-version = "0.1.0"
+version = "0.1.0-alpha.1"
 edition = "2021"
 authors = ["Vatsal Chavda"]
 description = "Local-first personal AI agent with memory, skills, Telegram access and controlled local tools."

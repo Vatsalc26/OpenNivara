@@ -32,6 +32,10 @@ are reserved policy labels, not runtime tools.
 Use `skillctl` from the repository root when creating or changing built-in skill
 packs:
 
+Built-in skill manifests are edited directly in `packs/builtin`. Upgrade packs
+one at a time with review and fixtures; do not rewrite manifests through a
+generator.
+
 ```bash
 cargo run -- skillctl validate-pack india_student_essentials
 cargo run -- skillctl eval india_student_essentials

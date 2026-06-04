@@ -1,6 +1,6 @@
 # Known Limitations
 
-OpenNivara `v0.1.0-alpha` is an early public release.
+OpenNivara `v0.1.0-alpha.1` is an early public release.
 
 Interactive approval enforcement for some local-tool actions is under development. Until it is complete, users should keep remote high-risk local-tool permissions disabled unless they understand the risk.
 

@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Report a security vulnerability
+    url: https://github.com/Vatsalc26/OpenNivara/security/advisories/new
+    about: Do not report vulnerabilities publicly. Use GitHub private vulnerability reporting.
+  - name: Security policy
+    url: https://github.com/Vatsalc26/OpenNivara/blob/main/SECURITY.md
+    about: Read how to report vulnerabilities safely.

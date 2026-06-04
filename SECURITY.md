@@ -4,7 +4,13 @@
 
 Please report security vulnerabilities privately instead of opening a public issue.
 
-Current verified contact: send a direct message on X to [@choco_chip2m](https://x.com/choco_chip2m).
+Preferred method: use GitHub private vulnerability reporting for this repository.
+Open the repository's Security tab, choose Advisories, and use **Report a
+vulnerability**. This creates a private report visible to the maintainers.
+
+Fallback contact: if GitHub private vulnerability reporting is unavailable to
+you, send a direct message on X to the verified maintainer account
+[@choco_chip2m](https://x.com/choco_chip2m).
 
 Especially sensitive issues include:
 

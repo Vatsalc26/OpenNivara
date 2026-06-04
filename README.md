@@ -4,7 +4,7 @@
 
 OpenNivara is an alpha-stage, desktop-first personal AI agent with a Rust CLI, local state, memory, skills, marketplace packs, and controlled local tools.
 
-OpenNivara is currently `v0.1.0-alpha`. Expect rough edges, incomplete hardening, and changing interfaces.
+OpenNivara is currently `v0.1.0-alpha.1`. Expect rough edges, incomplete hardening, and changing interfaces.
 
 ## What OpenNivara Is
 
@@ -113,7 +113,7 @@ When answering a request, OpenNivara may send selected context to Gemini. Select
 
 ## Development And Testing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup and quality expectations.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup, quality expectations, and contribution workflow. Contributors should also read the [Code of Conduct](CODE_OF_CONDUCT.md) and the lightweight [roadmap](ROADMAP.md).
 
 Common checks:
 
@@ -137,8 +137,8 @@ bun run docs:site:check
 ## Documentation, Support, Security, And License
 
 - Public docs source: [docs-site/](docs-site/).
-- Bugs and feature requests: [GitHub Issues](https://github.com/Vatsalc26/OpenNivara/issues).
-- Vulnerability reporting: read [SECURITY.md](SECURITY.md). Do not open public issues for sensitive vulnerabilities. The current verified private contact is [@choco_chip2m on X](https://x.com/choco_chip2m).
+- Bugs, feature requests, and contributor tasks: [GitHub Issues](https://github.com/Vatsalc26/OpenNivara/issues), including [good first issues](https://github.com/Vatsalc26/OpenNivara/issues?q=is%3Aissue%20is%3Aopen%20label%3A%22good%20first%20issue%22).
+- Vulnerability reporting: read [SECURITY.md](SECURITY.md). Do not open public issues for sensitive vulnerabilities. Use GitHub private vulnerability reporting where possible; the verified fallback contact is [@choco_chip2m on X](https://x.com/choco_chip2m).
 - License: [MIT](LICENSE).
 
 First-party bundled packs are distributed under this repository's MIT License unless otherwise noted.

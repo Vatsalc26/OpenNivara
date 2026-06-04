@@ -53,6 +53,9 @@ jobs:
           cargo run -- skillctl schema
           git diff --exit-code -- schemas
 
+      - name: Reject Obsolete Skill Generator References
+        run: bun run check:obsolete-skill-generator
+
   frontend-check:
     name: Frontend Quality Checks
     runs-on: ubuntu-latest
