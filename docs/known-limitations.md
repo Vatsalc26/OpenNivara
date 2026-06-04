@@ -10,4 +10,4 @@ Planned hardening: move Gemini API-key transport from URL query parameters to re
 
 Telegram tool-execution logs may contain private context, including file paths, queries and tool arguments. Users must treat logs as sensitive local data and must never commit them to source control.
 
-OpenNivara uses a new local data namespace and does not automatically import local data from earlier private Jarvis development builds.
+OpenNivara uses a new local data namespace and does not automatically import local data from earlier private development builds.

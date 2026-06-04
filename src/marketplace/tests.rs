@@ -270,6 +270,23 @@ allows_file_write = false
 allows_shell = false
 allows_network = false
 requires_fresh_info = false
+
+[metadata]
+audience = ["aspirant"]
+country = "IN"
+exam = "UPSC CSE"
+exam_stage = "preparation"
+language_style = ["english"]
+last_reviewed_at = "2026-06-03"
+freshness_sensitive = false
+official_source_labels = []
+
+[store_preview]
+best_for = ["Testing Store skill preview rows"]
+not_for = ["Runtime execution"]
+sample_prompts = ["use the pack skill"]
+what_it_does = ["Provides inspectable Store metadata"]
+what_it_will_not_do = ["Enable behavior at install time"]
 "#
     )
 }
@@ -452,6 +469,12 @@ fn test_preview_pack_with_skills_counts_skill_manifests() {
     let preview = preview_pack_from_path(src_dir).unwrap();
 
     assert_eq!(preview.additions.skills_count, 1);
+    assert_eq!(preview.skill_previews.len(), 1);
+    assert_eq!(preview.skill_previews[0].id, "pack_skill");
+    assert_eq!(
+        preview.skill_previews[0].pack_id.as_deref(),
+        Some("skill_pack")
+    );
     assert!(preview.warnings.is_empty());
 }
 

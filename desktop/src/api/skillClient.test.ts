@@ -18,11 +18,14 @@ const skillSummary = {
 	risk_level: "low",
 	allowed_tools: [],
 	denied_tools: [],
-	exam: "",
-	exam_stage: "",
+	exam: null,
+	exam_stage: null,
+	audience: [],
+	language_style: [],
 	freshness_sensitive: false,
 	official_source_labels: [],
 	best_for: [],
+	not_for: [],
 };
 
 const skillManifest = {
@@ -52,17 +55,20 @@ const skillManifest = {
 		requires_fresh_info: true,
 	},
 	metadata: {
+		audience: ["aspirant"],
 		country: "IN",
 		exam: "UPSC CSE",
 		exam_stage: "foundation",
+		language_style: ["english"],
 		freshness_sensitive: true,
 		official_source_labels: ["UPSC"],
 		last_reviewed_at: "2026-06-03",
 	},
 	store_preview: {
 		best_for: ["Foundation planning"],
+		not_for: ["Official notice replacement"],
 		sample_prompts: ["make an upsc plan"],
-		what_it_will_do: ["Create a study plan"],
+		what_it_does: ["Create a study plan"],
 		what_it_will_not_do: ["Replace official notices"],
 	},
 };
@@ -105,6 +111,14 @@ describe("skillClient command contracts", () => {
 			id: "upsc_exam_preparation",
 			prompt: { role: "Study coach" },
 			safety: { requires_fresh_info: true },
+			metadata: {
+				audience: ["aspirant"],
+				language_style: ["english"],
+			},
+			store_preview: {
+				what_it_does: ["Create a study plan"],
+				not_for: ["Official notice replacement"],
+			},
 		});
 		expect(await testSkillRoute("make an upsc plan")).toMatchObject({
 			primary_skill: { id: "upsc_exam_preparation" },

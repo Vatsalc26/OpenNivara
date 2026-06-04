@@ -8,7 +8,7 @@ Sensitive data can include profiles, preferences, contexts, goals, sessions, con
 
 OpenNivara stores local state in TOML configuration files, SQLite databases and logs under the OpenNivara local data namespace. Users must treat these files as sensitive local data. OpenNivara does not claim local-state encryption unless encryption is explicitly implemented in the future.
 
-OpenNivara uses a new local data namespace and does not automatically import local data from earlier private Jarvis development builds.
+OpenNivara uses a new local data namespace and does not automatically import local data from earlier private development builds.
 
 Users can locate local state with commands such as:
 

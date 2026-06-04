@@ -29,20 +29,34 @@ const SkillSafetySchema = z.object({
 });
 
 const SkillMetadataSchema = z.object({
-	country: z.string().default(""),
-	exam: z.string().default(""),
-	exam_stage: z.string().default(""),
+	audience: z.array(z.string()).default([]),
+	country: z.string().nullable().optional(),
+	exam: z.string().nullable().optional(),
+	exam_stage: z.string().nullable().optional(),
+	language_style: z.array(z.string()).default([]),
+	last_reviewed_at: z.string().nullable().optional(),
 	freshness_sensitive: z.boolean().default(false),
 	official_source_labels: z.array(z.string()).default([]),
-	last_reviewed_at: z.string().default(""),
 });
 
-const SkillStorePreviewSchema = z.object({
-	best_for: z.array(z.string()).default([]),
-	sample_prompts: z.array(z.string()).default([]),
-	what_it_will_do: z.array(z.string()).default([]),
-	what_it_will_not_do: z.array(z.string()).default([]),
-});
+const SkillStorePreviewSchema = z.preprocess(
+	(value) => {
+		if (value && typeof value === "object" && !Array.isArray(value)) {
+			const record = value as Record<string, unknown>;
+			if (!("what_it_does" in record) && "what_it_will_do" in record) {
+				return { ...record, what_it_does: record.what_it_will_do };
+			}
+		}
+		return value;
+	},
+	z.object({
+		best_for: z.array(z.string()).default([]),
+		not_for: z.array(z.string()).default([]),
+		sample_prompts: z.array(z.string()).default([]),
+		what_it_does: z.array(z.string()).default([]),
+		what_it_will_not_do: z.array(z.string()).default([]),
+	}),
+);
 
 export const SkillManifestSchema = z.object({
 	schema_version: z.number(),
@@ -63,17 +77,20 @@ export const SkillManifestSchema = z.object({
 	tools: SkillToolPolicySchema,
 	safety: SkillSafetySchema,
 	metadata: SkillMetadataSchema.default({
-		country: "",
-		exam: "",
-		exam_stage: "",
+		audience: [],
+		country: undefined,
+		exam: undefined,
+		exam_stage: undefined,
+		language_style: [],
+		last_reviewed_at: undefined,
 		freshness_sensitive: false,
 		official_source_labels: [],
-		last_reviewed_at: "",
 	}),
 	store_preview: SkillStorePreviewSchema.default({
 		best_for: [],
+		not_for: [],
 		sample_prompts: [],
-		what_it_will_do: [],
+		what_it_does: [],
 		what_it_will_not_do: [],
 	}),
 });
@@ -89,11 +106,14 @@ export const SkillSummarySchema = z.object({
 	risk_level: z.string(),
 	allowed_tools: z.array(z.string()),
 	denied_tools: z.array(z.string()).default([]),
-	exam: z.string().default(""),
-	exam_stage: z.string().default(""),
+	exam: z.string().nullable().optional(),
+	exam_stage: z.string().nullable().optional(),
+	audience: z.array(z.string()).default([]),
+	language_style: z.array(z.string()).default([]),
 	freshness_sensitive: z.boolean().default(false),
 	official_source_labels: z.array(z.string()).default([]),
 	best_for: z.array(z.string()).default([]),
+	not_for: z.array(z.string()).default([]),
 });
 
 const SelectedSkillSchema = z.object({

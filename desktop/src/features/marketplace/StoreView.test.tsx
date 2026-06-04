@@ -174,4 +174,161 @@ describe("StoreView themes-only product rule", () => {
 			screen.getByRole("button", { name: /Install Theme/i }),
 		).toBeInTheDocument();
 	});
+
+	test("skill pack details list included skills and skill-level metadata", async () => {
+		mockTauriCommand("marketplace_list_builtin_packs", [
+			{
+				id: "india_engineering_exams",
+				name: "India Engineering Exams",
+				version: "1.0.0",
+				author: "OpenNivara",
+				category: "India Exams",
+				description: "Data-only skill pack for JEE Main and GATE.",
+				risk_level: "low",
+			},
+		]);
+		mockTauriCommand("marketplace_preview_builtin_pack", {
+			manifest: {
+				schema_version: 1,
+				id: "india_engineering_exams",
+				name: "India Engineering Exams",
+				version: "1.0.0",
+				author: "OpenNivara",
+				category: "India Exams",
+				description: "Data-only skill pack for JEE Main and GATE.",
+				compatibility: {
+					opennivara_min_version: "0.1.0",
+					opennivara_max_version: "",
+				},
+				contents: {
+					preferences: false,
+					contexts: false,
+					style_presets: false,
+					profile_templates: false,
+					tool_presets: false,
+					workspace_map_rules: false,
+					prompt_behaviors: false,
+					command_snippets: false,
+					theme: false,
+					skills: true,
+				},
+				safety: {
+					contains_executable_code: false,
+					modifies_tool_permissions: false,
+					requires_network: false,
+					risk_level: "low",
+				},
+			},
+			source_path: "packs/builtin/india_engineering_exams",
+			warnings: [],
+			errors: [],
+			additions: {
+				preferences_count: 0,
+				contexts_count: 0,
+				style_presets_count: 0,
+				themes_count: 0,
+				command_snippets_count: 0,
+				workspace_rules_count: 0,
+				profile_templates_count: 0,
+				tool_presets_count: 0,
+				skills_count: 1,
+			},
+			safety_summary: {
+				allowed_to_install: true,
+				risk_level: "low",
+				modifies_tool_permissions: false,
+				contains_executable_code: false,
+				requires_network: false,
+			},
+			skill_previews: [
+				{
+					schema_version: 1,
+					id: "jee_main_mock_test_analyzer",
+					pack_id: "india_engineering_exams",
+					name: "JEE Main Mock Test Analyzer",
+					description: "Analyzes JEE Main mock-test performance.",
+					enabled: false,
+					category: "india_exams",
+					route_policy: "auto",
+					aliases: ["jee main mock analysis"],
+					triggers: ["jee main", "mock analysis"],
+					required_any: ["jee", "jee main", "nta"],
+					negative_triggers: ["jee advanced paper", "neet mock"],
+					examples: ["Analyze my JEE Main mock"],
+					min_score: 25,
+					prompt: {
+						role: "JEE Main mock-test analysis coach",
+						instructions: "Analyze subject marks and mistake types.",
+						constraints: ["Do not invent official cutoffs."],
+					},
+					tools: {
+						allow: [],
+						deny: ["write_file", "run_command", "open_url"],
+					},
+					safety: {
+						risk_level: "low",
+						requires_confirmation: false,
+						allows_file_write: false,
+						allows_shell: false,
+						allows_network: false,
+						requires_fresh_info: false,
+					},
+					metadata: {
+						audience: ["class_12", "dropper"],
+						country: "IN",
+						exam: "JEE Main",
+						exam_stage: "mock_analysis",
+						language_style: ["english", "hinglish_optional"],
+						last_reviewed_at: "2026-06-03",
+						freshness_sensitive: false,
+						official_source_labels: [],
+					},
+					store_preview: {
+						best_for: ["Students who gave a JEE Main mock test"],
+						not_for: ["JEE Advanced-only analysis"],
+						sample_prompts: ["Analyze my JEE Main mock: P 52 C 68 M 35"],
+						what_it_does: ["Finds weak subjects and mistake types"],
+						what_it_will_not_do: ["Invent official cutoffs"],
+					},
+				},
+			],
+		});
+
+		render(
+			<ThemeProvider>
+				<StoreView defaultTab="skills" />
+			</ThemeProvider>,
+		);
+
+		await waitFor(() => {
+			expect(screen.getByText("India Engineering Exams")).toBeInTheDocument();
+		});
+
+		fireEvent.click(screen.getByRole("button", { name: /Open Details/i }));
+
+		await waitFor(() => {
+			expect(
+				screen.getByText("JEE Main Mock Test Analyzer"),
+			).toBeInTheDocument();
+		});
+		expect(
+			screen.getByText("Students who gave a JEE Main mock test"),
+		).toBeInTheDocument();
+
+		fireEvent.click(
+			screen.getByRole("button", { name: /Open skill details/i }),
+		);
+
+		await waitFor(() => {
+			expect(screen.getByText("Trigger Preview")).toBeInTheDocument();
+		});
+		expect(
+			screen.getByText("Finds weak subjects and mistake types"),
+		).toBeInTheDocument();
+		expect(screen.getByText("jee advanced paper")).toBeInTheDocument();
+		expect(screen.getByText("Allowed: none")).toBeInTheDocument();
+		expect(
+			screen.getByText("Denied: write_file, run_command, open_url"),
+		).toBeInTheDocument();
+	});
 });

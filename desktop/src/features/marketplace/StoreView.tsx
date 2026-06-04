@@ -368,6 +368,9 @@ function SkillPackDetailsDialog({
 	onInstall: () => void;
 }) {
 	const skillCount = preview.skill_previews.length;
+	const [selectedSkill, setSelectedSkill] = useState<
+		PackPreview["skill_previews"][number] | null
+	>(null);
 	return (
 		<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
 			<Card className="max-h-[90vh] w-full max-w-4xl overflow-auto p-5">
@@ -428,7 +431,7 @@ function SkillPackDetailsDialog({
 									<div className="flex flex-wrap items-center justify-between gap-2">
 										<h4 className="text-sm font-semibold">{skill.name}</h4>
 										<Badge
-											label={skill.metadata.exam || skill.category}
+											label={skill.metadata.exam ?? skill.category}
 											tone="muted"
 										/>
 									</div>
@@ -452,6 +455,16 @@ function SkillPackDetailsDialog({
 											empty=""
 										/>
 									)}
+									<div className="flex justify-end">
+										<button
+											type="button"
+											onClick={() => setSelectedSkill(skill)}
+											className="inline-flex items-center gap-2 rounded-md border border-border px-3 py-2 text-xs hover:bg-muted"
+										>
+											<Eye size={14} />
+											Open skill details
+										</button>
+									</div>
 								</Card>
 							))}
 						</div>
@@ -468,6 +481,151 @@ function SkillPackDetailsDialog({
 						<Download size={15} />
 						Install Pack
 					</button>
+				</div>
+			</Card>
+			{selectedSkill && (
+				<StoreSkillDetailsDialog
+					skill={selectedSkill}
+					onClose={() => setSelectedSkill(null)}
+				/>
+			)}
+		</div>
+	);
+}
+
+function StoreSkillDetailsDialog({
+	skill,
+	onClose,
+}: {
+	skill: PackPreview["skill_previews"][number];
+	onClose: () => void;
+}) {
+	return (
+		<div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 p-4">
+			<Card className="max-h-[90vh] w-full max-w-3xl overflow-auto p-5">
+				<div className="mb-4 flex items-start justify-between gap-4">
+					<div>
+						<div className="mb-1 flex items-center gap-2 text-sm text-muted-foreground">
+							<Sparkles size={16} />
+							Skill Details
+						</div>
+						<h2 className="text-xl font-semibold">{skill.name}</h2>
+						<p className="text-sm text-muted-foreground">{skill.description}</p>
+					</div>
+					<button
+						type="button"
+						onClick={onClose}
+						className="rounded-md p-2 hover:bg-muted"
+						aria-label="Close skill details"
+					>
+						<X size={18} />
+					</button>
+				</div>
+
+				<div className="grid gap-4 md:grid-cols-2">
+					<div className="space-y-4">
+						<SmallList
+							label="Audience"
+							items={skill.metadata.audience}
+							empty="General students"
+						/>
+						<SmallList
+							label="Best for"
+							items={skill.store_preview.best_for}
+							empty="Focused study help"
+						/>
+						<SmallList
+							label="Not for"
+							items={skill.store_preview.not_for}
+							empty="No exclusions declared"
+						/>
+						<SmallList
+							label="What it does"
+							items={skill.store_preview.what_it_does}
+							empty="Guide the requested study workflow"
+						/>
+						<SmallList
+							label="What it will not do"
+							items={skill.store_preview.what_it_will_not_do}
+							empty="No unsupported actions declared"
+						/>
+						<SmallList
+							label="Sample prompts"
+							items={skill.store_preview.sample_prompts}
+							empty="Ask OpenNivara to use this skill"
+						/>
+					</div>
+
+					<div className="space-y-4 text-xs">
+						<div className="space-y-2">
+							<h3 className="font-medium">Metadata</h3>
+							<div className="grid gap-1 text-muted-foreground">
+								<div>Exam: {skill.metadata.exam ?? "general"}</div>
+								<div>Stage: {skill.metadata.exam_stage ?? "general"}</div>
+								<div>Country: {skill.metadata.country ?? "unspecified"}</div>
+								<div>Route policy: {skill.route_policy}</div>
+								<div>Prompt role: {skill.prompt.role}</div>
+							</div>
+						</div>
+						<div className="space-y-2">
+							<h3 className="font-medium">Trigger Preview</h3>
+							<SmallList label="Aliases" items={skill.aliases} empty="None" />
+							<SmallList
+								label="Required"
+								items={skill.required_any}
+								empty="No required terms"
+							/>
+							<SmallList
+								label="Negative triggers"
+								items={skill.negative_triggers}
+								empty="No negative triggers"
+							/>
+						</div>
+						<div className="space-y-2">
+							<h3 className="font-medium">Safety</h3>
+							<div className="flex flex-wrap gap-2">
+								<Badge
+									label={`Risk: ${skill.safety.risk_level}`}
+									tone="muted"
+								/>
+								<Badge
+									label={
+										skill.safety.requires_fresh_info
+											? "Fresh official info required"
+											: "No fresh lookup required"
+									}
+									tone="muted"
+								/>
+								<Badge
+									label={
+										skill.tools.allow.length
+											? `Allowed: ${skill.tools.allow.join(", ")}`
+											: "Allowed: none"
+									}
+									tone="muted"
+								/>
+								<Badge
+									label={
+										skill.tools.deny.length
+											? `Denied: ${skill.tools.deny.join(", ")}`
+											: "Denied: none"
+									}
+									tone="muted"
+								/>
+							</div>
+						</div>
+						<SmallList
+							label="Official sources"
+							items={skill.metadata.official_source_labels}
+							empty="No official-source labels required"
+						/>
+						<div className="space-y-2">
+							<h3 className="font-medium">Prompt summary</h3>
+							<p className="text-muted-foreground">
+								{skill.prompt.instructions}
+							</p>
+						</div>
+					</div>
 				</div>
 			</Card>
 		</div>
@@ -714,7 +872,7 @@ function examsCovered(preview: PackPreview) {
 		new Set(
 			preview.skill_previews
 				.map((skill) => skill.metadata.exam)
-				.filter((exam) => exam.trim().length > 0),
+				.filter((exam): exam is string => (exam ?? "").trim().length > 0),
 		),
 	);
 }

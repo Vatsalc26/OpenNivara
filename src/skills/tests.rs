@@ -1,8 +1,8 @@
 use super::manifest::*;
 use super::prompt::format_active_skills_prompt;
 use super::registry::{
-    get_enabled_skills_path, get_user_skills_path, load_available_skills, load_routable_skills,
-    set_skill_enabled,
+    get_enabled_skills_path, get_user_skills_path, list_skill_summaries, load_available_skills,
+    load_routable_skills, set_skill_enabled,
 };
 use super::selector::{select_skill_route, SkillRouteRequest};
 use super::tool_policy::allowed_tools_for_selected_skills;
@@ -116,7 +116,7 @@ fn valid_skill(id: &str) -> SkillManifest {
             best_for: vec!["UPSC aspirants building a study plan".to_string()],
             not_for: vec!["Official notice replacement".to_string()],
             sample_prompts: vec!["make a UPSC prelims study plan".to_string()],
-            what_it_will_do: vec!["Turns prep goals into a practical schedule".to_string()],
+            what_it_does: vec!["Turns prep goals into a practical schedule".to_string()],
             what_it_will_not_do: vec!["Invent official deadlines".to_string()],
         },
     }
@@ -488,6 +488,32 @@ fn uninstalling_pack_removes_child_skill_availability() {
         .unwrap()
         .iter()
         .any(|skill| skill.id == "pack_skill"));
+}
+
+#[test]
+fn skill_summaries_include_store_metadata_for_settings_filters() {
+    let _lock = TEST_MUTEX.lock().unwrap_or_else(|e| e.into_inner());
+    let (temp, _config_guard, _builtin_guard) = setup_registry_test_env("summary_metadata");
+    crate::marketplace::init_marketplace().unwrap();
+
+    let pack = create_skill_pack_source(&temp, "skill_pack", "pack_skill");
+    install_pack_from_path(pack).unwrap();
+
+    let summaries = list_skill_summaries().unwrap();
+    let summary = summaries
+        .iter()
+        .find(|skill| skill.id == "pack_skill")
+        .expect("installed pack skill should be summarized");
+
+    assert_eq!(summary.denied_tools, Vec::<String>::new());
+    assert_eq!(summary.exam.as_deref(), Some("UPSC CSE"));
+    assert_eq!(summary.exam_stage.as_deref(), Some("preparation"));
+    assert!(summary.freshness_sensitive);
+    assert_eq!(summary.official_source_labels, vec!["UPSC".to_string()]);
+    assert_eq!(
+        summary.best_for,
+        vec!["UPSC aspirants building a study plan".to_string()]
+    );
 }
 
 fn load_builtin_pack_skills_for_routing(pack_id: &str) -> Vec<SkillManifest> {

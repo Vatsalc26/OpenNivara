@@ -68,8 +68,8 @@ pub struct SkillStorePreview {
     pub not_for: Vec<String>,
     #[serde(default)]
     pub sample_prompts: Vec<String>,
-    #[serde(default)]
-    pub what_it_will_do: Vec<String>,
+    #[serde(default, alias = "what_it_will_do")]
+    pub what_it_does: Vec<String>,
     #[serde(default)]
     pub what_it_will_not_do: Vec<String>,
 }

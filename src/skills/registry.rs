@@ -34,6 +34,24 @@ pub struct SkillSummary {
     pub route_policy: SkillRoutePolicy,
     pub risk_level: String,
     pub allowed_tools: Vec<String>,
+    #[serde(default)]
+    pub denied_tools: Vec<String>,
+    #[serde(default)]
+    pub exam: Option<String>,
+    #[serde(default)]
+    pub exam_stage: Option<String>,
+    #[serde(default)]
+    pub audience: Vec<String>,
+    #[serde(default)]
+    pub language_style: Vec<String>,
+    #[serde(default)]
+    pub freshness_sensitive: bool,
+    #[serde(default)]
+    pub official_source_labels: Vec<String>,
+    #[serde(default)]
+    pub best_for: Vec<String>,
+    #[serde(default)]
+    pub not_for: Vec<String>,
 }
 
 pub fn get_skills_dir() -> anyhow::Result<PathBuf> {
@@ -296,5 +314,14 @@ fn skill_summary(skill: &SkillManifest) -> SkillSummary {
         route_policy: skill.route_policy.clone(),
         risk_level: skill.safety.risk_level.clone(),
         allowed_tools: skill.tools.allow.clone(),
+        denied_tools: skill.tools.deny.clone(),
+        exam: skill.metadata.exam.clone(),
+        exam_stage: skill.metadata.exam_stage.clone(),
+        audience: skill.metadata.audience.clone(),
+        language_style: skill.metadata.language_style.clone(),
+        freshness_sensitive: skill.metadata.freshness_sensitive,
+        official_source_labels: skill.metadata.official_source_labels.clone(),
+        best_for: skill.store_preview.best_for.clone(),
+        not_for: skill.store_preview.not_for.clone(),
     }
 }

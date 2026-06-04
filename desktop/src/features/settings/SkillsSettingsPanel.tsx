@@ -57,7 +57,7 @@ export function SkillsSettingsPanel() {
 				new Set(
 					skills
 						.map((skill) => skill.exam)
-						.filter((exam) => exam.trim().length > 0),
+						.filter((exam): exam is string => (exam ?? "").trim().length > 0),
 				),
 			),
 		[skills],
@@ -362,8 +362,8 @@ function SkillDetailDialog({
 							empty="Ask OpenNivara to use this skill"
 						/>
 						<DetailGroup
-							label="What it will do"
-							items={skill.store_preview.what_it_will_do}
+							label="What it does"
+							items={skill.store_preview.what_it_does}
 							empty="Guide the requested study workflow"
 						/>
 					</div>

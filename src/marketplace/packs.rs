@@ -76,6 +76,8 @@ pub struct PackPreview {
     pub errors: Vec<String>,
     pub additions: PackAdditionsSummary,
     pub safety_summary: PackSafetySummary,
+    #[serde(default)]
+    pub skill_previews: Vec<crate::skills::manifest::SkillManifest>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -195,6 +197,7 @@ pub fn preview_pack_from_path(path: PathBuf) -> anyhow::Result<PackPreview> {
     let mut profile_templates_count = 0;
     let mut tool_presets_count = 0;
     let mut skills_count = 0;
+    let mut skill_previews = Vec::new();
 
     // Check preferences
     if manifest.contents.preferences {
@@ -309,16 +312,63 @@ pub fn preview_pack_from_path(path: PathBuf) -> anyhow::Result<PackPreview> {
     if manifest.contents.skills {
         let skills_dir = path.join("skills");
         if skills_dir.exists() {
-            skills_count = fs::read_dir(&skills_dir)
+            let tool_registry = crate::tools::ToolRegistry::new(true);
+            let mut skill_paths: Vec<_> = fs::read_dir(&skills_dir)
                 .map(|entries| {
                     entries
                         .flatten()
-                        .filter(|entry| {
-                            entry.path().extension().and_then(|ext| ext.to_str()) == Some("toml")
+                        .map(|entry| entry.path())
+                        .filter(|entry_path| {
+                            entry_path.extension().and_then(|ext| ext.to_str()) == Some("toml")
                         })
-                        .count()
+                        .collect()
                 })
-                .unwrap_or(0);
+                .unwrap_or_default();
+            skill_paths.sort();
+            skills_count = skill_paths.len();
+            for skill_path in skill_paths {
+                match crate::config_store::read_toml_file::<crate::skills::manifest::SkillManifest>(
+                    &skill_path,
+                ) {
+                    Ok(mut skill) => {
+                        skill.pack_id = Some(skill.pack_id.unwrap_or_else(|| manifest.id.clone()));
+                        match crate::skills::manifest::validate_skill_manifest(
+                            &skill,
+                            &tool_registry,
+                        ) {
+                            Ok(skill_warnings) => {
+                                warnings.extend(skill_warnings.into_iter().map(|warning| {
+                                    format!(
+                                        "{}: {}",
+                                        skill_path
+                                            .file_name()
+                                            .and_then(|name| name.to_str())
+                                            .unwrap_or("skill.toml"),
+                                        warning
+                                    )
+                                }));
+                                skill_previews.push(skill);
+                            }
+                            Err(err) => errors.push(format!(
+                                "{}: {}",
+                                skill_path
+                                    .file_name()
+                                    .and_then(|name| name.to_str())
+                                    .unwrap_or("skill.toml"),
+                                err
+                            )),
+                        }
+                    }
+                    Err(err) => errors.push(format!(
+                        "{}: failed to parse skill manifest: {}",
+                        skill_path
+                            .file_name()
+                            .and_then(|name| name.to_str())
+                            .unwrap_or("skill.toml"),
+                        err
+                    )),
+                }
+            }
         } else {
             warnings.push("pack.toml declares 'skills = true' but skills/ is missing.".to_string());
         }
@@ -349,6 +399,7 @@ pub fn preview_pack_from_path(path: PathBuf) -> anyhow::Result<PackPreview> {
             contains_executable_code: manifest.safety.contains_executable_code,
             requires_network: manifest.safety.requires_network,
         },
+        skill_previews,
     })
 }
 

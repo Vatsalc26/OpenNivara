@@ -2,12 +2,14 @@ schema_version = 1
 id = "india_medical_exams"
 name = "India Medical Exams"
 version = "1.0.0"
-author = "Vatsal Chavda"
+author = "OpenNivara"
 category = "India Exams"
 description = "Data-only skill pack for NEET UG and NEET PG preparation."
+
 [compatibility]
 opennivara_min_version = "0.1.0"
 opennivara_max_version = ""
+
 [contents]
 skills = true
 preferences = false
@@ -19,6 +21,7 @@ workspace_map_rules = false
 prompt_behaviors = false
 command_snippets = false
 theme = false
+
 [safety]
 contains_executable_code = false
 modifies_tool_permissions = false
