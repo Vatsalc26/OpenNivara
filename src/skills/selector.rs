@@ -113,7 +113,14 @@ pub fn select_skill_route(skills: &[SkillManifest], request: SkillRouteRequest) 
     let selectable: Vec<_> = scored
         .iter()
         .filter(|(skill, _, accepted, _)| {
-            *accepted && skill.route_policy != SkillRoutePolicy::SuggestOnly
+            *accepted
+                && (skill.route_policy != SkillRoutePolicy::SuggestOnly
+                    || is_request_selected(
+                        skill,
+                        explicit_id.as_deref(),
+                        ui_id.as_deref(),
+                        &pinned,
+                    ))
         })
         .collect();
 
@@ -122,14 +129,14 @@ pub fn select_skill_route(skills: &[SkillManifest], request: SkillRouteRequest) 
     let mut confidence = 0.0;
 
     if let Some((top_skill, top_score, _, top_reason)) = selectable.first() {
-        let explicit = explicit_id.as_deref() == Some(top_skill.id.as_str())
-            || ui_id.as_deref() == Some(top_skill.id.as_str());
+        let explicit =
+            is_request_selected(top_skill, explicit_id.as_deref(), ui_id.as_deref(), &pinned);
         let ambiguous = selectable
             .get(1)
             .map(|(_, second_score, _, _)| top_score.saturating_sub(*second_score) <= 5)
             .unwrap_or(false);
 
-        if explicit || (*top_score >= 35 && !ambiguous) {
+        if explicit || (*top_score >= top_skill.min_score && !ambiguous) {
             primary_skill = Some(selected_from_manifest(top_skill, *top_score, top_reason));
             confidence = (*top_score as f32 / 100.0).min(1.0);
             reason = top_reason.clone();
@@ -145,7 +152,7 @@ pub fn select_skill_route(skills: &[SkillManifest], request: SkillRouteRequest) 
         if supporting_skills.len() >= 2 {
             break;
         }
-        if *accepted && *score >= 35 && skill.prompt.instructions.len() <= 400 {
+        if *accepted && *score >= skill.min_score && skill.prompt.instructions.len() <= 400 {
             supporting_skills.push(selected_from_manifest(skill, *score, candidate_reason));
         }
     }
@@ -187,8 +194,9 @@ fn score_skill(
     let has_explicit =
         explicit_id == Some(skill_id.as_str()) || message.contains(&format!("@{}", skill_id));
     let has_ui = ui_id == Some(skill_id.as_str());
+    let has_pin = pinned.contains(&skill_id);
 
-    if skill.route_policy == SkillRoutePolicy::ManualOnly && !has_ui {
+    if skill.route_policy == SkillRoutePolicy::ManualOnly && !has_ui && !has_pin {
         return (0, false, "manual_only without UI selection".to_string());
     }
     if skill.route_policy == SkillRoutePolicy::ExplicitOnly && !has_explicit {
@@ -226,9 +234,9 @@ fn score_skill(
             reasons.push("@pack hint +40");
         }
     }
-    if pinned.contains(&skill_id) {
-        score += 25;
-        reasons.push("session pin +25");
+    if has_pin {
+        score += 100;
+        reasons.push("session pin +100");
     }
     for alias in &skill.aliases {
         if contains_phrase(message, alias) {
@@ -243,7 +251,7 @@ fn score_skill(
     }
     for trigger in &skill.triggers {
         let normalized_trigger = normalize(trigger);
-        if normalized_trigger.contains(' ') && message.contains(&normalized_trigger) {
+        if normalized_trigger.contains(' ') && contains_phrase(message, &normalized_trigger) {
             score += 8;
             reasons.push("phrase trigger +8");
         } else if message
@@ -272,8 +280,20 @@ fn score_skill(
         reasons.push("fresh information warning");
     }
 
-    let accepted = has_explicit || has_ui || score >= skill.min_score;
+    let accepted = has_explicit || has_ui || has_pin || score >= skill.min_score;
     (score, accepted, reasons.join(", "))
+}
+
+fn is_request_selected(
+    skill: &SkillManifest,
+    explicit_id: Option<&str>,
+    ui_id: Option<&str>,
+    pinned: &HashSet<String>,
+) -> bool {
+    let skill_id = normalize_id(&skill.id);
+    explicit_id == Some(skill_id.as_str())
+        || ui_id == Some(skill_id.as_str())
+        || pinned.contains(&skill_id)
 }
 
 fn selected_from_manifest(skill: &SkillManifest, score: u32, reason: &str) -> SelectedSkill {
@@ -317,7 +337,18 @@ fn contains_any(message: &str, phrases: &[String]) -> bool {
 }
 
 fn contains_phrase(message: &str, phrase: &str) -> bool {
-    message.contains(&normalize(phrase))
+    let normalized_phrase = normalize(phrase);
+    if normalized_phrase.is_empty() {
+        return false;
+    }
+    let message_words: Vec<&str> = message.split_whitespace().collect();
+    let phrase_words: Vec<&str> = normalized_phrase.split_whitespace().collect();
+    if phrase_words.is_empty() || phrase_words.len() > message_words.len() {
+        return false;
+    }
+    message_words
+        .windows(phrase_words.len())
+        .any(|window| window == phrase_words.as_slice())
 }
 
 fn phrase_similarity(a: &str, b: &str) -> f64 {

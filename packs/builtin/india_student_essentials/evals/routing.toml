@@ -1,0 +1,335 @@
+[[cases]]
+id = "plan_01"
+message = "Make a weekly study plan for Physics Chemistry and Maths with 3 hours daily."
+expected_primary_skill = "india_study_plan_builder"
+
+[[cases]]
+id = "plan_02"
+message = "I have six weeks before college exams and two hours daily. Help me plan four subjects."
+expected_primary_skill = "india_study_plan_builder"
+
+[[cases]]
+id = "plan_03"
+message = "I have backlog in three chapters and only Sundays free. Make a recovery plan."
+expected_primary_skill = "india_study_plan_builder"
+
+[[cases]]
+id = "plan_04"
+message = "Plan my subjects for board exam revision across the next month."
+expected_primary_skill = "india_study_plan_builder"
+
+[[cases]]
+id = "plan_05"
+message = "I am in school and coaching four evenings weekly. Build a realistic study plan."
+expected_primary_skill = "india_study_plan_builder"
+
+[[cases]]
+id = "plan_06"
+message = "Make an exam study schedule for five chapters and one weak subject."
+expected_primary_skill = "india_study_plan_builder"
+
+[[cases]]
+id = "plan_07"
+message = "Help me allocate weekly study time across Economics, Accounts and Maths."
+expected_primary_skill = "india_study_plan_builder"
+
+[[cases]]
+id = "plan_08"
+message = "Create a study plan for self-study with backlog recovery and revision checkpoints."
+expected_primary_skill = "india_study_plan_builder"
+
+[[cases]]
+id = "timetable_01"
+message = "School is 8 to 2, coaching is 5 to 7 and travel takes one hour. Make a weekday timetable."
+expected_primary_skill = "india_daily_timetable_builder"
+
+[[cases]]
+id = "timetable_02"
+message = "I attend college and work evenings. Help me create a sustainable study routine."
+expected_primary_skill = "india_daily_timetable_builder"
+
+[[cases]]
+id = "timetable_03"
+message = "Make separate weekday and Sunday routines for board preparation."
+expected_primary_skill = "india_daily_timetable_builder"
+
+[[cases]]
+id = "timetable_04"
+message = "Create an exam leave daily schedule with sleep, meals, breaks and revision."
+expected_primary_skill = "india_daily_timetable_builder"
+
+[[cases]]
+id = "timetable_05"
+message = "I need a daily timetable around tuition, commute, dinner and light revision."
+expected_primary_skill = "india_daily_timetable_builder"
+
+[[cases]]
+id = "timetable_06"
+message = "Build a weekday study routine for college classes from 9 to 4."
+expected_primary_skill = "india_daily_timetable_builder"
+
+[[cases]]
+id = "timetable_07"
+message = "Make a school coaching timetable that protects seven hours of sleep."
+expected_primary_skill = "india_daily_timetable_builder"
+
+[[cases]]
+id = "timetable_08"
+message = "Plan my Sunday routine for revision, practice questions and breaks."
+expected_primary_skill = "india_daily_timetable_builder"
+
+[[cases]]
+id = "revision_01"
+message = "I finished five Biology chapters. Build an active-recall revision cycle until my monthly test."
+expected_primary_skill = "india_revision_cycle_planner"
+
+[[cases]]
+id = "revision_02"
+message = "Help me revise History answers and Maths formulas differently."
+expected_primary_skill = "india_revision_cycle_planner"
+
+[[cases]]
+id = "revision_03"
+message = "I keep forgetting chapters after one week. Build a revision system based on recall tests."
+expected_primary_skill = "india_revision_cycle_planner"
+
+[[cases]]
+id = "revision_04"
+message = "Create a spaced revision schedule for chapters I have already learned."
+expected_primary_skill = "india_revision_cycle_planner"
+
+[[cases]]
+id = "revision_05"
+message = "Make an active recall plan for formulas, diagrams and long answers."
+expected_primary_skill = "india_revision_cycle_planner"
+
+[[cases]]
+id = "revision_06"
+message = "Help me retain what I studied with short quizzes and checkpoint tests."
+expected_primary_skill = "india_revision_cycle_planner"
+
+[[cases]]
+id = "revision_07"
+message = "I revised once but forgot many definitions. Build a recall cycle."
+expected_primary_skill = "india_revision_cycle_planner"
+
+[[cases]]
+id = "revision_08"
+message = "Make a revision cycle for partly learned chapters and weak formulas."
+expected_primary_skill = "india_revision_cycle_planner"
+
+[[cases]]
+id = "mock_01"
+message = "I scored 61/100 in Maths: 12 wrong, mostly algebra and careless mistakes. Analyse it."
+expected_primary_skill = "india_mock_test_analyzer"
+
+[[cases]]
+id = "mock_02"
+message = "I lost marks because I attempted too many uncertain questions. Help me diagnose my mock."
+expected_primary_skill = "india_mock_test_analyzer"
+
+[[cases]]
+id = "mock_03"
+message = "Compare my last three mock scores and identify my pattern."
+expected_primary_skill = "india_mock_test_analyzer"
+
+[[cases]]
+id = "mock_04"
+message = "Mock test analysis: attempted 60, correct 42, incorrect 18 and skipped 20."
+expected_primary_skill = "india_mock_test_analyzer"
+
+[[cases]]
+id = "mock_05"
+message = "My test score fell because of time problems and poor question selection."
+expected_primary_skill = "india_mock_test_analyzer"
+
+[[cases]]
+id = "mock_06"
+message = "Low accuracy in mock test sections: Physics 55 percent, Chemistry 70 percent."
+expected_primary_skill = "india_mock_test_analyzer"
+
+[[cases]]
+id = "mock_07"
+message = "Analyse my mock where I had 15 wrong, 8 skipped and many misread questions."
+expected_primary_skill = "india_mock_test_analyzer"
+
+[[cases]]
+id = "mock_08"
+message = "Help me turn mock mistakes into highest-impact actions for the next test."
+expected_primary_skill = "india_mock_test_analyzer"
+
+[[cases]]
+id = "weak_01"
+message = "I keep losing marks in trigonometry even after revising formulas. Help me diagnose why."
+expected_primary_skill = "india_weak_topic_diagnosis"
+
+[[cases]]
+id = "weak_02"
+message = "I understand Biology while reading but forget answers in tests."
+expected_primary_skill = "india_weak_topic_diagnosis"
+
+[[cases]]
+id = "weak_03"
+message = "I made errors in three chapters in my last two tests. Separate concept gaps from careless mistakes."
+expected_primary_skill = "india_weak_topic_diagnosis"
+
+[[cases]]
+id = "weak_04"
+message = "Why am I losing marks in coordinate geometry even after practice?"
+expected_primary_skill = "india_weak_topic_diagnosis"
+
+[[cases]]
+id = "weak_05"
+message = "Diagnose my mistakes: I know formulas but get application questions wrong."
+expected_primary_skill = "india_weak_topic_diagnosis"
+
+[[cases]]
+id = "weak_06"
+message = "This chapter feels weak because I am slow and misread questions."
+expected_primary_skill = "india_weak_topic_diagnosis"
+
+[[cases]]
+id = "weak_07"
+message = "Tell me if my topic weakness is recall gap, speed gap or careless error."
+expected_primary_skill = "india_weak_topic_diagnosis"
+
+[[cases]]
+id = "weak_08"
+message = "I revise but still get this chapter wrong in tests."
+expected_primary_skill = "india_weak_topic_diagnosis"
+
+[[cases]]
+id = "notes_01"
+message = "Convert these Class 10 Science notes into active-recall questions."
+expected_no_primary = true
+expected_candidate_ids = ["india_notes_summarizer"]
+
+[[cases]]
+id = "notes_02"
+message = "Turn my economics chapter notes into a one-page revision sheet."
+expected_no_primary = true
+expected_candidate_ids = ["india_notes_summarizer"]
+
+[[cases]]
+id = "notes_03"
+message = "Make flashcards from these definitions and flag anything unclear."
+expected_no_primary = true
+expected_candidate_ids = ["india_notes_summarizer"]
+
+[[cases]]
+id = "notes_04"
+message = "Make recall questions from my pasted chemistry notes."
+expected_no_primary = true
+expected_candidate_ids = ["india_notes_summarizer"]
+
+[[cases]]
+id = "notes_05"
+message = "Create a formula list from these physics notes for revision."
+expected_no_primary = true
+expected_candidate_ids = ["india_notes_summarizer"]
+
+[[cases]]
+id = "notes_06"
+message = "Summarise these chapter notes into key points and common confusion flags."
+expected_no_primary = true
+expected_candidate_ids = ["india_notes_summarizer"]
+
+[[cases]]
+id = "notes_07"
+message = "Use this study note content to make a one minute revision sheet."
+ui_selected_skill_id = "india_notes_summarizer"
+expected_primary_skill = "india_notes_summarizer"
+
+[[cases]]
+id = "notes_08"
+message = "Manual selection: convert these notes into flashcards."
+ui_selected_skill_id = "india_notes_summarizer"
+expected_primary_skill = "india_notes_summarizer"
+
+[[cases]]
+id = "doubt_01"
+message = "Explain why current flows opposite to electron flow in simple terms."
+expected_no_primary = true
+expected_candidate_ids = ["india_doubt_explainer"]
+
+[[cases]]
+id = "doubt_02"
+message = "I am stuck on this quadratic equation step. Explain it slowly."
+expected_no_primary = true
+expected_candidate_ids = ["india_doubt_explainer"]
+
+[[cases]]
+id = "doubt_03"
+message = "Explain photosynthesis for my school test without assuming I know chemistry well."
+expected_no_primary = true
+expected_candidate_ids = ["india_doubt_explainer"]
+
+[[cases]]
+id = "doubt_04"
+message = "Clear this concept with a step by step explanation."
+expected_no_primary = true
+expected_candidate_ids = ["india_doubt_explainer"]
+
+[[cases]]
+id = "doubt_05"
+message = "Help me understand this topic: why does acceleration change?"
+expected_no_primary = true
+expected_candidate_ids = ["india_doubt_explainer"]
+
+[[cases]]
+id = "doubt_06"
+message = "I have a doubt in this chapter and need a simple explanation."
+expected_no_primary = true
+expected_candidate_ids = ["india_doubt_explainer"]
+
+[[cases]]
+id = "doubt_07"
+message = "Manual selection: explain this academic doubt step by step."
+ui_selected_skill_id = "india_doubt_explainer"
+expected_primary_skill = "india_doubt_explainer"
+
+[[cases]]
+id = "doubt_08"
+message = "Explain this question after I show my stuck step."
+ui_selected_skill_id = "india_doubt_explainer"
+expected_primary_skill = "india_doubt_explainer"
+
+[[cases]]
+id = "stress_01"
+message = "I wasted three days and feel guilty. Help me restart without an extreme schedule."
+expected_primary_skill = "india_exam_stress_consistency_coach"
+
+[[cases]]
+id = "stress_02"
+message = "Exam stress is making me avoid studying. Make a small consistency plan."
+expected_primary_skill = "india_exam_stress_consistency_coach"
+
+[[cases]]
+id = "stress_03"
+message = "I am burned out after coaching and mocks. Help me plan a lighter reset week."
+expected_primary_skill = "india_exam_stress_consistency_coach"
+
+[[cases]]
+id = "stress_04"
+message = "I cannot be consistent because of pressure and anxiety before exams."
+expected_primary_skill = "india_exam_stress_consistency_coach"
+
+[[cases]]
+id = "stress_05"
+message = "I panic before opening my books and avoid studying."
+expected_primary_skill = "india_exam_stress_consistency_coach"
+
+[[cases]]
+id = "stress_06"
+message = "I feel overwhelmed by backlog and need a no-shame restart plan."
+expected_primary_skill = "india_exam_stress_consistency_coach"
+
+[[cases]]
+id = "stress_07"
+message = "Make a tiny study plan because I am too anxious to start."
+expected_primary_skill = "india_exam_stress_consistency_coach"
+
+[[cases]]
+id = "stress_08"
+message = "I keep comparing myself with classmates and losing consistency."
+expected_primary_skill = "india_exam_stress_consistency_coach"

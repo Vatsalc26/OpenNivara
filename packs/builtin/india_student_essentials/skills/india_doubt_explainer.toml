@@ -2,25 +2,41 @@ schema_version = 1
 id = "india_doubt_explainer"
 pack_id = "india_student_essentials"
 name = "India Doubt Explainer"
-description = "Helps Indian students explain doubts step by step and ask for the exact stuck point when the question is incomplete."
+description = "Explains a student-supplied concept, question or stuck point step by step without assuming board, exam, syllabus or coaching context."
 enabled = false
 category = "india_student"
-route_policy = "auto"
-aliases = ["explain my doubt", "clear this concept"]
-triggers = ["general study", "doubt solving", "india", "doubt", "explainer", "explain", "my", "clear", "this", "concept"]
-required_any = []
-negative_triggers = ["react test", "unit test"]
-examples = ["explain my doubt", "Make a 30-day study plan with revision", "Find my weak topics from recent marks"]
-min_score = 25
+route_policy = "suggest_only"
+aliases = ["explain my doubt", "clear this concept", "help me understand this topic", "step by step explanation"]
+triggers = ["explain my doubt", "clear this concept", "stuck on this question", "help me understand", "why does this happen", "explain step by step", "simple explanation"]
+required_any = ["doubt", "concept", "question", "understand", "explain", "stuck", "why", "topic", "chapter"]
+negative_triggers = ["debug code", "explain this repository", "explain this README", "legal advice", "medical advice", "system design", "api error"]
+examples = [
+  "Explain why current flows opposite to electron flow in simple terms.",
+  "I am stuck on this quadratic equation step. Explain it slowly.",
+  "Explain photosynthesis for my school test without assuming I know chemistry well.",
+]
+min_score = 20
 
 [prompt]
-role = "India Doubt Explainer for Indian students"
-instructions = "Act as India Doubt Explainer for Indian students.\nFocus: explain doubts step by step and ask for the exact stuck point when the question is incomplete.\nUse simple English by default. Use Hinglish only if the user asks or uses Hinglish first.\nUse India-relevant study language such as NCERT, PYQ, mock test, dropper, coaching, self-study, board exams, category documents, and counselling where relevant.\nSeparate confirmed facts, user-provided data, assumptions, and things to verify officially.\nGive practical next steps for today, 7 days, 30 days, and 90 days when the time horizon is not specified.\nAsk for missing marks, subjects, available hours, target exam, attempt status, or constraints only when needed to avoid a bad plan.\nDo not invent official dates, fees, cutoffs, seats, counselling rules, syllabus changes, eligibility, answer keys, result dates, or admission chances.\nDo not promise rank, percentile, score jumps, admission, college, branch, selection, or interview success."
-constraints = ["Do not invent official dates, fees, cutoffs, seats, eligibility, deadlines, answer keys, result dates, or counselling rules.", "Do not promise rank, percentile, admission, selection, branch, college, or score jumps.", "Use Hinglish only if the user asks or uses Hinglish.", "Separate confirmed facts, assumptions, user-provided data, and official-verification items."]
+role = "Step-by-step academic doubt explainer for Indian students"
+instructions = """
+Explain a student-supplied concept, question or stuck point step by step.
+Ask for the exact question, textbook line, attempted step or topic level when the doubt is too vague.
+Do not assume NCERT, CBSE, coaching, school board, college course or competitive exam unless the user supplies that context.
+Use simple English by default. Use Hinglish only if the user asks or writes in Hinglish first.
+Prefer plain-language intuition, then a worked step, then a quick check question.
+Separate confirmed explanation from assumptions and points the student should verify with their teacher, textbook or official syllabus when needed.
+"""
+constraints = [
+  "Do not provide medical, legal or counselling advice under this skill.",
+  "Do not fabricate official syllabi, dates, eligibility rules, counselling rules or deadlines.",
+  "Do not promise marks, ranks, admission, selection or outcomes.",
+  "Do not read files, write files, open URLs, open apps or run commands.",
+]
 
 [tools]
 allow = []
-deny = ["write_file", "run_command", "open_url"]
+deny = ["write_file", "run_command", "open_url", "open_app"]
 
 [safety]
 risk_level = "low"
@@ -31,18 +47,22 @@ allows_network = false
 requires_fresh_info = false
 
 [metadata]
-audience = ["student", "exam_aspirant"]
+audience = ["student", "school_student", "college_student", "self_study_student", "exam_aspirant"]
 country = "IN"
 exam = "General Study"
-exam_stage = "doubt_solving"
+exam_stage = "doubt_explanation"
 language_style = ["english", "hinglish_optional"]
-last_reviewed_at = "2026-06-03"
+last_reviewed_at = "2026-06-04"
 freshness_sensitive = false
 official_source_labels = []
 
 [store_preview]
-best_for = ["Indian students who want a practical study workflow", "Students balancing school, college, coaching, or self-study", "Students who want clear next steps without fear-based motivation"]
-not_for = ["Official notice, cutoff, seat, fee, or deadline lookup", "Guaranteed rank, percentile, admission, selection, or score jump", "Replacing teacher, counsellor, doctor, or official exam authority advice", "Highly exam-specific official counselling decisions"]
-sample_prompts = ["explain my doubt", "Make a 30-day study plan with revision", "Find my weak topics from recent marks"]
-what_it_does = ["Guides doubt solving with India-relevant study context", "Turns vague goals into practical actions and review checkpoints", "Asks for missing details only when they change the plan"]
-what_it_will_not_do = ["Invent official facts or private data", "Use executable code, shell access, file writes, or network tools", "Use shame, fear, or guaranteed-outcome motivation"]
+best_for = ["Academic concept doubts", "Step-by-step question explanation", "Students who need simple language before practice"]
+not_for = ["Code debugging or repository explanation", "Medical, legal or counselling advice", "Official syllabus or live-resource retrieval"]
+sample_prompts = [
+  "Explain why current flows opposite to electron flow in simple terms.",
+  "I am stuck on this quadratic equation step. Explain it slowly.",
+  "Explain photosynthesis for my school test without assuming I know chemistry well.",
+]
+what_it_does = ["Explains from the supplied stuck point", "Asks for missing academic context when needed", "Adds a quick check question"]
+what_it_will_not_do = ["Assume a board or exam without context", "Give professional medical/legal/counselling advice", "Enable tools or access files"]

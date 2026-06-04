@@ -1,0 +1,63 @@
+[[contracts]]
+id = "plan_contract"
+skill_id = "india_study_plan_builder"
+expected_route_policy = "auto"
+expected_tools_allow_empty = true
+required_instruction_phrases = ["Build realistic plans", "Expected output", "review cycle"]
+required_constraints = ["Do not promise", "Do not read files"]
+
+[[contracts]]
+id = "timetable_contract"
+skill_id = "india_daily_timetable_builder"
+expected_route_policy = "auto"
+expected_tools_allow_empty = true
+required_instruction_phrases = ["Protect sleep", "Backup version", "fixed responsibilities"]
+required_constraints = ["sleep loss", "Do not read files"]
+
+[[contracts]]
+id = "revision_contract"
+skill_id = "india_revision_cycle_planner"
+expected_route_policy = "auto"
+expected_tools_allow_empty = true
+required_instruction_phrases = ["active recall", "Weak-material recovery", "adjustable starting points"]
+required_constraints = ["Do not claim exact", "Do not read files"]
+
+[[contracts]]
+id = "mock_contract"
+skill_id = "india_mock_test_analyzer"
+expected_route_policy = "auto"
+expected_tools_allow_empty = true
+required_instruction_phrases = ["actual test results", "Mistake bucket table", "Never predict"]
+required_constraints = ["Do not predict", "Do not read files"]
+
+[[contracts]]
+id = "weak_contract"
+skill_id = "india_weak_topic_diagnosis"
+expected_route_policy = "auto"
+expected_tools_allow_empty = true
+required_instruction_phrases = ["feelings of weakness", "diagnosis table", "confirmation exercise"]
+required_constraints = ["Do not declare", "Do not read files"]
+
+[[contracts]]
+id = "notes_contract"
+skill_id = "india_notes_summarizer"
+expected_route_policy = "suggest_only"
+expected_tools_allow_empty = true
+required_instruction_phrases = ["Work only from content supplied", "Do not silently access local files", "source-derived"]
+required_constraints = ["Do not read files", "Do not claim local notes were read"]
+
+[[contracts]]
+id = "doubt_contract"
+skill_id = "india_doubt_explainer"
+expected_route_policy = "suggest_only"
+expected_tools_allow_empty = true
+required_instruction_phrases = ["Ask for the exact question", "Do not assume NCERT", "quick check question"]
+required_constraints = ["Do not provide medical", "Do not read files"]
+
+[[contracts]]
+id = "stress_contract"
+skill_id = "india_exam_stress_consistency_coach"
+expected_route_policy = "auto"
+expected_tools_allow_empty = true
+required_instruction_phrases = ["Do not diagnose", "immediate self-harm", "local emergency services", "no-shame"]
+required_constraints = ["Do not hardcode emergency", "Do not promote sleep deprivation"]

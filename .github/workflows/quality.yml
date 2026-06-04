@@ -42,6 +42,17 @@ jobs:
       - name: Run Cargo Tests
         run: cargo test
 
+      - name: Validate Student Essentials Skill Pack
+        run: cargo run -- skillctl validate-pack india_student_essentials
+
+      - name: Run Student Essentials Skill Evals
+        run: cargo run -- skillctl eval india_student_essentials
+
+      - name: Verify Skill Schemas Are Current
+        run: |
+          cargo run -- skillctl schema
+          git diff --exit-code -- schemas
+
   frontend-check:
     name: Frontend Quality Checks
     runs-on: ubuntu-latest

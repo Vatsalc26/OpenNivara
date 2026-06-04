@@ -103,7 +103,7 @@ The executable is `target/release/opennivara` on Unix-like systems and `target/r
 
 Themes are visual only. They must not change prompts, memory, preferences, contexts, tools, or assistant behavior.
 
-Store can preview and install data-only skill packs. Installing a skill pack does not activate prompt behavior. Settings -> Skills controls enabling, disabling, and inspecting skill behavior. Skill packs do not add executable code, install-time activation, network tools, or tool-permission changes.
+Store can preview and install data-only skill packs. Installing a skill pack does not activate prompt behavior. Settings -> Skills controls enabling, disabling, and inspecting skill behavior. Desktop chat can select an enabled skill for one message or pin it for the current session. Skill packs do not add executable code, install-time activation, network tools, or tool-permission changes.
 
 ## Data And Privacy Summary
 

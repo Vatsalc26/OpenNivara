@@ -1,3 +1,4 @@
+pub mod dev;
 pub mod manifest;
 pub mod prompt;
 pub mod registry;

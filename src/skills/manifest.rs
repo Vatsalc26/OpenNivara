@@ -1,15 +1,16 @@
 use crate::tools::ToolRegistry;
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct SkillsFile {
     pub schema_version: u32,
     #[serde(default)]
     pub skills: Vec<SkillManifest>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct SkillManifest {
     pub schema_version: u32,
     pub id: String,
@@ -40,7 +41,7 @@ pub struct SkillManifest {
     pub store_preview: SkillStorePreview,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default, JsonSchema)]
 pub struct SkillMetadata {
     #[serde(default)]
     pub audience: Vec<String>,
@@ -60,7 +61,7 @@ pub struct SkillMetadata {
     pub official_source_labels: Vec<String>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default, JsonSchema)]
 pub struct SkillStorePreview {
     #[serde(default)]
     pub best_for: Vec<String>,
@@ -74,7 +75,7 @@ pub struct SkillStorePreview {
     pub what_it_will_not_do: Vec<String>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum SkillRoutePolicy {
     Auto,
@@ -84,7 +85,7 @@ pub enum SkillRoutePolicy {
     Disabled,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct SkillPrompt {
     pub role: String,
     pub instructions: String,
@@ -92,7 +93,7 @@ pub struct SkillPrompt {
     pub constraints: Vec<String>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct SkillToolPolicy {
     #[serde(default)]
     pub allow: Vec<String>,
@@ -100,7 +101,7 @@ pub struct SkillToolPolicy {
     pub deny: Vec<String>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct SkillSafety {
     pub risk_level: String,
     pub requires_confirmation: bool,

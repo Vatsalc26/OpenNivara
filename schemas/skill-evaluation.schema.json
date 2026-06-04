@@ -1,0 +1,183 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SkillEvaluationSchema",
+  "type": "object",
+  "properties": {
+    "cases": {
+      "default": [],
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/GenericEvaluationCase"
+      }
+    },
+    "contracts": {
+      "default": [],
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/PromptContractCase"
+      }
+    }
+  },
+  "definitions": {
+    "GenericEvaluationCase": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "properties": {
+        "enabled_skill_ids": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "expected_candidate_ids": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "expected_no_primary": {
+          "default": false,
+          "type": "boolean"
+        },
+        "expected_primary_skill": {
+          "default": null,
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "expected_reason_contains": {
+          "default": null,
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "expected_selection": {
+          "default": null,
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "explicit_skill_id": {
+          "default": null,
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "id": {
+          "type": "string"
+        },
+        "message": {
+          "default": null,
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "notes": {
+          "default": null,
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "prohibited_claims": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "required_prompt_boundary_phrases": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "session_pinned_skill_ids": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "skill_id": {
+          "default": null,
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "ui_selected_skill_id": {
+          "default": null,
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "PromptContractCase": {
+      "type": "object",
+      "required": [
+        "expected_route_policy",
+        "expected_tools_allow_empty",
+        "id",
+        "skill_id"
+      ],
+      "properties": {
+        "expected_route_policy": {
+          "$ref": "#/definitions/SkillRoutePolicy"
+        },
+        "expected_tools_allow_empty": {
+          "type": "boolean"
+        },
+        "id": {
+          "type": "string"
+        },
+        "prohibited_instruction_phrases": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "required_constraints": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "required_instruction_phrases": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "skill_id": {
+          "type": "string"
+        }
+      }
+    },
+    "SkillRoutePolicy": {
+      "type": "string",
+      "enum": [
+        "auto",
+        "manual_only",
+        "explicit_only",
+        "suggest_only",
+        "disabled"
+      ]
+    }
+  }
+}

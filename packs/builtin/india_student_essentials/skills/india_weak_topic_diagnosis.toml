@@ -2,25 +2,41 @@ schema_version = 1
 id = "india_weak_topic_diagnosis"
 pack_id = "india_student_essentials"
 name = "India Weak Topic Diagnosis"
-description = "Helps Indian students separate weak topics into concept gaps, practice gaps, memory gaps, and careless-error patterns."
+description = "Determines why a topic is weak using supplied evidence and separates concept, recall, application, speed, reading, careless-error and confidence patterns."
 enabled = false
 category = "india_student"
 route_policy = "auto"
-aliases = ["weak topic diagnosis", "find my weak topics"]
-triggers = ["general study", "diagnosis", "india", "weak", "topic", "find", "my", "topics"]
-required_any = []
-negative_triggers = ["react test", "unit test"]
-examples = ["weak topic diagnosis", "Make a 30-day study plan with revision", "Find my weak topics from recent marks"]
-min_score = 25
+aliases = ["weak topics", "diagnose my mistakes", "concept gap or careless error", "why am I losing marks", "chapter still wrong", "forget answers in tests", "slow and misread", "recall gap", "speed gap"]
+triggers = ["weak topic", "weak topics", "losing marks", "diagnose mistakes", "concept gap", "concept gaps", "careless error", "careless mistakes", "forget answers", "forget karta", "answers in tests", "slow and misread", "recall gap", "speed gap", "topic weakness", "topic is weak", "still get this chapter wrong", "revise but still wrong"]
+required_any = ["weak", "mistake", "mistakes", "wrong", "marks", "topic", "chapter", "concept", "careless", "forget", "slow"]
+negative_triggers = ["security weakness", "weak reference", "weak typing", "weak password", "unit test failure", "mock test analysis"]
+examples = [
+  "I keep losing marks in trigonometry even after revising formulas. Help me diagnose why.",
+  "I understand Biology while reading but forget answers in tests.",
+  "I made errors in three chapters in my last two tests. Separate concept gaps from careless mistakes.",
+]
+min_score = 18
 
 [prompt]
-role = "India Weak Topic Diagnosis for Indian students"
-instructions = "Act as India Weak Topic Diagnosis for Indian students.\nFocus: separate weak topics into concept gaps, practice gaps, memory gaps, and careless-error patterns.\nUse simple English by default. Use Hinglish only if the user asks or uses Hinglish first.\nUse India-relevant study language such as NCERT, PYQ, mock test, dropper, coaching, self-study, board exams, category documents, and counselling where relevant.\nSeparate confirmed facts, user-provided data, assumptions, and things to verify officially.\nGive practical next steps for today, 7 days, 30 days, and 90 days when the time horizon is not specified.\nAsk for missing marks, subjects, available hours, target exam, attempt status, or constraints only when needed to avoid a bad plan.\nDo not invent official dates, fees, cutoffs, seats, counselling rules, syllabus changes, eligibility, answer keys, result dates, or admission chances.\nDo not promise rank, percentile, score jumps, admission, college, branch, selection, or interview success."
-constraints = ["Do not invent official dates, fees, cutoffs, seats, eligibility, deadlines, answer keys, result dates, or counselling rules.", "Do not promise rank, percentile, admission, selection, branch, college, or score jumps.", "Use Hinglish only if the user asks or uses Hinglish.", "Separate confirmed facts, assumptions, user-provided data, and official-verification items."]
+role = "Weak-topic diagnosis coach for Indian students"
+instructions = """
+Determine why a topic is weak using supplied evidence.
+Distinguish feelings of weakness from evidence of weakness. Ask for a test question, answer attempt or example when useful.
+Classify weakness into foundational concept gap, recall gap, application gap, speed gap, reading or comprehension gap, careless-error pattern, or confidence and avoidance pattern.
+Do not replace full mock-test analysis when the user provides a complete test; hand off by saying the full test should be analyzed as a mock.
+Use simple English by default. Use Hinglish only if the user asks or writes in Hinglish first.
+Expected output: a diagnosis table with topic, evidence, likely difficulty type, confirmation exercise, next action, and recheck date or checkpoint.
+"""
+constraints = [
+  "Do not declare a student incapable or generally weak.",
+  "Do not promise marks, ranks, admission, selection or outcomes.",
+  "Do not fabricate missing performance evidence.",
+  "Do not read files, write files, open URLs, open apps or run commands.",
+]
 
 [tools]
 allow = []
-deny = ["write_file", "run_command", "open_url"]
+deny = ["write_file", "run_command", "open_url", "open_app"]
 
 [safety]
 risk_level = "low"
@@ -31,18 +47,22 @@ allows_network = false
 requires_fresh_info = false
 
 [metadata]
-audience = ["student", "exam_aspirant"]
+audience = ["student", "school_student", "college_student", "self_study_student", "exam_aspirant"]
 country = "IN"
 exam = "General Study"
 exam_stage = "diagnosis"
 language_style = ["english", "hinglish_optional"]
-last_reviewed_at = "2026-06-03"
+last_reviewed_at = "2026-06-04"
 freshness_sensitive = false
 official_source_labels = []
 
 [store_preview]
-best_for = ["Indian students who want a practical study workflow", "Students balancing school, college, coaching, or self-study", "Students who want clear next steps without fear-based motivation"]
-not_for = ["Official notice, cutoff, seat, fee, or deadline lookup", "Guaranteed rank, percentile, admission, selection, or score jump", "Replacing teacher, counsellor, doctor, or official exam authority advice", "Highly exam-specific official counselling decisions"]
-sample_prompts = ["weak topic diagnosis", "Make a 30-day study plan with revision", "Find my weak topics from recent marks"]
-what_it_does = ["Guides diagnosis with India-relevant study context", "Turns vague goals into practical actions and review checkpoints", "Asks for missing details only when they change the plan"]
-what_it_will_not_do = ["Invent official facts or private data", "Use executable code, shell access, file writes, or network tools", "Use shame, fear, or guaranteed-outcome motivation"]
+best_for = ["Diagnosing why a topic stays weak", "Separating concept gaps from careless errors", "Planning a confirmation exercise and recheck"]
+not_for = ["Full mock-test score analysis", "General self-judgment about ability", "Outcome guarantees"]
+sample_prompts = [
+  "I keep losing marks in trigonometry even after revising formulas. Help me diagnose why.",
+  "I understand Biology while reading but forget answers in tests.",
+  "I made errors in three chapters in my last two tests. Separate concept gaps from careless mistakes.",
+]
+what_it_does = ["Uses supplied evidence to classify weakness", "Suggests confirmation exercises", "Sets next actions and checkpoints"]
+what_it_will_not_do = ["Label a student as incapable", "Replace full mock analysis", "Enable tools or access local files"]

@@ -8,3 +8,6 @@ labels, and best-for hints.
 This makes skill routing auditable without enabling hidden behavior. A user can
 inspect why an India exam prompt routed to a skill and then adjust enablement in
 Settings > Skills.
+
+Manual chat selection and session pins are also visible through routing state:
+they select only enabled skills and are scoped to the current message or session.

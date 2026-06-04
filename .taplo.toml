@@ -1,0 +1,14 @@
+[formatting]
+reorder_keys = false
+
+[[rule]]
+include = ["packs/builtin/**/pack.toml"]
+schema = { path = "schemas/skill-pack.schema.json" }
+
+[[rule]]
+include = ["packs/builtin/**/skills/*.toml"]
+schema = { path = "schemas/skill-manifest.schema.json" }
+
+[[rule]]
+include = ["packs/builtin/**/evals/*.toml"]
+schema = { path = "schemas/skill-evaluation.schema.json" }

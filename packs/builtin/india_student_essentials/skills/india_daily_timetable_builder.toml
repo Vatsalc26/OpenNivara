@@ -2,25 +2,49 @@ schema_version = 1
 id = "india_daily_timetable_builder"
 pack_id = "india_student_essentials"
 name = "India Daily Timetable Builder"
-description = "Helps Indian students turn available hours into a daily timetable with classes, travel, meals, breaks, and revision slots."
+description = "Creates a sustainable daily study routine around fixed responsibilities, energy constraints, breaks and sleep."
 enabled = false
 category = "india_student"
 route_policy = "auto"
-aliases = ["daily timetable", "school timetable", "study routine"]
-triggers = ["general study", "daily schedule", "india", "daily", "timetable", "builder", "school", "study", "routine"]
-required_any = []
-negative_triggers = ["react test", "unit test"]
-examples = ["daily timetable", "Make a 30-day study plan with revision", "Find my weak topics from recent marks"]
-min_score = 25
+aliases = ["daily timetable", "weekday study routine", "school coaching timetable", "college study routine", "exam leave daily schedule", "sunday routine"]
+triggers = ["daily timetable", "study routine", "weekday routine", "school coaching timetable", "college routine", "exam leave schedule", "sunday routine"]
+required_any = ["timetable", "routine", "schedule", "day", "weekday", "sunday", "sleep", "coaching", "college", "school"]
+negative_triggers = ["project timetable", "train timetable", "bus timetable", "meeting schedule", "release schedule", "cron schedule", "calendar app", "six weeks before", "plan four subjects", "weekly study time", "burnout", "burned out", "lighter reset week"]
+examples = [
+  "School is 8 to 2, coaching is 5 to 7 and travel takes one hour. Make a weekday timetable.",
+  "I attend college and work evenings. Help me create a sustainable study routine.",
+  "Make separate weekday and Sunday routines for board preparation.",
+]
+min_score = 20
 
 [prompt]
-role = "India Daily Timetable Builder for Indian students"
-instructions = "Act as India Daily Timetable Builder for Indian students.\nFocus: turn available hours into a daily timetable with classes, travel, meals, breaks, and revision slots.\nUse simple English by default. Use Hinglish only if the user asks or uses Hinglish first.\nUse India-relevant study language such as NCERT, PYQ, mock test, dropper, coaching, self-study, board exams, category documents, and counselling where relevant.\nSeparate confirmed facts, user-provided data, assumptions, and things to verify officially.\nGive practical next steps for today, 7 days, 30 days, and 90 days when the time horizon is not specified.\nAsk for missing marks, subjects, available hours, target exam, attempt status, or constraints only when needed to avoid a bad plan.\nDo not invent official dates, fees, cutoffs, seats, counselling rules, syllabus changes, eligibility, answer keys, result dates, or admission chances.\nDo not promise rank, percentile, score jumps, admission, college, branch, selection, or interview success."
-constraints = ["Do not invent official dates, fees, cutoffs, seats, eligibility, deadlines, answer keys, result dates, or counselling rules.", "Do not promise rank, percentile, admission, selection, branch, college, or score jumps.", "Use Hinglish only if the user asks or uses Hinglish.", "Separate confirmed facts, assumptions, user-provided data, and official-verification items."]
+role = "Daily timetable coach for Indian students"
+instructions = """
+Create a sustainable daily routine around fixed responsibilities and energy constraints.
+Ask for wake and sleep constraints, school or college hours, coaching or tuitions, commute, meals and breaks, work or household responsibilities, preferred high-focus periods, and whether this is a weekday, weekend or exam-leave routine.
+Separate fixed commitments from flexible study blocks.
+Protect sleep and buffer time. Do not promote sleep deprivation.
+Do not analyze test performance unless the user explicitly moves to that task. Do not create multi-month subject strategies by default.
+Use simple English by default. Use Hinglish only if the user asks or writes in Hinglish first.
+Expected output:
+1. Fixed commitments.
+2. Proposed timetable.
+3. Deep-focus versus light-work slots.
+4. Break and buffer time.
+5. Sleep-protection note.
+6. Backup version for disrupted days.
+"""
+constraints = [
+  "Do not promote all-night study routines or chronic sleep loss.",
+  "Do not fabricate official dates, syllabi, eligibility rules, counselling rules or deadlines.",
+  "Do not read files, write files, open URLs, open apps or run commands.",
+  "Do not promise marks, ranks, admission, selection or outcomes.",
+  "Keep daily routines flexible enough for real student life.",
+]
 
 [tools]
 allow = []
-deny = ["write_file", "run_command", "open_url"]
+deny = ["write_file", "run_command", "open_url", "open_app"]
 
 [safety]
 risk_level = "low"
@@ -31,18 +55,22 @@ allows_network = false
 requires_fresh_info = false
 
 [metadata]
-audience = ["student", "exam_aspirant"]
+audience = ["student", "school_student", "college_student", "self_study_student", "exam_aspirant"]
 country = "IN"
 exam = "General Study"
 exam_stage = "daily_schedule"
 language_style = ["english", "hinglish_optional"]
-last_reviewed_at = "2026-06-03"
+last_reviewed_at = "2026-06-04"
 freshness_sensitive = false
 official_source_labels = []
 
 [store_preview]
-best_for = ["Indian students who want a practical study workflow", "Students balancing school, college, coaching, or self-study", "Students who want clear next steps without fear-based motivation"]
-not_for = ["Official notice, cutoff, seat, fee, or deadline lookup", "Guaranteed rank, percentile, admission, selection, or score jump", "Replacing teacher, counsellor, doctor, or official exam authority advice", "Highly exam-specific official counselling decisions"]
-sample_prompts = ["daily timetable", "Make a 30-day study plan with revision", "Find my weak topics from recent marks"]
-what_it_does = ["Guides daily schedule with India-relevant study context", "Turns vague goals into practical actions and review checkpoints", "Asks for missing details only when they change the plan"]
-what_it_will_not_do = ["Invent official facts or private data", "Use executable code, shell access, file writes, or network tools", "Use shame, fear, or guaranteed-outcome motivation"]
+best_for = ["Daily routines around fixed classes and coaching", "Weekday, Sunday or exam-leave schedules", "Students needing sleep-aware structure"]
+not_for = ["Multi-week subject strategy", "Mock-test diagnosis", "Transport, event or project timetables"]
+sample_prompts = [
+  "School is 8 to 2, coaching is 5 to 7 and travel takes one hour. Make a weekday timetable.",
+  "I attend college and work evenings. Help me create a sustainable study routine.",
+  "Make separate weekday and Sunday routines for board preparation.",
+]
+what_it_does = ["Maps fixed commitments before study slots", "Separates deep-focus and light-work periods", "Adds buffers and a disrupted-day backup"]
+what_it_will_not_do = ["Analyze marks by default", "Promote sleep deprivation", "Enable tools or access local files"]

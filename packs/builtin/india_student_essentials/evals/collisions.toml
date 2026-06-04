@@ -1,0 +1,314 @@
+[[cases]]
+id = "collision_project_plan"
+message = "Make a project plan for a React dashboard sprint."
+expected_no_primary = true
+
+[[cases]]
+id = "collision_business_plan"
+message = "Write a business plan for a coaching startup."
+expected_no_primary = true
+
+[[cases]]
+id = "collision_trip_plan"
+message = "Plan my trip itinerary for Delhi."
+expected_no_primary = true
+
+[[cases]]
+id = "collision_meal_plan"
+message = "Create a meal plan for the week."
+expected_no_primary = true
+
+[[cases]]
+id = "collision_workout_plan"
+message = "Make a workout plan with daily sets."
+expected_no_primary = true
+
+[[cases]]
+id = "collision_sprint_plan"
+message = "Plan our software sprint backlog."
+expected_no_primary = true
+
+[[cases]]
+id = "collision_train_timetable"
+message = "Check the train timetable from Mumbai to Pune."
+expected_no_primary = true
+
+[[cases]]
+id = "collision_bus_timetable"
+message = "Create a bus timetable poster."
+expected_no_primary = true
+
+[[cases]]
+id = "collision_project_timetable"
+message = "Build a project timetable for the release."
+expected_no_primary = true
+
+[[cases]]
+id = "collision_meeting_schedule"
+message = "Make a meeting schedule for office notes."
+expected_no_primary = true
+
+[[cases]]
+id = "collision_cron_schedule"
+message = "Write a cron schedule for nightly jobs."
+expected_no_primary = true
+
+[[cases]]
+id = "collision_billing_cycle"
+message = "Explain my billing cycle and invoice revision."
+expected_no_primary = true
+
+[[cases]]
+id = "collision_release_cycle"
+message = "Plan the release cycle and code review."
+expected_no_primary = true
+
+[[cases]]
+id = "collision_design_revision"
+message = "Summarize design revision comments."
+expected_no_primary = true
+
+[[cases]]
+id = "collision_pull_request_review"
+message = "Review this pull request revision cycle."
+expected_no_primary = true
+
+[[cases]]
+id = "collision_unit_test"
+message = "Analyze my unit test score coverage."
+expected_no_primary = true
+
+[[cases]]
+id = "collision_api_test"
+message = "Stress test my API and analyze load test errors."
+expected_no_primary = true
+
+[[cases]]
+id = "collision_playwright"
+message = "My Playwright test has low accuracy matching selectors."
+expected_no_primary = true
+
+[[cases]]
+id = "collision_medical_test"
+message = "Analyze my medical test report values."
+expected_no_primary = true
+
+[[cases]]
+id = "collision_security_weakness"
+message = "Find weak password and security weakness patterns."
+expected_no_primary = true
+
+[[cases]]
+id = "collision_weak_reference"
+message = "Explain weak references in Rust."
+expected_no_primary = true
+
+[[cases]]
+id = "collision_weak_typing"
+message = "Compare weak typing and strong typing."
+expected_no_primary = true
+
+[[cases]]
+id = "collision_readme_summary"
+message = "README summary from these repo notes."
+expected_no_primary = true
+
+[[cases]]
+id = "collision_meeting_notes"
+message = "Convert my meeting notes into action items."
+expected_no_primary = true
+
+[[cases]]
+id = "collision_office_notes"
+message = "Summarize these office notes for my manager."
+expected_no_primary = true
+
+[[cases]]
+id = "collision_release_notes"
+message = "Turn release notes into a changelog."
+expected_no_primary = true
+
+[[cases]]
+id = "collision_coding_notes"
+message = "Convert coding notes about TypeScript into flashcards."
+expected_no_primary = true
+
+[[cases]]
+id = "collision_repo_explainer"
+message = "Explain this repository and API error."
+expected_no_primary = true
+
+[[cases]]
+id = "collision_debug_code"
+message = "Debug code where this concept is failing."
+expected_no_primary = true
+
+[[cases]]
+id = "collision_legal_advice"
+message = "Explain my legal notice and give legal advice."
+expected_no_primary = true
+
+[[cases]]
+id = "collision_medical_advice"
+message = "Explain my symptoms and give medical advice."
+expected_no_primary = true
+
+[[cases]]
+id = "collision_system_design"
+message = "Explain system design for API scaling."
+expected_no_primary = true
+
+[[cases]]
+id = "collision_api_stress"
+message = "API stress testing for my server."
+expected_no_primary = true
+
+[[cases]]
+id = "collision_load_test"
+message = "Load test my backend and find bottlenecks."
+expected_no_primary = true
+
+[[cases]]
+id = "collision_stress_tensor"
+message = "Explain stress tensor in mechanics."
+expected_no_primary = true
+
+[[cases]]
+id = "collision_mechanical_stress"
+message = "Calculate mechanical stress on a beam."
+expected_no_primary = true
+
+[[cases]]
+id = "collision_performance_test"
+message = "Performance test the app with benchmark scores."
+expected_no_primary = true
+
+[[cases]]
+id = "collision_jest"
+message = "Jest test analysis for failed snapshots."
+expected_no_primary = true
+
+[[cases]]
+id = "collision_vitest"
+message = "Vitest mock test fails in this codebase."
+expected_no_primary = true
+
+[[cases]]
+id = "collision_file_summary"
+message = "Summarize this local file automatically."
+expected_no_primary = true
+
+[[cases]]
+id = "collision_calendar_app"
+message = "Create a calendar app schedule."
+expected_no_primary = true
+
+[[cases]]
+id = "collision_train_schedule"
+message = "What is the railway schedule tomorrow?"
+expected_no_primary = true
+
+[[cases]]
+id = "collision_open_url"
+message = "Open URL for official syllabus."
+expected_no_primary = true
+
+[[cases]]
+id = "collision_read_file"
+message = "Read my notes file from downloads."
+expected_no_primary = true
+
+[[cases]]
+id = "collision_write_file"
+message = "Write this timetable into a file."
+expected_no_primary = true
+
+[[cases]]
+id = "collision_run_command"
+message = "Run command to inspect my study folder."
+expected_no_primary = true
+
+[[cases]]
+id = "collision_app_open"
+message = "Open my calendar app for exam dates."
+expected_no_primary = true
+
+[[cases]]
+id = "collision_rank_prediction"
+message = "Predict my rank from this score."
+expected_no_primary = true
+
+[[cases]]
+id = "collision_admission_chance"
+message = "Guarantee my admission chance from marks."
+expected_no_primary = true
+
+[[cases]]
+id = "collision_official_deadline"
+message = "Fetch official counselling deadline now."
+expected_no_primary = true
+
+[[cases]]
+id = "collision_syllabus_lookup"
+message = "Retrieve live CBSE syllabus changes."
+expected_no_primary = true
+
+[[cases]]
+id = "collision_cutoff_lookup"
+message = "Find live cutoff and seats from a government site."
+expected_no_primary = true
+
+[[cases]]
+id = "collision_platform_contact"
+message = "Give me official education platform helpline numbers."
+expected_no_primary = true
+
+[[cases]]
+id = "collision_health_diagnosis"
+message = "Diagnose my anxiety disorder."
+expected_no_primary = true
+
+[[cases]]
+id = "collision_counselling_replacement"
+message = "Be my therapist and solve my mental health problem."
+expected_no_primary = true
+
+[[cases]]
+id = "collision_generic_plan"
+message = "Plan this."
+expected_no_primary = true
+
+[[cases]]
+id = "collision_generic_day"
+message = "My day."
+expected_no_primary = true
+
+[[cases]]
+id = "collision_generic_notes"
+message = "Notes."
+expected_no_primary = true
+
+[[cases]]
+id = "collision_generic_mock"
+message = "mock"
+expected_no_primary = true
+
+[[cases]]
+id = "collision_generic_stress"
+message = "stress"
+expected_no_primary = true
+
+[[cases]]
+id = "collision_generic_revision"
+message = "revision"
+expected_no_primary = true
+
+[[cases]]
+id = "collision_generic_doubt"
+message = "doubt"
+expected_no_primary = true
+
+[[cases]]
+id = "collision_generic_weak"
+message = "weak"
+expected_no_primary = true

@@ -2,25 +2,47 @@ schema_version = 1
 id = "india_revision_cycle_planner"
 pack_id = "india_student_essentials"
 name = "India Revision Cycle Planner"
-description = "Helps Indian students create spaced revision cycles using active recall, PYQs, NCERT where relevant, and short checkpoint tests."
+description = "Builds a spaced revision and active-recall workflow after material has been learned."
 enabled = false
 category = "india_student"
 route_policy = "auto"
-aliases = ["revision cycle", "revision planner", "spaced revision"]
-triggers = ["general study", "revision", "india", "cycle", "planner", "spaced"]
-required_any = []
-negative_triggers = ["react test", "unit test"]
-examples = ["revision cycle", "Make a 30-day study plan with revision", "Find my weak topics from recent marks"]
-min_score = 25
+aliases = ["revision cycle", "spaced revision", "revision schedule", "active recall plan", "retain what I studied", "revise answers", "formula recall plan", "forgot definitions", "revision interval"]
+triggers = ["revision cycle", "spaced revision", "revision schedule", "active recall", "recall plan", "forgetting chapters", "forget definitions", "forgot definitions", "forgot many definitions", "retain studied", "formula recall plan", "revision interval"]
+required_any = ["revision", "revise", "recall", "remember", "forget", "forgot", "retain", "chapter", "chapters", "formula", "answers"]
+negative_triggers = ["pasted notes", "study notes", "chapter notes", "code review cycle", "release cycle", "billing cycle", "design revision", "document revision", "pull request review", "pull request"]
+examples = [
+  "I finished five Biology chapters. Build an active-recall revision cycle until my monthly test.",
+  "Help me revise History answers and Maths formulas differently.",
+  "I keep forgetting chapters after one week. Build a revision system based on recall tests.",
+]
+min_score = 18
 
 [prompt]
-role = "India Revision Cycle Planner for Indian students"
-instructions = "Act as India Revision Cycle Planner for Indian students.\nFocus: create spaced revision cycles using active recall, PYQs, NCERT where relevant, and short checkpoint tests.\nUse simple English by default. Use Hinglish only if the user asks or uses Hinglish first.\nUse India-relevant study language such as NCERT, PYQ, mock test, dropper, coaching, self-study, board exams, category documents, and counselling where relevant.\nSeparate confirmed facts, user-provided data, assumptions, and things to verify officially.\nGive practical next steps for today, 7 days, 30 days, and 90 days when the time horizon is not specified.\nAsk for missing marks, subjects, available hours, target exam, attempt status, or constraints only when needed to avoid a bad plan.\nDo not invent official dates, fees, cutoffs, seats, counselling rules, syllabus changes, eligibility, answer keys, result dates, or admission chances.\nDo not promise rank, percentile, score jumps, admission, college, branch, selection, or interview success."
-constraints = ["Do not invent official dates, fees, cutoffs, seats, eligibility, deadlines, answer keys, result dates, or counselling rules.", "Do not promise rank, percentile, admission, selection, branch, college, or score jumps.", "Use Hinglish only if the user asks or uses Hinglish.", "Separate confirmed facts, assumptions, user-provided data, and official-verification items."]
+role = "Active-recall revision coach for Indian students"
+instructions = """
+Build a spaced revision and active-recall workflow after material has been learned.
+Prefer active recall, short quizzes, diagram recall, formula recall, written retrieval and practice questions over rereading-only plans.
+Treat intervals as adjustable starting points, not universally perfect timing. Adapt revision by subject type.
+Move poorly recalled material back into earlier review stages.
+Use simple English by default. Use Hinglish only if the user asks or writes in Hinglish first.
+Expected output:
+1. Material inventory.
+2. Current learning state: new, partly learned or previously revised.
+3. Suggested recall method by subject.
+4. Revision cycle with checkpoint tests.
+5. Weak-material recovery rule.
+6. Adjustment rule after the next checkpoint.
+"""
+constraints = [
+  "Do not claim exact spaced-repetition intervals are universally proven for every student.",
+  "Do not assume NCERT, CBSE, coaching or a competitive exam unless supplied.",
+  "Do not read files, write files, open URLs, open apps or run commands.",
+  "Do not promise marks, ranks, admission, selection or outcomes.",
+]
 
 [tools]
 allow = []
-deny = ["write_file", "run_command", "open_url"]
+deny = ["write_file", "run_command", "open_url", "open_app"]
 
 [safety]
 risk_level = "low"
@@ -31,18 +53,22 @@ allows_network = false
 requires_fresh_info = false
 
 [metadata]
-audience = ["student", "exam_aspirant"]
+audience = ["student", "school_student", "college_student", "self_study_student", "exam_aspirant"]
 country = "IN"
 exam = "General Study"
 exam_stage = "revision"
 language_style = ["english", "hinglish_optional"]
-last_reviewed_at = "2026-06-03"
+last_reviewed_at = "2026-06-04"
 freshness_sensitive = false
 official_source_labels = []
 
 [store_preview]
-best_for = ["Indian students who want a practical study workflow", "Students balancing school, college, coaching, or self-study", "Students who want clear next steps without fear-based motivation"]
-not_for = ["Official notice, cutoff, seat, fee, or deadline lookup", "Guaranteed rank, percentile, admission, selection, or score jump", "Replacing teacher, counsellor, doctor, or official exam authority advice", "Highly exam-specific official counselling decisions"]
-sample_prompts = ["revision cycle", "Make a 30-day study plan with revision", "Find my weak topics from recent marks"]
-what_it_does = ["Guides revision with India-relevant study context", "Turns vague goals into practical actions and review checkpoints", "Asks for missing details only when they change the plan"]
-what_it_will_not_do = ["Invent official facts or private data", "Use executable code, shell access, file writes, or network tools", "Use shame, fear, or guaranteed-outcome motivation"]
+best_for = ["Active recall after initial learning", "Subject-specific revision cycles", "Recovering material that keeps being forgotten"]
+not_for = ["Learning a brand-new concept from scratch", "Full mock-test analysis", "Official exam-resource retrieval"]
+sample_prompts = [
+  "I finished five Biology chapters. Build an active-recall revision cycle until my monthly test.",
+  "Help me revise History answers and Maths formulas differently.",
+  "I keep forgetting chapters after one week. Build a revision system based on recall tests.",
+]
+what_it_does = ["Creates recall-based revision cycles", "Adapts methods by subject type", "Adds checkpoint and recovery rules"]
+what_it_will_not_do = ["Rely only on rereading", "Claim perfect universal intervals", "Enable tools or access files"]

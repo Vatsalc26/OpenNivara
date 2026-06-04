@@ -16,6 +16,8 @@ pub struct EngineRequest {
     pub source: RequestSource,
     pub session_id: Option<String>,
     pub message: String,
+    pub ui_selected_skill_id: Option<String>,
+    pub pin_selected_skill: bool,
 }
 
 #[allow(dead_code)]
@@ -312,10 +314,22 @@ impl OpenNivaraEngine {
         message: &str,
         session_id: Option<&str>,
     ) -> anyhow::Result<ContextPreview> {
+        self.preview_context_for_message_with_skill(message, session_id, None)
+    }
+
+    pub fn preview_context_for_message_with_skill(
+        &self,
+        message: &str,
+        session_id: Option<&str>,
+        ui_selected_skill_id: Option<&str>,
+    ) -> anyhow::Result<ContextPreview> {
         let session_conn = crate::sessions::init_db()?;
         let memory_conn = crate::memory::db::open_memory_db()?;
         let pinned_context_ids = session_id
             .and_then(|id| crate::sessions::list_pinned_contexts(&session_conn, id).ok())
+            .unwrap_or_default();
+        let session_pinned_skill_ids = session_id
+            .and_then(|id| crate::sessions::list_pinned_skills(&session_conn, id).ok())
             .unwrap_or_default();
         let settings = crate::memory::db::get_settings(&memory_conn).unwrap_or_default();
         let timezone = crate::profile::read_profile()
@@ -353,8 +367,8 @@ impl OpenNivaraEngine {
                 pinned_context_ids,
                 explicit_skill_id: None,
                 pack_hint: None,
-                ui_selected_skill_id: None,
-                session_pinned_skill_ids: vec![],
+                ui_selected_skill_id: ui_selected_skill_id.map(str::to_string),
+                session_pinned_skill_ids,
             },
         )?;
 
@@ -402,6 +416,12 @@ impl OpenNivaraEngine {
             }
         };
 
+        if request.pin_selected_skill {
+            if let Some(skill_id) = request.ui_selected_skill_id.as_deref() {
+                sessions::pin_skill(&conn, &session_id, skill_id)?;
+            }
+        }
+
         // 3. Store the user's message in the session history database
         sessions::store_message(
             &conn,
@@ -428,7 +448,11 @@ impl OpenNivaraEngine {
         };
 
         // 5. Build system prompt instructions and context blocks using preview selector
-        let preview = self.preview_context_for_message(&request.message, Some(&session_id))?;
+        let preview = self.preview_context_for_message_with_skill(
+            &request.message,
+            Some(&session_id),
+            request.ui_selected_skill_id.as_deref(),
+        )?;
         let context_block_full = preview.final_context_text;
 
         // 6. Build the multi-turn conversational history

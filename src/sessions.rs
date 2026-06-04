@@ -128,6 +128,18 @@ pub fn init_db() -> anyhow::Result<Connection> {
         [],
     )?;
 
+    // Create session_pinned_skills table
+    conn.execute(
+        "CREATE TABLE IF NOT EXISTS session_pinned_skills (
+            session_id TEXT NOT NULL,
+            skill_id TEXT NOT NULL,
+            pinned_at TEXT NOT NULL,
+            PRIMARY KEY(session_id, skill_id),
+            FOREIGN KEY(session_id) REFERENCES sessions(id) ON DELETE CASCADE
+        );",
+        [],
+    )?;
+
     // Create indices
     conn.execute(
         "CREATE INDEX IF NOT EXISTS idx_messages_session_id ON messages(session_id);",
@@ -423,6 +435,36 @@ pub fn unpin_context(conn: &Connection, session_id: &str, context_id: &str) -> a
 pub fn list_pinned_contexts(conn: &Connection, session_id: &str) -> anyhow::Result<Vec<String>> {
     let mut stmt = conn.prepare(
         "SELECT context_id FROM session_pinned_contexts WHERE session_id = ?1 ORDER BY pinned_at ASC"
+    )?;
+    let rows = stmt.query_map(params![session_id], |row| row.get(0))?;
+    let mut pinned = Vec::new();
+    for r in rows {
+        pinned.push(r?);
+    }
+    Ok(pinned)
+}
+
+pub fn pin_skill(conn: &Connection, session_id: &str, skill_id: &str) -> anyhow::Result<()> {
+    let now = chrono::Utc::now().to_rfc3339();
+    conn.execute(
+        "INSERT OR REPLACE INTO session_pinned_skills (session_id, skill_id, pinned_at)
+         VALUES (?1, ?2, ?3)",
+        params![session_id, skill_id, now],
+    )?;
+    Ok(())
+}
+
+pub fn unpin_skill(conn: &Connection, session_id: &str, skill_id: &str) -> anyhow::Result<()> {
+    conn.execute(
+        "DELETE FROM session_pinned_skills WHERE session_id = ?1 AND skill_id = ?2",
+        params![session_id, skill_id],
+    )?;
+    Ok(())
+}
+
+pub fn list_pinned_skills(conn: &Connection, session_id: &str) -> anyhow::Result<Vec<String>> {
+    let mut stmt = conn.prepare(
+        "SELECT skill_id FROM session_pinned_skills WHERE session_id = ?1 ORDER BY pinned_at ASC",
     )?;
     let rows = stmt.query_map(params![session_id], |row| row.get(0))?;
     let mut pinned = Vec::new();

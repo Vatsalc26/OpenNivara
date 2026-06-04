@@ -8,6 +8,11 @@ labels when a skill requires fresh information.
 Installing a skill pack only copies data into the marketplace. Users must go to
 Settings > Skills to enable or disable behavior.
 
+After enabling skills, desktop chat can also select an enabled skill for a single
+message or keep one enabled skill pinned for the current session. Manual
+selection and pinning are routing choices; they do not install packs, enable
+disabled skills, or change tool permissions.
+
 ## Safety Messaging
 
 Store skill packs are presented as data-only:

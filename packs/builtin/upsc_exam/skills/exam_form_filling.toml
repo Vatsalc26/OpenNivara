@@ -29,3 +29,6 @@ allows_file_write = false
 allows_shell = false
 allows_network = false
 requires_fresh_info = true
+
+[metadata]
+official_source_labels = ["UPSC"]

@@ -8,6 +8,7 @@ use super::selector::{select_skill_route, SkillRouteRequest};
 use super::tool_policy::allowed_tools_for_selected_skills;
 use crate::marketplace::packs::{enable_pack, install_pack_from_path, uninstall_pack};
 use crate::tools::{GeneralConfig, PathsConfig, ToolRegistry, ToolSettings, ToolsConfig};
+use proptest::prelude::*;
 use std::collections::HashMap;
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -279,6 +280,145 @@ fn ambiguous_close_scores_return_no_primary() {
 
     assert!(decision.primary_skill.is_none());
     assert!(decision.reason.contains("ambiguous"));
+}
+
+#[test]
+fn phrase_alias_does_not_match_inside_longer_word() {
+    let mut skill = valid_skill("study_plan");
+    skill.aliases = vec!["study plan".to_string()];
+    skill.triggers = vec![];
+    skill.required_any = vec![];
+    skill.examples = vec![];
+    skill.safety.requires_fresh_info = false;
+    skill.min_score = 10;
+
+    let decision = select_skill_route(
+        &[skill],
+        SkillRouteRequest {
+            message: "review my study planner app copy".to_string(),
+            explicit_skill_id: None,
+            pack_hint: None,
+            ui_selected_skill_id: None,
+            session_pinned_skill_ids: vec![],
+        },
+    );
+
+    let candidate = decision
+        .candidates
+        .iter()
+        .find(|candidate| candidate.id == "study_plan")
+        .expect("rejected audit candidate should be present");
+    assert_eq!(candidate.score, 0);
+    assert!(!candidate.accepted);
+}
+
+proptest! {
+    #[test]
+    fn phrase_alias_requires_token_boundaries(prefix in "[a-z]{1,12}", suffix in "[a-z]{1,12}") {
+        let mut skill = valid_skill("study_plan");
+        skill.aliases = vec!["study plan".to_string()];
+        skill.triggers = vec![];
+        skill.required_any = vec![];
+        skill.examples = vec![];
+        skill.safety.requires_fresh_info = false;
+        skill.min_score = 10;
+
+        let decision = select_skill_route(
+            &[skill],
+            SkillRouteRequest {
+                message: format!("{prefix}study plan{suffix}"),
+                explicit_skill_id: None,
+                pack_hint: None,
+                ui_selected_skill_id: None,
+                session_pinned_skill_ids: vec![],
+            },
+        );
+
+        let candidate = decision
+            .candidates
+            .iter()
+            .find(|candidate| candidate.id == "study_plan")
+            .expect("candidate should be present for audit");
+        prop_assert_eq!(candidate.score, 0);
+        prop_assert!(!candidate.accepted);
+    }
+}
+
+#[test]
+fn suggest_only_skill_can_be_selected_manually_but_not_automatically() {
+    let mut skill = valid_skill("notes_to_recall");
+    skill.route_policy = SkillRoutePolicy::SuggestOnly;
+    skill.aliases = vec!["convert notes".to_string()];
+    skill.triggers = vec!["notes".to_string(), "flashcards".to_string()];
+    skill.required_any = vec![];
+    skill.examples = vec!["convert my study notes into flashcards".to_string()];
+    skill.min_score = 10;
+
+    let auto_decision = select_skill_route(
+        &[skill.clone()],
+        SkillRouteRequest {
+            message: "convert my study notes into flashcards".to_string(),
+            explicit_skill_id: None,
+            pack_hint: None,
+            ui_selected_skill_id: None,
+            session_pinned_skill_ids: vec![],
+        },
+    );
+    assert!(auto_decision.primary_skill.is_none());
+    assert!(auto_decision
+        .candidates
+        .iter()
+        .any(|candidate| candidate.id == "notes_to_recall" && candidate.accepted));
+
+    let manual_decision = select_skill_route(
+        &[skill],
+        SkillRouteRequest {
+            message: "convert my study notes into flashcards".to_string(),
+            explicit_skill_id: None,
+            pack_hint: None,
+            ui_selected_skill_id: Some("notes_to_recall".to_string()),
+            session_pinned_skill_ids: vec![],
+        },
+    );
+
+    assert_eq!(
+        manual_decision
+            .primary_skill
+            .as_ref()
+            .map(|skill| skill.id.as_str()),
+        Some("notes_to_recall")
+    );
+}
+
+#[test]
+fn session_pinned_skill_selects_enabled_skill_for_chat() {
+    let mut skill = valid_skill("daily_timetable");
+    skill.route_policy = SkillRoutePolicy::ManualOnly;
+    skill.aliases = vec![];
+    skill.triggers = vec![];
+    skill.examples = vec![];
+    skill.required_any = vec![];
+    skill.min_score = 50;
+
+    let decision = select_skill_route(
+        &[skill],
+        SkillRouteRequest {
+            message: "today was disrupted, make the next reply use the pinned routine skill"
+                .to_string(),
+            explicit_skill_id: None,
+            pack_hint: None,
+            ui_selected_skill_id: None,
+            session_pinned_skill_ids: vec!["daily_timetable".to_string()],
+        },
+    );
+
+    assert_eq!(
+        decision
+            .primary_skill
+            .as_ref()
+            .map(|skill| skill.id.as_str()),
+        Some("daily_timetable")
+    );
 }
 
 #[test]
@@ -686,7 +826,24 @@ fn india_builtin_ambiguity_routes_to_broad_skills_only_when_appropriate() {
     skills.extend(load_builtin_pack_skills_for_routing(
         "india_management_law_exams",
     ));
-    assert_routes_to_none(&skills, "mock test analysis");
+    assert_routes_to(&skills, "mock test analysis", "india_mock_test_analyzer");
     assert_routes_to_none(&skills, "form filling help");
     assert_routes_to(&skills, "study plan", "india_study_plan_builder");
+}
+
+#[test]
+fn india_student_essentials_eval_fixtures_pass() {
+    let report = super::dev::eval_builtin_pack("india_student_essentials").unwrap();
+
+    assert_eq!(
+        report.failed,
+        0,
+        "fixture failures:\n{}",
+        report.failures.join("\n")
+    );
+    assert!(
+        report.total >= 300,
+        "expected a substantial routing/prompt/safety suite, got {} checks",
+        report.total
+    );
 }

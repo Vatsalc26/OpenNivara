@@ -220,6 +220,12 @@ enum Commands {
         command: SkillsCommand,
     },
 
+    /// Run internal skills development validation, schemas and deterministic evaluations
+    Skillctl {
+        #[command(subcommand)]
+        command: SkillctlCommand,
+    },
+
     /// Manage active modes and enabled packs
     Modes {
         #[command(subcommand)]
@@ -374,6 +380,36 @@ enum SkillsCommand {
     RouteTest {
         /// Message to route
         message: String,
+    },
+}
+
+#[derive(Subcommand)]
+enum SkillctlCommand {
+    /// Validate all built-in skill packs in repository scope
+    Validate,
+    /// Validate one built-in pack and its required development fixtures
+    ValidatePack {
+        /// Built-in pack ID
+        pack_id: String,
+    },
+    /// Generate JSON Schema files for skill, pack and evaluation TOML
+    Schema,
+    /// Route one message through one built-in pack
+    Route {
+        /// Built-in pack ID
+        pack_id: String,
+        /// Message to route
+        message: String,
+    },
+    /// Run deterministic evaluation fixtures for one built-in pack
+    Eval {
+        /// Built-in pack ID
+        pack_id: String,
+    },
+    /// Print a compact quality report for one built-in pack
+    Report {
+        /// Built-in pack ID
+        pack_id: String,
     },
 }
 
@@ -698,6 +734,8 @@ async fn run_app(cli: Cli) -> anyhow::Result<()> {
                 source: engine::RequestSource::Cli,
                 session_id: None, // Resolves or resumes default active CLI session
                 message: question,
+                ui_selected_skill_id: None,
+                pin_selected_skill: false,
             };
 
             println!("Consulting with OpenNivara...");
@@ -940,6 +978,62 @@ async fn run_app(cli: Cli) -> anyhow::Result<()> {
                         println!("  - {}", warning);
                     }
                 }
+            }
+        },
+        Commands::Skillctl { command } => match command {
+            SkillctlCommand::Validate => {
+                let builtin_dir = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+                    .join("packs")
+                    .join("builtin");
+                let mut checked = 0usize;
+                for entry in std::fs::read_dir(builtin_dir)? {
+                    let entry = entry?;
+                    if !entry.path().is_dir() {
+                        continue;
+                    }
+                    let pack_id = entry.file_name().to_string_lossy().to_string();
+                    let warnings = skills::dev::validate_builtin_pack(&pack_id)?;
+                    checked += 1;
+                    if warnings.is_empty() {
+                        println!("OK {pack_id}");
+                    } else {
+                        println!("WARN {pack_id}: {:?}", warnings);
+                    }
+                }
+                println!("validated {checked} built-in packs");
+            }
+            SkillctlCommand::ValidatePack { pack_id } => {
+                let warnings = skills::dev::validate_builtin_pack(&pack_id)?;
+                if warnings.is_empty() {
+                    println!("OK {pack_id}");
+                } else {
+                    println!("WARN {pack_id}: {:?}", warnings);
+                }
+            }
+            SkillctlCommand::Schema => {
+                let files = skills::dev::generate_schema_files()?;
+                for file in files {
+                    println!("{}", file.display());
+                }
+            }
+            SkillctlCommand::Route { pack_id, message } => {
+                println!("{}", skills::dev::route_builtin_pack(&pack_id, message)?);
+            }
+            SkillctlCommand::Eval { pack_id } => {
+                let report = skills::dev::eval_builtin_pack(&pack_id)?;
+                println!(
+                    "total={} passed={} failed={}",
+                    report.total, report.passed, report.failed
+                );
+                for failure in report.failures {
+                    println!("FAIL {failure}");
+                }
+                if report.failed > 0 {
+                    return Err(anyhow::anyhow!("skillctl eval failed"));
+                }
+            }
+            SkillctlCommand::Report { pack_id } => {
+                println!("{}", skills::dev::report_builtin_pack(&pack_id)?);
             }
         },
         Commands::Marketplace { command } => match command {
@@ -1443,6 +1537,8 @@ async fn run_chat_loop(
             source: engine::RequestSource::Cli,
             session_id: Some(session_id.clone()),
             message: trimmed.to_string(),
+            ui_selected_skill_id: None,
+            pin_selected_skill: false,
         };
 
         match engine.handle_message(request).await {

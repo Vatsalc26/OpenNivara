@@ -1027,6 +1027,8 @@ async fn handle_engine_request(
         source: crate::engine::RequestSource::Telegram { chat_id, username },
         session_id: None,
         message: msg_text,
+        ui_selected_skill_id: None,
+        pin_selected_skill: false,
     };
 
     match engine.handle_message(request).await {

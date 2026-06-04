@@ -4,7 +4,7 @@ name = "India Student Essentials"
 version = "1.0.0"
 author = "OpenNivara"
 category = "India Skills"
-description = "Reusable data-only study skills for Indian students."
+description = "Practical learning-support skills for Indian students across school, college, self-study and exam preparation. Build realistic plans, revise with active recall, understand mistakes, clarify concepts and stay consistent without unsafe pressure."
 
 [compatibility]
 opennivara_min_version = "0.1.0"

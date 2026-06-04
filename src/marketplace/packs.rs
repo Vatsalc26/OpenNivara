@@ -1,10 +1,11 @@
 use chrono::Utc;
+use schemars::JsonSchema;
 use semver::Version;
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::PathBuf;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct PackManifest {
     pub schema_version: u32,
     pub id: String,
@@ -22,14 +23,14 @@ pub struct PackManifest {
     pub safety: PackSafety,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct PackCompatibility {
     pub opennivara_min_version: String,
     #[serde(default)]
     pub opennivara_max_version: String,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct PackContents {
     pub preferences: bool,
     pub contexts: bool,
@@ -44,7 +45,7 @@ pub struct PackContents {
     pub skills: bool,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct PackSafety {
     pub contains_executable_code: bool,
     pub modifies_tool_permissions: bool,

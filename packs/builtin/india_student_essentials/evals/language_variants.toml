@@ -1,0 +1,125 @@
+[[cases]]
+id = "plan_hinglish_01"
+message = "Mere paas 6 weeks hain, four subjects ka study plan bana do."
+expected_primary_skill = "india_study_plan_builder"
+
+[[cases]]
+id = "plan_hinglish_02"
+message = "Backlog recovery plan chahiye for three chapters."
+expected_primary_skill = "india_study_plan_builder"
+
+[[cases]]
+id = "plan_mixed_03"
+message = "College exams ke liye weekly study schedule banao."
+expected_primary_skill = "india_study_plan_builder"
+
+[[cases]]
+id = "timetable_hinglish_01"
+message = "School aur coaching ke beech daily timetable bana do."
+expected_primary_skill = "india_daily_timetable_builder"
+
+[[cases]]
+id = "timetable_hinglish_02"
+message = "Sunday routine chahiye revision breaks aur sleep ke saath."
+expected_primary_skill = "india_daily_timetable_builder"
+
+[[cases]]
+id = "timetable_mixed_03"
+message = "Exam leave daily schedule bana do with meals and breaks."
+expected_primary_skill = "india_daily_timetable_builder"
+
+[[cases]]
+id = "revision_hinglish_01"
+message = "Active recall revision cycle bana do Biology chapters ke liye."
+expected_primary_skill = "india_revision_cycle_planner"
+
+[[cases]]
+id = "revision_hinglish_02"
+message = "Main chapters bhool jata hoon, spaced revision schedule chahiye."
+expected_primary_skill = "india_revision_cycle_planner"
+
+[[cases]]
+id = "revision_mixed_03"
+message = "Formula recall plan and checkpoint tests bana do."
+expected_primary_skill = "india_revision_cycle_planner"
+
+[[cases]]
+id = "mock_hinglish_01"
+message = "Mera mock score 61/100 hai, 12 wrong. Analyse my mock."
+expected_primary_skill = "india_mock_test_analyzer"
+
+[[cases]]
+id = "mock_hinglish_02"
+message = "Low accuracy in mock hai, time problem aur silly mistakes."
+expected_primary_skill = "india_mock_test_analyzer"
+
+[[cases]]
+id = "mock_mixed_03"
+message = "Last three mock scores compare karo and pattern batao."
+expected_primary_skill = "india_mock_test_analyzer"
+
+[[cases]]
+id = "weak_hinglish_01"
+message = "Trigonometry weak lag raha hai, concept gap ya careless error diagnose karo."
+expected_primary_skill = "india_weak_topic_diagnosis"
+
+[[cases]]
+id = "weak_hinglish_02"
+message = "Biology padhte waqt samajh aata hai but test mein forget karta hoon."
+expected_primary_skill = "india_weak_topic_diagnosis"
+
+[[cases]]
+id = "weak_mixed_03"
+message = "Chapter weak hai because I am slow and misread questions."
+expected_primary_skill = "india_weak_topic_diagnosis"
+
+[[cases]]
+id = "notes_hinglish_01"
+message = "In notes se flashcards bana do."
+expected_no_primary = true
+expected_candidate_ids = ["india_notes_summarizer"]
+
+[[cases]]
+id = "notes_hinglish_02"
+message = "Mere chapter notes ko revision sheet mein convert karo."
+expected_no_primary = true
+expected_candidate_ids = ["india_notes_summarizer"]
+
+[[cases]]
+id = "notes_mixed_03"
+message = "Pasted notes se active recall questions banao."
+expected_no_primary = true
+expected_candidate_ids = ["india_notes_summarizer"]
+
+[[cases]]
+id = "doubt_hinglish_01"
+message = "Ye concept simple terms mein explain karo."
+expected_no_primary = true
+expected_candidate_ids = ["india_doubt_explainer"]
+
+[[cases]]
+id = "doubt_hinglish_02"
+message = "Is question mein stuck hoon, step by step samjhao."
+expected_no_primary = true
+expected_candidate_ids = ["india_doubt_explainer"]
+
+[[cases]]
+id = "doubt_mixed_03"
+message = "Mera doubt clear karo with a quick check question."
+expected_no_primary = true
+expected_candidate_ids = ["india_doubt_explainer"]
+
+[[cases]]
+id = "stress_hinglish_01"
+message = "Teen din waste ho gaye aur guilt ho raha hai, restart plan do."
+expected_primary_skill = "india_exam_stress_consistency_coach"
+
+[[cases]]
+id = "stress_hinglish_02"
+message = "Exam stress ki wajah se study avoid kar raha hoon."
+expected_primary_skill = "india_exam_stress_consistency_coach"
+
+[[cases]]
+id = "stress_mixed_03"
+message = "Burnout feel ho raha hai after coaching and mocks."
+expected_primary_skill = "india_exam_stress_consistency_coach"

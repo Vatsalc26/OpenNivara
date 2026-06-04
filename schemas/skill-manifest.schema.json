@@ -1,0 +1,312 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SkillManifest",
+  "type": "object",
+  "required": [
+    "category",
+    "description",
+    "enabled",
+    "id",
+    "min_score",
+    "name",
+    "prompt",
+    "route_policy",
+    "safety",
+    "schema_version",
+    "tools"
+  ],
+  "properties": {
+    "aliases": {
+      "default": [],
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "category": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "enabled": {
+      "type": "boolean"
+    },
+    "examples": {
+      "default": [],
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "id": {
+      "type": "string"
+    },
+    "metadata": {
+      "default": {
+        "audience": [],
+        "country": null,
+        "exam": null,
+        "exam_stage": null,
+        "freshness_sensitive": false,
+        "language_style": [],
+        "last_reviewed_at": null,
+        "official_source_labels": []
+      },
+      "allOf": [
+        {
+          "$ref": "#/definitions/SkillMetadata"
+        }
+      ]
+    },
+    "min_score": {
+      "type": "integer",
+      "format": "uint32",
+      "minimum": 0.0
+    },
+    "name": {
+      "type": "string"
+    },
+    "negative_triggers": {
+      "default": [],
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "pack_id": {
+      "default": null,
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "prompt": {
+      "$ref": "#/definitions/SkillPrompt"
+    },
+    "required_any": {
+      "default": [],
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "route_policy": {
+      "$ref": "#/definitions/SkillRoutePolicy"
+    },
+    "safety": {
+      "$ref": "#/definitions/SkillSafety"
+    },
+    "schema_version": {
+      "type": "integer",
+      "format": "uint32",
+      "minimum": 0.0
+    },
+    "store_preview": {
+      "default": {
+        "best_for": [],
+        "not_for": [],
+        "sample_prompts": [],
+        "what_it_does": [],
+        "what_it_will_not_do": []
+      },
+      "allOf": [
+        {
+          "$ref": "#/definitions/SkillStorePreview"
+        }
+      ]
+    },
+    "tools": {
+      "$ref": "#/definitions/SkillToolPolicy"
+    },
+    "triggers": {
+      "default": [],
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "definitions": {
+    "SkillMetadata": {
+      "type": "object",
+      "properties": {
+        "audience": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "country": {
+          "default": null,
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "exam": {
+          "default": null,
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "exam_stage": {
+          "default": null,
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "freshness_sensitive": {
+          "default": false,
+          "type": "boolean"
+        },
+        "language_style": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "last_reviewed_at": {
+          "default": null,
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "official_source_labels": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "SkillPrompt": {
+      "type": "object",
+      "required": [
+        "instructions",
+        "role"
+      ],
+      "properties": {
+        "constraints": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "instructions": {
+          "type": "string"
+        },
+        "role": {
+          "type": "string"
+        }
+      }
+    },
+    "SkillRoutePolicy": {
+      "type": "string",
+      "enum": [
+        "auto",
+        "manual_only",
+        "explicit_only",
+        "suggest_only",
+        "disabled"
+      ]
+    },
+    "SkillSafety": {
+      "type": "object",
+      "required": [
+        "allows_file_write",
+        "allows_network",
+        "allows_shell",
+        "requires_confirmation",
+        "risk_level"
+      ],
+      "properties": {
+        "allows_file_write": {
+          "type": "boolean"
+        },
+        "allows_network": {
+          "type": "boolean"
+        },
+        "allows_shell": {
+          "type": "boolean"
+        },
+        "requires_confirmation": {
+          "type": "boolean"
+        },
+        "requires_fresh_info": {
+          "default": false,
+          "type": "boolean"
+        },
+        "risk_level": {
+          "type": "string"
+        }
+      }
+    },
+    "SkillStorePreview": {
+      "type": "object",
+      "properties": {
+        "best_for": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "not_for": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "sample_prompts": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "what_it_does": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "what_it_will_not_do": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "SkillToolPolicy": {
+      "type": "object",
+      "properties": {
+        "allow": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "deny": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,146 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "PackManifest",
+  "type": "object",
+  "required": [
+    "author",
+    "category",
+    "compatibility",
+    "contents",
+    "description",
+    "id",
+    "name",
+    "safety",
+    "schema_version",
+    "version"
+  ],
+  "properties": {
+    "author": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string"
+    },
+    "compatibility": {
+      "$ref": "#/definitions/PackCompatibility"
+    },
+    "contents": {
+      "$ref": "#/definitions/PackContents"
+    },
+    "description": {
+      "type": "string"
+    },
+    "homepage": {
+      "default": "",
+      "type": "string"
+    },
+    "id": {
+      "type": "string"
+    },
+    "license": {
+      "default": "",
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "safety": {
+      "$ref": "#/definitions/PackSafety"
+    },
+    "schema_version": {
+      "type": "integer",
+      "format": "uint32",
+      "minimum": 0.0
+    },
+    "version": {
+      "type": "string"
+    }
+  },
+  "definitions": {
+    "PackCompatibility": {
+      "type": "object",
+      "required": [
+        "opennivara_min_version"
+      ],
+      "properties": {
+        "opennivara_max_version": {
+          "default": "",
+          "type": "string"
+        },
+        "opennivara_min_version": {
+          "type": "string"
+        }
+      }
+    },
+    "PackContents": {
+      "type": "object",
+      "required": [
+        "command_snippets",
+        "contexts",
+        "preferences",
+        "profile_templates",
+        "prompt_behaviors",
+        "style_presets",
+        "theme",
+        "tool_presets",
+        "workspace_map_rules"
+      ],
+      "properties": {
+        "command_snippets": {
+          "type": "boolean"
+        },
+        "contexts": {
+          "type": "boolean"
+        },
+        "preferences": {
+          "type": "boolean"
+        },
+        "profile_templates": {
+          "type": "boolean"
+        },
+        "prompt_behaviors": {
+          "type": "boolean"
+        },
+        "skills": {
+          "default": false,
+          "type": "boolean"
+        },
+        "style_presets": {
+          "type": "boolean"
+        },
+        "theme": {
+          "type": "boolean"
+        },
+        "tool_presets": {
+          "type": "boolean"
+        },
+        "workspace_map_rules": {
+          "type": "boolean"
+        }
+      }
+    },
+    "PackSafety": {
+      "type": "object",
+      "required": [
+        "contains_executable_code",
+        "modifies_tool_permissions",
+        "requires_network",
+        "risk_level"
+      ],
+      "properties": {
+        "contains_executable_code": {
+          "type": "boolean"
+        },
+        "modifies_tool_permissions": {
+          "type": "boolean"
+        },
+        "requires_network": {
+          "type": "boolean"
+        },
+        "risk_level": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

@@ -1,26 +1,43 @@
 schema_version = 1
 id = "india_notes_summarizer"
 pack_id = "india_student_essentials"
-name = "India Notes Summarizer"
-description = "Helps Indian students summarize notes into exam-ready bullets, formulas, definitions, examples, and revision questions."
+name = "Notes to Recall Converter"
+description = "Transforms student-provided study notes into recall questions, flashcards, key summaries and revision material without reading local files."
 enabled = false
 category = "india_student"
-route_policy = "auto"
-aliases = ["summarize my notes", "notes summary for revision"]
-triggers = ["general study", "notes", "india", "summarizer", "summarize", "my", "summary", "for", "revision"]
-required_any = []
-negative_triggers = ["react test", "unit test"]
-examples = ["summarize my notes", "Make a 30-day study plan with revision", "Find my weak topics from recent marks"]
-min_score = 25
+route_policy = "suggest_only"
+aliases = ["convert study notes", "notes to flashcards", "revision sheet from notes", "make recall questions from notes"]
+triggers = ["convert my study notes", "make recall questions", "flashcards from notes", "revision sheet", "chapter notes", "one minute revision", "formula list", "definition list"]
+required_any = ["notes", "note", "flashcards", "summary", "summarise", "summarize", "revision sheet", "recall questions"]
+negative_triggers = ["meeting notes", "office notes", "release notes", "readme summary", "README summary", "coding notes", "project notes", "file summary", "summarize this repo"]
+examples = [
+  "Convert these Class 10 Science notes into active-recall questions.",
+  "Turn my economics chapter notes into a one-page revision sheet.",
+  "Make flashcards from these definitions and flag anything unclear.",
+]
+min_score = 20
 
 [prompt]
-role = "India Notes Summarizer for Indian students"
-instructions = "Act as India Notes Summarizer for Indian students.\nFocus: summarize notes into exam-ready bullets, formulas, definitions, examples, and revision questions.\nUse simple English by default. Use Hinglish only if the user asks or uses Hinglish first.\nUse India-relevant study language such as NCERT, PYQ, mock test, dropper, coaching, self-study, board exams, category documents, and counselling where relevant.\nSeparate confirmed facts, user-provided data, assumptions, and things to verify officially.\nGive practical next steps for today, 7 days, 30 days, and 90 days when the time horizon is not specified.\nAsk for missing marks, subjects, available hours, target exam, attempt status, or constraints only when needed to avoid a bad plan.\nDo not invent official dates, fees, cutoffs, seats, counselling rules, syllabus changes, eligibility, answer keys, result dates, or admission chances.\nDo not promise rank, percentile, score jumps, admission, college, branch, selection, or interview success."
-constraints = ["Do not invent official dates, fees, cutoffs, seats, eligibility, deadlines, answer keys, result dates, or counselling rules.", "Do not promise rank, percentile, admission, selection, branch, college, or score jumps.", "Use Hinglish only if the user asks or uses Hinglish.", "Separate confirmed facts, assumptions, user-provided data, and official-verification items."]
+role = "Study-notes to recall converter"
+instructions = """
+Transform student-provided notes into usable recall and revision material.
+Work only from content supplied by the user in the message or chat context. Do not silently access local files.
+Do not assert that supplied notes are correct or complete. Clearly distinguish source-derived summary from added explanation, if any.
+Avoid non-study summarization such as meeting notes, coding notes, README summaries, office notes or unrelated writing.
+Supported output modes include key-point summary, active-recall questions, flashcards, formula or definition list, one-minute revision sheet, common confusion flags, and missing or unclear points requiring verification.
+Use simple English by default. Use Hinglish only if the user asks or writes in Hinglish first.
+"""
+constraints = [
+  "Do not read files, write files, open URLs, open apps or run commands.",
+  "Do not claim local notes were read unless the user pasted the content.",
+  "Do not treat supplied notes as automatically correct or complete.",
+  "Do not fabricate official dates, syllabi, eligibility rules, counselling rules or deadlines.",
+  "Do not promise marks, ranks, admission, selection or outcomes.",
+]
 
 [tools]
 allow = []
-deny = ["write_file", "run_command", "open_url"]
+deny = ["write_file", "run_command", "open_url", "open_app"]
 
 [safety]
 risk_level = "low"
@@ -31,18 +48,22 @@ allows_network = false
 requires_fresh_info = false
 
 [metadata]
-audience = ["student", "exam_aspirant"]
+audience = ["student", "school_student", "college_student", "self_study_student", "exam_aspirant"]
 country = "IN"
 exam = "General Study"
-exam_stage = "notes"
+exam_stage = "notes_to_recall"
 language_style = ["english", "hinglish_optional"]
-last_reviewed_at = "2026-06-03"
+last_reviewed_at = "2026-06-04"
 freshness_sensitive = false
 official_source_labels = []
 
 [store_preview]
-best_for = ["Indian students who want a practical study workflow", "Students balancing school, college, coaching, or self-study", "Students who want clear next steps without fear-based motivation"]
-not_for = ["Official notice, cutoff, seat, fee, or deadline lookup", "Guaranteed rank, percentile, admission, selection, or score jump", "Replacing teacher, counsellor, doctor, or official exam authority advice", "Highly exam-specific official counselling decisions"]
-sample_prompts = ["summarize my notes", "Make a 30-day study plan with revision", "Find my weak topics from recent marks"]
-what_it_does = ["Guides notes with India-relevant study context", "Turns vague goals into practical actions and review checkpoints", "Asks for missing details only when they change the plan"]
-what_it_will_not_do = ["Invent official facts or private data", "Use executable code, shell access, file writes, or network tools", "Use shame, fear, or guaranteed-outcome motivation"]
+best_for = ["Pasted study notes", "Flashcards and recall questions", "One-page revision sheets"]
+not_for = ["Meeting, office, README or coding summaries", "Reading local files automatically", "Verifying official syllabus or platform information"]
+sample_prompts = [
+  "Convert these Class 10 Science notes into active-recall questions.",
+  "Turn my economics chapter notes into a one-page revision sheet.",
+  "Make flashcards from these definitions and flag anything unclear.",
+]
+what_it_does = ["Converts supplied notes into recall material", "Flags unclear or missing points", "Separates source-derived content from added explanation"]
+what_it_will_not_do = ["Read local files", "Assert pasted notes are complete", "Auto-select for unrelated summarization"]

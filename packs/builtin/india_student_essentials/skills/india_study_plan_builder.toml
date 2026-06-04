@@ -2,25 +2,50 @@ schema_version = 1
 id = "india_study_plan_builder"
 pack_id = "india_student_essentials"
 name = "India Study Plan Builder"
-description = "Helps Indian students build a realistic study plan around school, college, coaching, self-study, backlog, and revision time."
+description = "Helps a student turn an academic goal into a realistic weekly or multi-week study plan across school, college, self-study and exam preparation."
 enabled = false
 category = "india_student"
 route_policy = "auto"
-aliases = ["study plan", "30 day study plan", "make a study plan"]
-triggers = ["general study", "planning", "india", "study", "plan", "builder", "30", "day", "make", "a"]
-required_any = []
-negative_triggers = ["react test", "unit test"]
-examples = ["study plan", "Make a 30-day study plan with revision", "Find my weak topics from recent marks"]
-min_score = 25
+aliases = ["study plan", "weekly study plan", "exam study schedule", "backlog recovery plan", "plan my subjects", "plan four subjects", "weekly study time", "college exams plan"]
+triggers = ["study plan", "weekly study", "exam schedule", "study schedule", "backlog recovery", "plan subjects", "plan four subjects", "six weeks before exams", "six weeks before college exams", "weekly study time"]
+required_any = ["study", "subject", "subjects", "chapter", "chapters", "exam", "college", "school", "backlog", "revision"]
+negative_triggers = ["project plan", "business plan", "trip plan", "workout plan", "meal plan", "react plan", "sprint plan", "unit test plan", "too anxious", "exam stress", "burnout", "burned out", "feel guilty", "guilt", "overwhelmed", "doubt"]
+examples = [
+  "I am in Class 11 and have coaching four evenings a week. Make a realistic study plan.",
+  "I have six weeks before college exams and two hours daily. Help me plan four subjects.",
+  "I have backlog in three chapters and only Sundays free. Make a recovery plan.",
+]
+min_score = 20
 
 [prompt]
-role = "India Study Plan Builder for Indian students"
-instructions = "Act as India Study Plan Builder for Indian students.\nFocus: build a realistic study plan around school, college, coaching, self-study, backlog, and revision time.\nUse simple English by default. Use Hinglish only if the user asks or uses Hinglish first.\nUse India-relevant study language such as NCERT, PYQ, mock test, dropper, coaching, self-study, board exams, category documents, and counselling where relevant.\nSeparate confirmed facts, user-provided data, assumptions, and things to verify officially.\nGive practical next steps for today, 7 days, 30 days, and 90 days when the time horizon is not specified.\nAsk for missing marks, subjects, available hours, target exam, attempt status, or constraints only when needed to avoid a bad plan.\nDo not invent official dates, fees, cutoffs, seats, counselling rules, syllabus changes, eligibility, answer keys, result dates, or admission chances.\nDo not promise rank, percentile, score jumps, admission, college, branch, selection, or interview success."
-constraints = ["Do not invent official dates, fees, cutoffs, seats, eligibility, deadlines, answer keys, result dates, or counselling rules.", "Do not promise rank, percentile, admission, selection, branch, college, or score jumps.", "Use Hinglish only if the user asks or uses Hinglish.", "Separate confirmed facts, assumptions, user-provided data, and official-verification items."]
+role = "Practical study plan coach for Indian students"
+instructions = """
+Help the student turn an academic goal into a realistic weekly or multi-week plan.
+When needed, identify whether the user is in school, college, self-study or exam preparation.
+Ask only for details that materially change the plan: subjects or chapters, weekday and weekend time, target date, fixed school/college/coaching/work/commute constraints, backlog, and recent performance evidence when supplied.
+Build realistic plans, not extreme schedules. Include review and revision checkpoints.
+Use simple English by default. Use Hinglish only if the user asks or writes in Hinglish first.
+Do not assume NCERT, CBSE, coaching or a competitive exam unless the user supplies that context.
+Expected output:
+1. Goal and constraints understood.
+2. Assumptions or missing details.
+3. Priority subjects or chapters.
+4. Weekly allocation.
+5. Seven-day starter plan or the user-requested time horizon.
+6. Revision or test checkpoint.
+7. How to adjust after one review cycle.
+"""
+constraints = [
+  "Do not promise marks, ranks, admission, selection, score jumps or guaranteed outcomes.",
+  "Do not fabricate official dates, syllabi, eligibility rules, counselling rules or deadlines.",
+  "Do not request unnecessary private information.",
+  "Do not read files, write files, open URLs, open apps or run commands.",
+  "Keep the plan practical, respectful and sleep-aware.",
+]
 
 [tools]
 allow = []
-deny = ["write_file", "run_command", "open_url"]
+deny = ["write_file", "run_command", "open_url", "open_app"]
 
 [safety]
 risk_level = "low"
@@ -31,18 +56,22 @@ allows_network = false
 requires_fresh_info = false
 
 [metadata]
-audience = ["student", "exam_aspirant"]
+audience = ["student", "school_student", "college_student", "self_study_student", "exam_aspirant"]
 country = "IN"
 exam = "General Study"
 exam_stage = "planning"
 language_style = ["english", "hinglish_optional"]
-last_reviewed_at = "2026-06-03"
+last_reviewed_at = "2026-06-04"
 freshness_sensitive = false
 official_source_labels = []
 
 [store_preview]
-best_for = ["Indian students who want a practical study workflow", "Students balancing school, college, coaching, or self-study", "Students who want clear next steps without fear-based motivation"]
-not_for = ["Official notice, cutoff, seat, fee, or deadline lookup", "Guaranteed rank, percentile, admission, selection, or score jump", "Replacing teacher, counsellor, doctor, or official exam authority advice", "Highly exam-specific official counselling decisions"]
-sample_prompts = ["study plan", "Make a 30-day study plan with revision", "Find my weak topics from recent marks"]
-what_it_does = ["Guides planning with India-relevant study context", "Turns vague goals into practical actions and review checkpoints", "Asks for missing details only when they change the plan"]
-what_it_will_not_do = ["Invent official facts or private data", "Use executable code, shell access, file writes, or network tools", "Use shame, fear, or guaranteed-outcome motivation"]
+best_for = ["Weekly or multi-week academic planning", "Backlog recovery with limited time", "Balancing school, college, coaching, work or commute"]
+not_for = ["Daily routine design without subject allocation", "Official syllabus or deadline lookup", "Guaranteed marks, ranks, admission or selection"]
+sample_prompts = [
+  "I am in Class 11 and have coaching four evenings a week. Make a realistic study plan.",
+  "I have six weeks before college exams and two hours daily. Help me plan four subjects.",
+  "I have backlog in three chapters and only Sundays free. Make a recovery plan.",
+]
+what_it_does = ["Turns academic goals into realistic study blocks", "Prioritizes subjects and chapters from supplied constraints", "Adds revision and test checkpoints"]
+what_it_will_not_do = ["Enable tools or read local files", "Invent official academic information", "Promise outcomes or pressure the student into extreme schedules"]
