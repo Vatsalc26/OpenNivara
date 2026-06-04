@@ -5,7 +5,7 @@ use super::retrieval;
 use super::token_budget;
 use super::types::{
     CompilerActiveTheme, CompilerSelectedSkill, CompilerSkillCandidate, ContextCompilerInput,
-    ContextCompilerOutput, IntentClassification, MemorySearchQuery,
+    ContextCompilerOutput, EffectivePrivacyPolicy, IntentClassification, MemorySearchQuery,
 };
 use rusqlite::Connection;
 
@@ -124,14 +124,33 @@ pub fn compile_context(
     input: ContextCompilerInput,
 ) -> anyhow::Result<ContextCompilerOutput> {
     let intent = classify_intent(&input.user_message);
-    let memory_allowed = privacy::memory_inclusion_allowed(&input.privacy_mode);
+    let effective_policy = input
+        .effective_privacy_policy
+        .clone()
+        .unwrap_or_else(|| EffectivePrivacyPolicy::from_legacy_mode(&input.privacy_mode));
+    let memory_allowed = effective_policy.memory_enabled
+        && !effective_policy.private_chat
+        && !effective_policy.pause_memory
+        && privacy::memory_inclusion_allowed(&input.privacy_mode);
     let runtime_relevant = runtime_relevant(&input.user_message, &intent);
     let location_relevant = location_relevant(&input.user_message, &intent);
 
     let mut notes = Vec::new();
+    let mut privacy_warnings = Vec::new();
     let mut included_memory_ids = Vec::new();
     let mut included_graph_edge_ids = Vec::new();
     let mut memory_brief = String::new();
+
+    if effective_policy.private_chat {
+        let warning = "Private chat is enabled. Stored memory is excluded.".to_string();
+        notes.push(warning.clone());
+        privacy_warnings.push(warning);
+    }
+    if effective_policy.pause_memory {
+        let warning = "Memory is paused. No memory will be read or saved.".to_string();
+        notes.push(warning.clone());
+        privacy_warnings.push(warning);
+    }
 
     if !memory_allowed {
         notes.push("privacy_off: memory lookup skipped".to_string());
@@ -154,7 +173,14 @@ pub fn compile_context(
             },
         )?;
         let mut lines = Vec::new();
+        let mut blocked_sensitive_count = 0;
         for result in results {
+            if !effective_policy.allow_sensitive_memory_transmission
+                && memory_sensitivity_requires_approval(&result.item.sensitivity)
+            {
+                blocked_sensitive_count += 1;
+                continue;
+            }
             included_memory_ids.push(result.item.id.clone());
             let qualifier = match result.answerability.as_str() {
                 "planned_only" => "planned, not confirmed",
@@ -171,6 +197,19 @@ pub fn compile_context(
         memory_brief = lines.join("\n");
         if memory_brief.is_empty() {
             notes.push("memory_lookup: no matching memory found".to_string());
+        }
+        if blocked_sensitive_count > 0 {
+            let warning = format!(
+                "Sensitive memory is blocked pending explicit approval ({} item{}).",
+                blocked_sensitive_count,
+                if blocked_sensitive_count == 1 {
+                    ""
+                } else {
+                    "s"
+                }
+            );
+            notes.push(warning.clone());
+            privacy_warnings.push(warning);
         }
     }
 
@@ -202,6 +241,9 @@ pub fn compile_context(
     };
     let (mut location_brief, location_decision) = if !location_relevant {
         (String::new(), "skipped:not_relevant".to_string())
+    } else if !effective_policy.allow_location_context {
+        notes.push("location_context: blocked by privacy policy".to_string());
+        (String::new(), "skipped:privacy_policy".to_string())
     } else if input.runtime_context.location.permission_state != "granted"
         || input.runtime_context.location.privacy_level == "disabled"
     {
@@ -343,7 +385,8 @@ pub fn compile_context(
         .collect();
     let skill_warnings = skill_decision.warnings.clone();
     notes.extend(skill_warnings.clone());
-    let mut warnings = skill_warnings.clone();
+    let mut warnings = privacy_warnings;
+    warnings.extend(skill_warnings.clone());
     if std::env::var("GEMINI_API_KEY").is_err() {
         warnings.push("GEMINI_API_KEY is not defined in the environment.".to_string());
     }
@@ -623,6 +666,14 @@ fn location_relevant(message: &str, intent: &IntentClassification) -> bool {
                 "where am i",
             ],
         )
+}
+
+fn memory_sensitivity_requires_approval(sensitivity: &str) -> bool {
+    let normalized = sensitivity.trim().to_lowercase();
+    !normalized.is_empty()
+        && normalized != "normal"
+        && normalized != "low"
+        && normalized != "public"
 }
 
 fn runtime_brief(runtime: &crate::runtime::context::RuntimeContext) -> String {

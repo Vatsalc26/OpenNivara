@@ -6,6 +6,7 @@ use std::collections::HashSet;
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum RequestSource {
     Cli,
+    Desktop,
     Telegram {
         chat_id: i64,
         username: Option<String>,
@@ -117,6 +118,8 @@ fn tool_execution_policy_error(
     tool_name: &str,
     selected_allowlist: Option<&HashSet<String>>,
     telegram_config: Option<&crate::remote_policy::TelegramConfig>,
+    source: &RequestSource,
+    tools_config: Option<&crate::tools::ToolsConfig>,
 ) -> Option<serde_json::Value> {
     if let Some(allowed) = selected_allowlist {
         if !allowed.contains(tool_name) {
@@ -137,7 +140,39 @@ fn tool_execution_policy_error(
         }
     }
 
+    if matches!(source, RequestSource::Desktop) {
+        let registry = crate::tools::ToolRegistry::new(true);
+        let requires_confirmation = tools_config
+            .and_then(|config| config.tools.get(tool_name))
+            .map(|settings| settings.requires_confirmation)
+            .unwrap_or(false);
+        let is_risky = registry
+            .definition(tool_name)
+            .map(|definition| definition.risk_level != crate::tools::ToolRisk::Low)
+            .unwrap_or(true);
+        if requires_confirmation || is_risky {
+            return Some(serde_json::json!({
+                "error": format!(
+                    "Tool '{}' requires desktop approval and was not executed.",
+                    tool_name
+                )
+            }));
+        }
+    }
+
     None
+}
+
+fn gemini_generate_content_url() -> &'static str {
+    "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent"
+}
+
+fn sanitize_provider_error(message: &str, api_key: &str) -> String {
+    let trimmed_key = api_key.trim();
+    if trimmed_key.is_empty() {
+        return message.to_string();
+    }
+    message.replace(trimmed_key, "[REDACTED_API_KEY]")
 }
 
 fn context_preview_from_compiler(
@@ -278,6 +313,8 @@ struct FunctionDeclaration {
     name: String,
     description: String,
     parameters: serde_json::Value,
+    #[serde(skip)]
+    risk_level: crate::tools::ToolRisk,
 }
 
 #[derive(Debug, Deserialize)]
@@ -359,7 +396,10 @@ impl OpenNivaraEngine {
                 reserved_output_tokens:
                     crate::runtime::model_registry::get_current_model_context_info()
                         .default_reserved_output_tokens,
-                privacy_mode: settings.mode,
+                privacy_mode: settings.mode.clone(),
+                effective_privacy_policy: Some(
+                    crate::memory::types::EffectivePrivacyPolicy::from_settings(&settings),
+                ),
                 enabled_sources: vec!["chat".to_string(), "manual".to_string()],
                 current_workspace_context: current_workspace_context(),
                 current_route_context: None,
@@ -384,11 +424,13 @@ impl OpenNivaraEngine {
         // 2. Resolve active user key and session ID
         let user_key = match &request.source {
             RequestSource::Cli => "cli".to_string(),
+            RequestSource::Desktop => "desktop".to_string(),
             RequestSource::Telegram { chat_id, .. } => format!("telegram_{}", chat_id),
         };
 
         let source_str = match &request.source {
             RequestSource::Cli => "CLI".to_string(),
+            RequestSource::Desktop => "Desktop".to_string(),
             RequestSource::Telegram { chat_id, .. } => format!("Telegram ({})", chat_id),
         };
 
@@ -507,18 +549,27 @@ impl OpenNivaraEngine {
                     name: definition.name,
                     description: definition.description,
                     parameters: definition.parameters,
+                    risk_level: definition.risk_level,
                 })
                 .collect();
 
-            // Filter declarations if requested from Telegram based on permissions
+            // Filter declarations by source policy before exposing tools to Gemini.
             let filtered_functions: Vec<FunctionDeclaration> = functions
                 .into_iter()
                 .filter(|f| {
                     if let Some(ref t_config) = telegram_config {
-                        remote_policy::is_tool_allowed(&f.name, t_config)
-                    } else {
-                        true // CLI allows all declared tools
+                        return remote_policy::is_tool_allowed(&f.name, t_config);
                     }
+                    if matches!(&request.source, RequestSource::Desktop) {
+                        let requires_confirmation = tools_config
+                            .as_ref()
+                            .and_then(|config| config.tools.get(&f.name))
+                            .map(|settings| settings.requires_confirmation)
+                            .unwrap_or(false);
+                        return !requires_confirmation
+                            && f.risk_level == crate::tools::ToolRisk::Low;
+                    }
+                    true
                 })
                 .collect();
 
@@ -551,10 +602,7 @@ impl OpenNivaraEngine {
             .map_err(|_| anyhow::anyhow!("Missing GEMINI_API_KEY environment variable in .env."))?;
 
         let client = reqwest::Client::new();
-        let url = format!(
-            "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={}",
-            api_key.trim()
-        );
+        let url = gemini_generate_content_url();
 
         let max_rounds = tools_config
             .as_ref()
@@ -574,7 +622,8 @@ impl OpenNivaraEngine {
             };
 
             let response = client
-                .post(&url)
+                .post(url)
+                .header("x-goog-api-key", api_key.trim())
                 .json(&request_payload)
                 .send()
                 .await
@@ -591,7 +640,7 @@ impl OpenNivaraEngine {
                     anyhow::anyhow!(
                         "Failed to parse Gemini API JSON response: {}\nRaw Response: {}",
                         e,
-                        response_text
+                        sanitize_provider_error(&response_text, &api_key)
                     )
                 })?;
 
@@ -599,7 +648,7 @@ impl OpenNivaraEngine {
                 return Err(anyhow::anyhow!(
                     "Gemini API Error ({}): {}",
                     err.code.unwrap_or(0),
-                    err.message.unwrap_or_default()
+                    sanitize_provider_error(&err.message.unwrap_or_default(), &api_key)
                 ));
             }
 
@@ -607,7 +656,7 @@ impl OpenNivaraEngine {
                 return Err(anyhow::anyhow!(
                     "Gemini API returned unsuccessful status {}: {}",
                     status,
-                    response_text
+                    sanitize_provider_error(&response_text, &api_key)
                 ));
             }
 
@@ -637,8 +686,9 @@ impl OpenNivaraEngine {
             if let Some(call) = requested_call {
                 if current_round >= max_rounds {
                     if show_activity {
-                        match request.source {
+                        match &request.source {
                             RequestSource::Cli => println!("\n\x1b[1;33m[OpenNivara Limit]\x1b[0m Max tool rounds limit ({}) reached.", max_rounds),
+                            RequestSource::Desktop => tracing::warn!("Max tool rounds limit ({}) reached.", max_rounds),
                             RequestSource::Telegram { .. } => tracing::warn!("Max tool rounds limit ({}) reached.", max_rounds),
                         }
                     }
@@ -664,6 +714,8 @@ impl OpenNivaraEngine {
                     &call.name,
                     selected_skill_tool_allowlist.as_ref(),
                     telegram_config.as_ref(),
+                    &request.source,
+                    tools_config.as_ref(),
                 ) {
                     history.push(Content {
                         role: "function".to_string(),
@@ -682,7 +734,7 @@ impl OpenNivaraEngine {
 
                 // Log or print activity
                 let args_str = serde_json::to_string(&call.args).unwrap_or_default();
-                match request.source {
+                match &request.source {
                     RequestSource::Cli => {
                         if show_activity {
                             println!(
@@ -690,6 +742,13 @@ impl OpenNivaraEngine {
                                 call.name, args_str
                             );
                         }
+                    }
+                    RequestSource::Desktop => {
+                        tracing::info!(
+                            "Desktop OpenNivara tool requested: {} {}",
+                            call.name,
+                            args_str
+                        );
                     }
                     RequestSource::Telegram { .. } => {
                         tracing::info!(
@@ -883,7 +942,14 @@ mod tests {
     fn selected_skill_blocks_tool_execution_outside_allowlist() {
         let allowlist = HashSet::from(["read_file".to_string()]);
 
-        let error = tool_execution_policy_error("map_search", Some(&allowlist), None).unwrap();
+        let error = tool_execution_policy_error(
+            "map_search",
+            Some(&allowlist),
+            None,
+            &RequestSource::Cli,
+            None,
+        )
+        .unwrap();
 
         assert_eq!(
             error["error"],
@@ -893,7 +959,10 @@ mod tests {
 
     #[test]
     fn no_selected_skill_preserves_default_tool_execution_policy() {
-        assert!(tool_execution_policy_error("map_search", None, None).is_none());
+        assert!(
+            tool_execution_policy_error("map_search", None, None, &RequestSource::Cli, None)
+                .is_none()
+        );
     }
 
     #[test]
@@ -901,8 +970,14 @@ mod tests {
         let allowlist = HashSet::from(["read_file".to_string()]);
         let telegram = telegram_config_allowing_read_file(false);
 
-        let error =
-            tool_execution_policy_error("read_file", Some(&allowlist), Some(&telegram)).unwrap();
+        let error = tool_execution_policy_error(
+            "read_file",
+            Some(&allowlist),
+            Some(&telegram),
+            &RequestSource::Cli,
+            None,
+        )
+        .unwrap();
 
         assert_eq!(
             error["error"],
@@ -966,5 +1041,62 @@ mod tests {
             .as_deref()
             .unwrap()
             .contains("compiled prompt"));
+    }
+
+    #[test]
+    fn gemini_endpoint_does_not_put_api_key_in_url() {
+        let url = gemini_generate_content_url();
+
+        assert!(!url.contains("?key="));
+        assert!(!url.contains("raw-secret"));
+    }
+
+    #[test]
+    fn desktop_source_blocks_confirmation_required_tool_execution() {
+        let mut config = tools_config();
+        config.tools.insert(
+            "read_file".to_string(),
+            ToolSettings {
+                enabled: true,
+                requires_confirmation: true,
+                max_bytes: Some(20_000),
+            },
+        );
+
+        let error = tool_execution_policy_error(
+            "read_file",
+            Some(&HashSet::from(["read_file".to_string()])),
+            None,
+            &RequestSource::Desktop,
+            Some(&config),
+        )
+        .unwrap();
+
+        assert_eq!(
+            error["error"],
+            "Tool 'read_file' requires desktop approval and was not executed."
+        );
+    }
+
+    #[test]
+    fn cli_source_keeps_declared_tool_policy_separate_from_desktop() {
+        let mut config = tools_config();
+        config.tools.insert(
+            "read_file".to_string(),
+            ToolSettings {
+                enabled: true,
+                requires_confirmation: true,
+                max_bytes: Some(20_000),
+            },
+        );
+
+        assert!(tool_execution_policy_error(
+            "read_file",
+            Some(&HashSet::from(["read_file".to_string()])),
+            None,
+            &RequestSource::Cli,
+            Some(&config),
+        )
+        .is_none());
     }
 }

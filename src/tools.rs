@@ -460,8 +460,8 @@ enabled = true
 requires_confirmation = false
 
 [tools.read_file]
-enabled = true
-requires_confirmation = false
+enabled = false
+requires_confirmation = true
 max_bytes = 20000
 
 [tools.open_app]

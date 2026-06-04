@@ -1,5 +1,3 @@
-// TODO: CSP Cleanup - Before public production release, replace the null CSP ('csp': null) in tauri.conf.json with a highly restrictive Content Security Policy.
-
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { RouterProvider } from "@tanstack/react-router";
 import { Toaster } from "sonner";

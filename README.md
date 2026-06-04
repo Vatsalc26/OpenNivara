@@ -29,9 +29,10 @@ OpenNivara is alpha software that can process sensitive local data. Local state 
 
 Important current limitations:
 
-- Interactive approval enforcement for some local-tool actions is still under development.
+- Desktop requests are separated from CLI requests, and desktop local tools that require confirmation or carry medium/high risk are not executed until an approval flow is available.
 - Canonical-path and symlink hardening for allowed filesystem roots is planned, not complete.
-- Moving Gemini API-key transport from URL query parameters to request headers is planned hardening, not complete.
+- Gemini API keys are sent through provider request headers, not URL query strings, and provider error text is sanitized before display.
+- The desktop app has a restrictive Tauri Content Security Policy; continue testing CSP behavior when adding new frontend integrations.
 - Telegram tool-execution logs may contain sensitive data.
 
 Read the repository docs for [privacy and data flow](docs/privacy-and-data-flow.md), [security model](docs/security-model.md), and [known limitations](docs/known-limitations.md) before using OpenNivara with private data.
@@ -105,11 +106,15 @@ Themes are visual only. They must not change prompts, memory, preferences, conte
 
 Store can preview and install data-only skill packs. Installing a skill pack does not activate prompt behavior. Settings -> Skills controls enabling, disabling, and inspecting skill behavior. Desktop chat can select an enabled skill for one message or pin it for the current session. Skill packs do not add executable code, install-time activation, network tools, or tool-permission changes.
 
+Skill pack installs are rejected before copying files if any incoming skill ID conflicts with an existing user skill or installed pack skill. This keeps the skills registry loadable after failed installs.
+
 ## Data And Privacy Summary
 
 OpenNivara stores user-owned state locally in TOML files, SQLite databases, and logs under the OpenNivara local data namespace. Local state is not claimed to be encrypted.
 
 When answering a request, OpenNivara may send selected context to Gemini. Selected context can include profile fields, preferences, style instructions, contexts, goals, skill instructions, memory retrieval results, runtime context, location context, conversation history, and selected local tool results. Telegram-based requests pass through Telegram and may cause selected context to be sent to Gemini.
+
+Memory privacy controls are enforced before prompt context is compiled. Private chat and paused memory exclude stored memory from outbound context, sensitive memories are blocked unless policy allows transmission, and location context is excluded when location memories are disabled.
 
 ## Development And Testing
 

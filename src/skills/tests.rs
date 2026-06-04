@@ -477,13 +477,13 @@ fn duplicate_skill_ids_across_installed_packs_fail() {
     let pack_a = create_skill_pack_source(&temp, "skill_pack_a", "shared_skill");
     let pack_b = create_skill_pack_source(&temp, "skill_pack_b", "shared_skill");
     install_pack_from_path(pack_a).unwrap();
-    install_pack_from_path(pack_b).unwrap();
+    let install_err = install_pack_from_path(pack_b).unwrap_err().to_string();
 
-    let err = load_available_skills().unwrap_err().to_string();
-    assert!(err.contains("Duplicate skill IDs are not allowed"));
-    assert!(err.contains("shared_skill"));
-    assert!(err.contains("skill_pack_a"));
-    assert!(err.contains("skill_pack_b"));
+    assert!(install_err.contains("Cannot install pack \"skill_pack_b\""));
+    assert!(
+        install_err.contains("skill ID \"shared_skill\" already exists in pack \"skill_pack_a\"")
+    );
+    assert!(load_available_skills().is_ok());
 }
 
 #[test]
@@ -504,13 +504,11 @@ fn duplicate_user_and_pack_skill_ids_fail() {
     .unwrap();
 
     let pack = create_skill_pack_source(&temp, "skill_pack", "shared_skill");
-    install_pack_from_path(pack).unwrap();
+    let install_err = install_pack_from_path(pack).unwrap_err().to_string();
 
-    let err = load_available_skills().unwrap_err().to_string();
-    assert!(err.contains("Duplicate skill IDs are not allowed"));
-    assert!(err.contains("shared_skill"));
-    assert!(err.contains("user skills"));
-    assert!(err.contains("skill_pack"));
+    assert!(install_err.contains("Cannot install pack \"skill_pack\""));
+    assert!(install_err.contains("skill ID \"shared_skill\" already exists in user skills"));
+    assert!(load_available_skills().is_ok());
 }
 
 #[test]
@@ -523,12 +521,12 @@ fn set_skill_enabled_fails_when_duplicate_ids_are_loaded() {
     let pack_a = create_skill_pack_source(&temp, "skill_pack_a", "shared_skill");
     let pack_b = create_skill_pack_source(&temp, "skill_pack_b", "shared_skill");
     install_pack_from_path(pack_a).unwrap();
-    install_pack_from_path(pack_b).unwrap();
+    let install_err = install_pack_from_path(pack_b).unwrap_err().to_string();
 
-    let err = set_skill_enabled("shared_skill", true)
-        .unwrap_err()
-        .to_string();
-    assert!(err.contains("Duplicate skill IDs are not allowed"));
+    assert!(install_err.contains("Cannot install pack \"skill_pack_b\""));
+    assert!(
+        install_err.contains("skill ID \"shared_skill\" already exists in pack \"skill_pack_a\"")
+    );
     assert!(!get_enabled_skills_path().unwrap().exists());
 }
 

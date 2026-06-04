@@ -34,6 +34,37 @@ impl Default for MemorySettings {
     }
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize, Type, PartialEq, Eq)]
+pub struct EffectivePrivacyPolicy {
+    pub memory_enabled: bool,
+    pub private_chat: bool,
+    pub pause_memory: bool,
+    pub allow_sensitive_memory_transmission: bool,
+    pub allow_location_context: bool,
+}
+
+impl EffectivePrivacyPolicy {
+    pub fn from_settings(settings: &MemorySettings) -> Self {
+        Self {
+            memory_enabled: !matches!(settings.mode, MemoryMode::Off),
+            private_chat: settings.private_chat,
+            pause_memory: settings.pause_memory,
+            allow_sensitive_memory_transmission: !settings.sensitive_approval_required,
+            allow_location_context: settings.allow_location_memories,
+        }
+    }
+
+    pub fn from_legacy_mode(mode: &MemoryMode) -> Self {
+        Self {
+            memory_enabled: !matches!(mode, MemoryMode::Off),
+            private_chat: false,
+            pause_memory: false,
+            allow_sensitive_memory_transmission: true,
+            allow_location_context: true,
+        }
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize, Type)]
 pub struct CreateMemorySource {
     pub source_type: String,
@@ -172,6 +203,8 @@ pub struct ContextCompilerInput {
     pub model_context_limit: u32,
     pub reserved_output_tokens: u32,
     pub privacy_mode: MemoryMode,
+    #[serde(default)]
+    pub effective_privacy_policy: Option<EffectivePrivacyPolicy>,
     pub enabled_sources: Vec<String>,
     pub current_workspace_context: Option<String>,
     pub current_route_context: Option<String>,

@@ -514,6 +514,23 @@ fn test_install_pack_copies_skill_manifests() {
 }
 
 #[test]
+fn test_install_pack_rejects_duplicate_skill_ids_before_copying() {
+    let _lock = TEST_MUTEX.lock().unwrap_or_else(|e| e.into_inner());
+    let (temp, _config_guard) = setup_test_env("install_pack_rejects_duplicate_skills");
+    init_marketplace().unwrap();
+
+    let first_pack = create_mock_skill_pack(&temp, "first_skill_pack", true);
+    install_pack_from_path(first_pack).unwrap();
+
+    let second_pack = create_mock_skill_pack(&temp, "second_skill_pack", true);
+    let err = install_pack_from_path(second_pack).unwrap_err().to_string();
+
+    assert!(err.contains("skill ID \"pack_skill\" already exists in pack \"first_skill_pack\""));
+    assert!(!get_packs_dir().unwrap().join("second_skill_pack").exists());
+    assert!(crate::skills::registry::load_available_skills().is_ok());
+}
+
+#[test]
 fn test_builtin_packs_discovery() {
     let _lock = TEST_MUTEX.lock().unwrap_or_else(|e| e.into_inner());
     let (temp, _config_guard) = setup_test_env("builtin_discovery");

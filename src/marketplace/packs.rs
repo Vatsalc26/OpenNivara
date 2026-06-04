@@ -2,8 +2,9 @@ use chrono::Utc;
 use schemars::JsonSchema;
 use semver::Version;
 use serde::{Deserialize, Serialize};
+use std::collections::{HashMap, HashSet};
 use std::fs;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct PackManifest {
@@ -413,6 +414,95 @@ pub fn preview_installed_pack(pack_id: &str) -> anyhow::Result<PackPreview> {
     preview_pack_from_path(target_dir)
 }
 
+fn collect_skill_ids_from_dir(
+    skills_dir: &Path,
+    source: String,
+    out: &mut HashMap<String, String>,
+) -> anyhow::Result<()> {
+    if !skills_dir.exists() {
+        return Ok(());
+    }
+
+    for entry in fs::read_dir(skills_dir)? {
+        let entry = entry?;
+        let path = entry.path();
+        if path.extension().and_then(|ext| ext.to_str()) != Some("toml") {
+            continue;
+        }
+        let skill: crate::skills::manifest::SkillManifest =
+            crate::config_store::read_toml_file(&path)?;
+        out.entry(skill.id).or_insert_with(|| source.clone());
+    }
+    Ok(())
+}
+
+fn collect_existing_skill_sources(
+    exclude_pack_id: &str,
+) -> anyhow::Result<HashMap<String, String>> {
+    let mut existing = HashMap::new();
+
+    let user_path = crate::skills::registry::get_user_skills_path()?;
+    if user_path.exists() {
+        let file: crate::skills::manifest::SkillsFile =
+            crate::config_store::read_toml_file(&user_path)?;
+        for skill in file.skills {
+            existing
+                .entry(skill.id)
+                .or_insert_with(|| "user skills".to_string());
+        }
+    }
+
+    let installed_file = list_installed_packs()?;
+    let packs_dir = super::get_packs_dir()?;
+    for pack in installed_file.installed {
+        if pack.id == exclude_pack_id {
+            continue;
+        }
+        collect_skill_ids_from_dir(
+            &packs_dir.join(&pack.id).join("skills"),
+            format!("pack \"{}\"", pack.id),
+            &mut existing,
+        )?;
+    }
+
+    Ok(existing)
+}
+
+fn ensure_pack_skill_ids_can_install(preview: &PackPreview) -> anyhow::Result<()> {
+    let mut incoming_ids = HashSet::new();
+    for skill in &preview.skill_previews {
+        if !incoming_ids.insert(skill.id.clone()) {
+            return Err(anyhow::anyhow!(
+                "Cannot install pack \"{}\": skill ID \"{}\" appears more than once in the incoming pack.",
+                preview.manifest.id,
+                skill.id
+            ));
+        }
+    }
+
+    let existing = collect_existing_skill_sources(&preview.manifest.id)?;
+    let mut conflicts = Vec::new();
+    for skill in &preview.skill_previews {
+        if let Some(source) = existing.get(&skill.id) {
+            conflicts.push(format!(
+                "skill ID \"{}\" already exists in {}",
+                skill.id, source
+            ));
+        }
+    }
+    conflicts.sort();
+
+    if conflicts.is_empty() {
+        Ok(())
+    } else {
+        Err(anyhow::anyhow!(
+            "Cannot install pack \"{}\": {}.",
+            preview.manifest.id,
+            conflicts.join("; ")
+        ))
+    }
+}
+
 /// Reads the tracking list of installed packs.
 pub fn list_installed_packs() -> anyhow::Result<InstalledPacksFile> {
     let path = super::get_installed_packs_path()?;
@@ -432,6 +522,7 @@ pub fn install_pack_from_path(path: PathBuf) -> anyhow::Result<InstalledPack> {
             preview.errors
         ));
     }
+    ensure_pack_skill_ids_can_install(&preview)?;
 
     let pack_id = &preview.manifest.id;
     let target_dir = super::get_packs_dir()?.join(pack_id);

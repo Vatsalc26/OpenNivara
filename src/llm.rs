@@ -76,6 +76,18 @@ struct ApiErrorDetail {
     message: Option<String>,
 }
 
+fn gemini_generate_content_url() -> &'static str {
+    "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent"
+}
+
+fn sanitize_provider_error(message: &str, api_key: &str) -> String {
+    let trimmed_key = api_key.trim();
+    if trimmed_key.is_empty() {
+        return message.to_string();
+    }
+    message.replace(trimmed_key, "[REDACTED_API_KEY]")
+}
+
 /// Core loop function that coordinates context, queries Gemini, validates tool requests,
 /// executes them locally under safety constraints, and feeds results back to the LLM.
 pub async fn ask_gemini(
@@ -190,10 +202,7 @@ pub async fn ask_gemini(
         .unwrap_or(true);
 
     let client = reqwest::Client::new();
-    let url = format!(
-        "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={}",
-        api_key
-    );
+    let url = gemini_generate_content_url();
 
     let mut current_round = 0;
 
@@ -204,7 +213,8 @@ pub async fn ask_gemini(
             tools: tools_declaration.clone(),
         };
 
-        let response = client.post(&url)
+        let response = client.post(url)
+            .header("x-goog-api-key", api_key.trim())
             .json(&request_payload)
             .send()
             .await
@@ -225,7 +235,7 @@ pub async fn ask_gemini(
                 "Failed to parse Gemini API JSON response: {}\n\
                  Raw Response: {}",
                 e,
-                response_text
+                sanitize_provider_error(&response_text, api_key)
             )
         })?;
 
@@ -233,8 +243,11 @@ pub async fn ask_gemini(
             return Err(anyhow::anyhow!(
                 "Gemini API Error (Code: {}): {}",
                 err.code.unwrap_or(0),
-                err.message
-                    .unwrap_or_else(|| "No error message".to_string())
+                sanitize_provider_error(
+                    &err.message
+                        .unwrap_or_else(|| "No error message".to_string()),
+                    api_key
+                )
             ));
         }
 
@@ -243,7 +256,7 @@ pub async fn ask_gemini(
                 "Gemini API returned an unsuccessful HTTP status: {}\n\
                  Raw Response: {}",
                 status,
-                response_text
+                sanitize_provider_error(&response_text, api_key)
             ));
         }
 

@@ -65,6 +65,8 @@ export type MemoryMode = "off" | "ask_before_saving" | "auto_save_low_risk" | "f
 
 export type MemorySettings = { schema_version: number; mode: MemoryMode; pause_memory: boolean; private_chat: boolean; allow_location_memories: boolean; sensitive_approval_required: boolean }
 
+export type EffectivePrivacyPolicy = { memory_enabled: boolean; private_chat: boolean; pause_memory: boolean; allow_sensitive_memory_transmission: boolean; allow_location_context: boolean }
+
 export type CreateMemorySource = { source_type: string; source_ref: string | null; source_text: string; source_quote: string | null; session_id: string | null; message_id: string | null; observed_at: string; timezone: string; sensitivity: string; privacy_scope: string }
 
 export type MemorySource = { id: string; source_type: string; source_ref: string | null; source_text: string; source_quote: string | null; session_id: string | null; message_id: string | null; created_at: string; observed_at: string; timezone: string; sensitivity: string; privacy_scope: string }
@@ -83,7 +85,7 @@ export type MemoryExtractionProposal = { id: string; source_id: string; proposal
 
 export type IntentClassification = { labels: string[]; confidence: number; reason: string }
 
-export type ContextCompilerInput = { user_message: string; session_id: string | null; message_id: string | null; runtime_context: RuntimeContext; model_context_limit: number; reserved_output_tokens: number; privacy_mode: MemoryMode; enabled_sources: string[]; current_workspace_context: string | null; current_route_context: string | null; manual_context_overrides: string[]; pinned_context_ids?: string[]; explicit_skill_id?: string | null; pack_hint?: string | null; ui_selected_skill_id?: string | null; session_pinned_skill_ids?: string[] }
+export type ContextCompilerInput = { user_message: string; session_id: string | null; message_id: string | null; runtime_context: RuntimeContext; model_context_limit: number; reserved_output_tokens: number; privacy_mode: MemoryMode; effective_privacy_policy?: EffectivePrivacyPolicy | null; enabled_sources: string[]; current_workspace_context: string | null; current_route_context: string | null; manual_context_overrides: string[]; pinned_context_ids?: string[]; explicit_skill_id?: string | null; pack_hint?: string | null; ui_selected_skill_id?: string | null; session_pinned_skill_ids?: string[] }
 
 export type TokenBudgetSection = { section: string; priority: number; estimated_tokens: number; included: boolean; reason: string }
 

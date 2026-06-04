@@ -356,6 +356,7 @@ fn context_compiler_excludes_memory_for_hello_and_records_audit() {
                 model_context_limit: 8_000,
                 reserved_output_tokens: 1_000,
                 privacy_mode: types::MemoryMode::AskBeforeSaving,
+                effective_privacy_policy: None,
                 enabled_sources: vec!["manual".into(), "chat".into()],
                 current_workspace_context: None,
                 current_route_context: None,
@@ -398,6 +399,7 @@ fn context_compiler_is_superset_of_old_preview_builder() {
                 model_context_limit: 8_000,
                 reserved_output_tokens: 1_000,
                 privacy_mode: types::MemoryMode::AskBeforeSaving,
+                effective_privacy_policy: None,
                 enabled_sources: vec!["manual".into(), "chat".into()],
                 current_workspace_context: Some("workspace map summary".into()),
                 current_route_context: None,
@@ -492,6 +494,7 @@ fn context_compiler_includes_relevant_memory_only_for_memory_lookup() {
                 model_context_limit: 8_000,
                 reserved_output_tokens: 1_000,
                 privacy_mode: types::MemoryMode::AskBeforeSaving,
+                effective_privacy_policy: None,
                 enabled_sources: vec!["manual".into()],
                 current_workspace_context: Some("Rust Tauri workspace".into()),
                 current_route_context: None,
@@ -529,6 +532,7 @@ fn privacy_off_prevents_memory_context_inclusion() {
                 model_context_limit: 8_000,
                 reserved_output_tokens: 1_000,
                 privacy_mode: types::MemoryMode::Off,
+                effective_privacy_policy: None,
                 enabled_sources: vec!["manual".into()],
                 current_workspace_context: None,
                 current_route_context: None,
@@ -878,6 +882,7 @@ fn compiler_includes_runtime_and_fresh_location_only_when_relevant() {
                 model_context_limit: 8_000,
                 reserved_output_tokens: 1_000,
                 privacy_mode: types::MemoryMode::AskBeforeSaving,
+                effective_privacy_policy: None,
                 enabled_sources: vec![],
                 current_workspace_context: Some("workspace".into()),
                 current_route_context: None,
@@ -905,6 +910,7 @@ fn compiler_includes_runtime_and_fresh_location_only_when_relevant() {
                 model_context_limit: 8_000,
                 reserved_output_tokens: 1_000,
                 privacy_mode: types::MemoryMode::AskBeforeSaving,
+                effective_privacy_policy: None,
                 enabled_sources: vec![],
                 current_workspace_context: Some("workspace".into()),
                 current_route_context: Some("destination: grocery".into()),
@@ -921,6 +927,248 @@ fn compiler_includes_runtime_and_fresh_location_only_when_relevant() {
         assert!(route.location_decision.contains("included"));
         assert!(route.raw_prompt.contains("Bengaluru"));
         assert!(route.workspace_brief.is_empty());
+    });
+}
+
+#[test]
+#[serial]
+fn sensitive_memory_is_blocked_when_approval_is_required() {
+    with_temp_memory_db(|| {
+        let conn = db::open_memory_db().expect("open memory db");
+        let source = db::create_source(
+            &conn,
+            &types::CreateMemorySource {
+                source_type: "manual".into(),
+                source_ref: None,
+                source_text: "Health condition: migraine treatment plan.".into(),
+                source_quote: None,
+                session_id: None,
+                message_id: None,
+                observed_at: "2026-06-02T10:00:00Z".into(),
+                timezone: "Asia/Kolkata".into(),
+                sensitivity: "health".into(),
+                privacy_scope: "local".into(),
+            },
+        )
+        .expect("source");
+        let item = db::create_memory_item(
+            &conn,
+            &types::CreateMemoryItem {
+                memory_type: "fact".into(),
+                title: "Migraine treatment".into(),
+                summary: "User has a migraine treatment plan.".into(),
+                details_json: "{}".into(),
+                status: "active".into(),
+                confidence: 0.95,
+                user_verified: true,
+                sensitivity: "health".into(),
+                visibility: "private".into(),
+                source_id: source.id,
+                observed_at: "2026-06-02T10:00:00Z".into(),
+                happened_at: None,
+                due_at: None,
+                timezone: "Asia/Kolkata".into(),
+                time_precision: "unknown".into(),
+                natural_time_phrase: None,
+                tags: vec!["migraine".into()],
+            },
+        )
+        .expect("memory item");
+
+        let output = compiler::compile_context(
+            &conn,
+            types::ContextCompilerInput {
+                user_message: "what do you remember about my migraine?".into(),
+                session_id: None,
+                message_id: None,
+                runtime_context: test_runtime_context(),
+                model_context_limit: 8_000,
+                reserved_output_tokens: 1_000,
+                privacy_mode: types::MemoryMode::AskBeforeSaving,
+                effective_privacy_policy: Some(types::EffectivePrivacyPolicy {
+                    memory_enabled: true,
+                    private_chat: false,
+                    pause_memory: false,
+                    allow_sensitive_memory_transmission: false,
+                    allow_location_context: false,
+                }),
+                enabled_sources: vec!["manual".into()],
+                current_workspace_context: None,
+                current_route_context: None,
+                manual_context_overrides: vec![],
+                pinned_context_ids: vec![],
+                explicit_skill_id: None,
+                pack_hint: None,
+                ui_selected_skill_id: None,
+                session_pinned_skill_ids: vec![],
+            },
+        )
+        .expect("compile");
+
+        assert!(!output.memory_brief.contains("Migraine treatment"));
+        assert!(!output.included_memory_ids.contains(&item.id));
+        assert!(output
+            .warnings
+            .iter()
+            .any(|warning| warning.contains("Sensitive memory is blocked")));
+    });
+}
+
+#[test]
+#[serial]
+fn private_chat_and_pause_memory_exclude_memory_context() {
+    with_temp_memory_db(|| {
+        let conn = db::open_memory_db().expect("open memory db");
+        let source = db::create_source(
+            &conn,
+            &types::CreateMemorySource {
+                source_type: "manual".into(),
+                source_ref: None,
+                source_text: "I planned to buy saffron.".into(),
+                source_quote: None,
+                session_id: None,
+                message_id: None,
+                observed_at: "2026-06-02T10:00:00Z".into(),
+                timezone: "Asia/Kolkata".into(),
+                sensitivity: "normal".into(),
+                privacy_scope: "local".into(),
+            },
+        )
+        .expect("source");
+        db::create_memory_item(
+            &conn,
+            &types::CreateMemoryItem {
+                memory_type: "task".into(),
+                title: "Buy saffron".into(),
+                summary: "User planned to buy saffron.".into(),
+                details_json: "{}".into(),
+                status: "planned".into(),
+                confidence: 0.9,
+                user_verified: true,
+                sensitivity: "normal".into(),
+                visibility: "default".into(),
+                source_id: source.id,
+                observed_at: "2026-06-02T10:00:00Z".into(),
+                happened_at: None,
+                due_at: None,
+                timezone: "Asia/Kolkata".into(),
+                time_precision: "unknown".into(),
+                natural_time_phrase: None,
+                tags: vec!["saffron".into()],
+            },
+        )
+        .expect("memory item");
+
+        for (policy, expected_warning) in [
+            (
+                types::EffectivePrivacyPolicy {
+                    memory_enabled: true,
+                    private_chat: true,
+                    pause_memory: false,
+                    allow_sensitive_memory_transmission: true,
+                    allow_location_context: false,
+                },
+                "Private chat is enabled. Stored memory is excluded.",
+            ),
+            (
+                types::EffectivePrivacyPolicy {
+                    memory_enabled: true,
+                    private_chat: false,
+                    pause_memory: true,
+                    allow_sensitive_memory_transmission: true,
+                    allow_location_context: false,
+                },
+                "Memory is paused. No memory will be read or saved.",
+            ),
+        ] {
+            let output = compiler::compile_context(
+                &conn,
+                types::ContextCompilerInput {
+                    user_message: "did I buy saffron?".into(),
+                    session_id: None,
+                    message_id: None,
+                    runtime_context: test_runtime_context(),
+                    model_context_limit: 8_000,
+                    reserved_output_tokens: 1_000,
+                    privacy_mode: types::MemoryMode::AskBeforeSaving,
+                    effective_privacy_policy: Some(policy),
+                    enabled_sources: vec!["manual".into()],
+                    current_workspace_context: None,
+                    current_route_context: None,
+                    manual_context_overrides: vec![],
+                    pinned_context_ids: vec![],
+                    explicit_skill_id: None,
+                    pack_hint: None,
+                    ui_selected_skill_id: None,
+                    session_pinned_skill_ids: vec![],
+                },
+            )
+            .expect("compile");
+
+            assert!(output.memory_brief.is_empty());
+            assert!(output.included_memory_ids.is_empty());
+            assert!(output
+                .warnings
+                .iter()
+                .any(|warning| warning == expected_warning));
+        }
+    });
+}
+
+#[test]
+#[serial]
+fn policy_blocks_location_context_even_when_runtime_location_is_available() {
+    with_temp_memory_db(|| {
+        let conn = db::open_memory_db().expect("open memory db");
+        let location = crate::runtime::location::LocationContext {
+            status: "exact_current".into(),
+            latitude: Some(12.9),
+            longitude: Some(77.6),
+            accuracy_meters: Some(50.0),
+            source: "manual".into(),
+            captured_at: Some("2026-06-02T09:59:00Z".into()),
+            freshness_seconds: Some(60),
+            timezone_hint: Some("Asia/Kolkata".into()),
+            city: Some("Bengaluru".into()),
+            region: Some("Karnataka".into()),
+            country: Some("India".into()),
+            label: Some("Home".into()),
+            permission_state: "granted".into(),
+            privacy_level: "exact".into(),
+        };
+
+        let output = compiler::compile_context(
+            &conn,
+            types::ContextCompilerInput {
+                user_message: "what is nearby?".into(),
+                session_id: None,
+                message_id: None,
+                runtime_context: test_runtime_context_with_location(location),
+                model_context_limit: 8_000,
+                reserved_output_tokens: 1_000,
+                privacy_mode: types::MemoryMode::AskBeforeSaving,
+                effective_privacy_policy: Some(types::EffectivePrivacyPolicy {
+                    memory_enabled: true,
+                    private_chat: false,
+                    pause_memory: false,
+                    allow_sensitive_memory_transmission: true,
+                    allow_location_context: false,
+                }),
+                enabled_sources: vec![],
+                current_workspace_context: None,
+                current_route_context: None,
+                manual_context_overrides: vec![],
+                pinned_context_ids: vec![],
+                explicit_skill_id: None,
+                pack_hint: None,
+                ui_selected_skill_id: None,
+                session_pinned_skill_ids: vec![],
+            },
+        )
+        .expect("compile");
+
+        assert_eq!(output.location_decision, "skipped:privacy_policy");
+        assert!(!output.raw_prompt.contains("Bengaluru"));
     });
 }
 
@@ -1001,6 +1249,7 @@ fn compiler_uses_model_budget_and_trims_lower_priority_sections_first() {
                 model_context_limit: 480,
                 reserved_output_tokens: 80,
                 privacy_mode: types::MemoryMode::AskBeforeSaving,
+                effective_privacy_policy: None,
                 enabled_sources: vec!["manual".into()],
                 current_workspace_context: Some("workspace ".repeat(200)),
                 current_route_context: Some("route ".repeat(200)),

@@ -26,7 +26,7 @@ async fn ask_opennivara(
     // Call unified message handler
     let response = engine
         .handle_message(opennivara::engine::EngineRequest {
-            source: opennivara::engine::RequestSource::Cli,
+            source: opennivara::engine::RequestSource::Desktop,
             session_id,
             message,
             ui_selected_skill_id,
@@ -459,12 +459,15 @@ fn memory_extract_proposals_for_message(
     mode: Option<opennivara::memory::types::MemoryMode>,
 ) -> Result<Vec<opennivara::memory::types::MemoryExtractionProposal>, String> {
     let conn = memory_conn()?;
-    let mode = match mode {
-        Some(mode) => mode,
-        None => opennivara::memory::db::get_settings(&conn)
-            .map(|settings| settings.mode)
-            .map_err(|e| e.to_string())?,
-    };
+    let settings = opennivara::memory::db::get_settings(&conn).map_err(|e| e.to_string())?;
+    let mode = mode.unwrap_or_else(|| settings.mode.clone());
+    if !opennivara::memory::privacy::memory_saving_allowed(
+        &mode,
+        settings.private_chat,
+        settings.pause_memory,
+    ) {
+        return Ok(vec![]);
+    }
     opennivara::memory::extraction::extract_proposals_for_message(&conn, &message, session_id, mode)
         .map_err(|e| e.to_string())
 }

@@ -314,6 +314,7 @@ pub fn generated_typescript() -> anyhow::Result<String> {
         ts::export::<ToolSecuritySummary>(&conf)?,
         ts::export::<crate::memory::types::MemoryMode>(&conf)?,
         ts::export::<crate::memory::types::MemorySettings>(&conf)?,
+        ts::export::<crate::memory::types::EffectivePrivacyPolicy>(&conf)?,
         ts::export::<crate::memory::types::CreateMemorySource>(&conf)?,
         ts::export::<crate::memory::types::MemorySource>(&conf)?,
         ts::export::<crate::memory::types::CreateMemoryItem>(&conf)?,
