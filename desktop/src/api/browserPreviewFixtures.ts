@@ -223,6 +223,44 @@ export async function handleBrowserPreviewCommand(
 	if (cmd === "check_api_key") {
 		return true;
 	}
+	if (cmd === "check_gemini_key") {
+		return {
+			available: true,
+			source: "browser_preview",
+			storage_note: "Browser preview uses mock Gemini availability.",
+		};
+	}
+	if (cmd === "first_run_status") {
+		return {
+			is_first_run: false,
+			required_state_ready: true,
+			profile_exists: true,
+			style_exists: true,
+			preferences_exists: true,
+			contexts_exists: true,
+			tools_exists: true,
+			memory_ready: true,
+			marketplace_ready: true,
+			skills_ready: true,
+			gemini_key: {
+				available: true,
+				source: "browser_preview",
+				storage_note: "Browser preview uses mock Gemini availability.",
+			},
+		};
+	}
+	if (cmd === "initialize_clean_first_run") {
+		return handleBrowserPreviewCommand("first_run_status");
+	}
+	if (cmd === "save_gemini_key") {
+		return null;
+	}
+	if (cmd === "map_summary") {
+		return "Browser preview workspace summary is mocked.";
+	}
+	if (cmd === "skills_list") {
+		return [];
+	}
 	if (cmd === "list_tools") {
 		return {
 			general: {

@@ -13,7 +13,7 @@ test.describe("OpenNivara CLI Config Hub Accessibility Audits", () => {
 	test("1. Chat view should not have any critical automatically detectable accessibility issues", async ({
 		page,
 	}) => {
-		await page.goto("/");
+		await page.goto("/chat");
 		// Wait for the chat page elements to load
 		await page.waitForSelector("textarea");
 

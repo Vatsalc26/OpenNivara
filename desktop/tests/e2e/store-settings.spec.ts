@@ -6,7 +6,7 @@ test.describe("OpenNivara CLI Config Hub E2E Tests", () => {
 		await page.goto("/");
 	});
 
-	test("should load the main chat and display the browser preview mock banner", async ({
+	test("should load the home screen and display the browser preview mock banner", async ({
 		page,
 	}) => {
 		// Assert the browser mock banner is visible on screen
@@ -15,6 +15,9 @@ test.describe("OpenNivara CLI Config Hub E2E Tests", () => {
 		await expect(banner).toContainText(
 			"Browser Preview Mode — using mock data",
 		);
+		await expect(
+			page.getByRole("heading", { name: "OpenNivara Alpha" }),
+		).toBeVisible();
 	});
 
 	test("should navigate to the Store and view theme details modal", async ({
