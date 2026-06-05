@@ -4,6 +4,7 @@ This is the canonical internal engineering documentation index.
 
 ## Current
 
+- [Core Agent Contract](architecture/core-agent-contract.md)
 - [Architecture](current/architecture.md)
 - [Testing Strategy](current/testing-strategy.md)
 - [Feature Implementation Contract](current/feature-implementation-contract.md)

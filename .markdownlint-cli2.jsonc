@@ -8,6 +8,7 @@
     "docs/README.md",
     "docs/STATUS.md",
     "docs/_meta/**/*.md",
+    "docs/architecture/**/*.md",
     "docs/adr/**/*.md",
     "docs/current/**/*.md",
     "docs-site/**/*.mdx"

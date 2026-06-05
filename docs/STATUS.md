@@ -6,10 +6,10 @@ The canonical current docs are linked from [README.md](README.md). Root-level le
 
 Product decisions:
 
-- Desktop/Tauri is the primary app.
+- Desktop, CLI, and Telegram are equal user surfaces over the same agent engine.
 - Browser preview is for fast React iteration only.
 - Store discovers themes and skill packs; Settings owns assistant behavior.
-- Settings owns assistant behavior.
+- Read-only operations run without approval; deleting or modifying operations require per-operation approval.
 - Memory is local-first, dynamic, and has no templates.
 - Time and location context are deterministic, permissioned, and audited.
 - SQLite remains the source of truth.
