@@ -387,8 +387,11 @@ pub fn compile_context(
     notes.extend(skill_warnings.clone());
     let mut warnings = privacy_warnings;
     warnings.extend(skill_warnings.clone());
-    if std::env::var("GEMINI_API_KEY").is_err() {
-        warnings.push("GEMINI_API_KEY is not defined in the environment.".to_string());
+    if !crate::secrets::gemini_key_status()
+        .map(|status| status.available)
+        .unwrap_or(false)
+    {
+        warnings.push("Gemini API key is not configured.".to_string());
     }
 
     let budgeted_prompt = token_budget::build_budgeted_prompt(

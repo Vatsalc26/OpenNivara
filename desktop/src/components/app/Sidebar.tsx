@@ -3,13 +3,14 @@ import {
 	Brain,
 	Calendar,
 	Database,
+	Home,
+	KeyRound,
 	MessageSquare,
 	Plus,
 	Shield,
 	ShoppingBag,
 	Sliders,
 	Sparkles,
-	Terminal,
 	Wrench,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -62,6 +63,7 @@ export function Sidebar({
 	};
 
 	const items = [
+		{ id: "home", label: "Home", icon: Home },
 		{ id: "chat", label: "Chat", icon: MessageSquare },
 		{ id: "sessions", label: "Sessions", icon: Calendar },
 		{ id: "tools", label: "Tools", icon: Wrench },
@@ -83,7 +85,7 @@ export function Sidebar({
 						OPENNIVARA
 					</span>
 					<span className="text-[9px] text-muted-foreground font-bold uppercase tracking-wider">
-						Command Center
+						Alpha App
 					</span>
 				</div>
 			</div>
@@ -129,16 +131,16 @@ export function Sidebar({
 					<div className="flex items-center justify-between px-1.5 py-0.5 rounded hover:bg-sidebar-accent/30 transition-colors">
 						<span className="flex items-center gap-1.5">
 							<Shield className="h-3 w-3 text-emerald-400 shrink-0" />
-							<span>Safe Shell</span>
+							<span>Alpha Mode</span>
 						</span>
-						<span className="text-[8px] bg-emerald-500/10 text-emerald-400 font-extrabold px-1.5 py-0.5 rounded border border-emerald-500/20 select-none">
+						<span className="text-[8px] bg-amber-500/10 text-amber-400 font-extrabold px-1.5 py-0.5 rounded border border-amber-500/20 select-none">
 							Active
 						</span>
 					</div>
 
 					<div className="flex items-center justify-between px-1.5 py-0.5 rounded hover:bg-sidebar-accent/30 transition-colors">
 						<span className="flex items-center gap-1.5">
-							<Terminal className="h-3 w-3 text-muted-foreground/80 shrink-0" />
+							<KeyRound className="h-3 w-3 text-muted-foreground/80 shrink-0" />
 							<span>API Status</span>
 						</span>
 						<span

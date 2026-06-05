@@ -61,6 +61,12 @@ export type SessionSummary = { id: string; title: string; updated_at: string; st
 
 export type ToolSecuritySummary = { enabled: boolean; max_tool_rounds: number; allowed_roots: string[]; blocked_patterns: string[] }
 
+export type ApiKeyStatus = { available: boolean; source: string | null; storage_note: string }
+
+export type FirstRunInput = { accepted_alpha_notice: boolean; gemini_api_key?: string | null }
+
+export type FirstRunStatus = { is_first_run: boolean; required_state_ready: boolean; profile_exists: boolean; style_exists: boolean; preferences_exists: boolean; contexts_exists: boolean; tools_exists: boolean; memory_ready: boolean; marketplace_ready: boolean; skills_ready: boolean; gemini_key: ApiKeyStatus }
+
 export type MemoryMode = "off" | "ask_before_saving" | "auto_save_low_risk" | "full_life_journal"
 
 export type MemorySettings = { schema_version: number; mode: MemoryMode; pause_memory: boolean; private_chat: boolean; allow_location_memories: boolean; sensitive_approval_required: boolean }

@@ -126,43 +126,7 @@ pub fn init_contexts() -> anyhow::Result<String> {
 
     let default_contexts = ContextsFile {
         schema_version: 1,
-        contexts: vec![
-            ContextEntry {
-                id: "opennivara_project".to_string(),
-                enabled: true,
-                kind: "project".to_string(),
-                send_policy: "session_pinned".to_string(),
-                title: "OpenNivara Rust CLI and Tauri desktop assistant".to_string(),
-                summary: "The user is building a Rust-first assistant with CLI, Telegram daemon, tools, workspace map, and Tauri desktop UI.".to_string(),
-                triggers: vec![
-                    "opennivara".to_string(),
-                    "tauri".to_string(),
-                    "desktop app".to_string(),
-                    "cli assistant".to_string(),
-                    "tools system".to_string(),
-                ],
-                required_any: vec![
-                    "opennivara".to_string(),
-                    "tauri".to_string(),
-                    "desktop".to_string(),
-                    "cli".to_string(),
-                ],
-                negative_triggers: vec![
-                    "movie".to_string(),
-                    "food".to_string(),
-                    "restaurant".to_string(),
-                ],
-                min_score: 3,
-                facts: vec![
-                    "The project is written primarily in Rust.".to_string(),
-                    "The desktop app uses Tauri, React, TypeScript, Vite, and Bun.".to_string(),
-                    "The user is still learning programming and prefers practical explanations.".to_string(),
-                ],
-                rules: vec![
-                    "Use this context only when the user is discussing the OpenNivara project.".to_string(),
-                ],
-            }
-        ],
+        contexts: vec![],
     };
 
     config_store::save_toml_file(&path, &default_contexts)?;
@@ -191,6 +155,26 @@ mod tests {
         let path = get_contexts_path().expect("contexts path");
 
         assert_eq!(path, temp_dir.path().join("contexts.toml"));
+        std::env::remove_var("OPENNIVARA_TEST_CONFIG_DIR");
+    }
+
+    #[test]
+    #[serial]
+    fn init_contexts_creates_empty_clean_state() {
+        let _lock = crate::config_paths::TEST_CONFIG_ENV_MUTEX
+            .lock()
+            .unwrap_or_else(|poisoned| poisoned.into_inner());
+        let temp_dir = tempfile::tempdir().expect("temp dir");
+        std::env::set_var("OPENNIVARA_TEST_CONFIG_DIR", temp_dir.path());
+
+        init_contexts().expect("init contexts");
+        let contexts = read_contexts().expect("read contexts");
+
+        assert!(contexts.contexts.is_empty());
+        assert!(!std::fs::read_to_string(get_contexts_path().unwrap())
+            .unwrap()
+            .contains("opennivara_project"));
+
         std::env::remove_var("OPENNIVARA_TEST_CONFIG_DIR");
     }
 }

@@ -27,11 +27,18 @@ export const pinSkill = tauri.tauriPinSkill;
 export const unpinSkill = tauri.tauriUnpinSkill;
 export const listPinnedSkills = tauri.tauriListPinnedSkills;
 export const checkApiKey = tauri.tauriCheckApiKey;
+export const checkGeminiKey = tauri.tauriCheckGeminiKey;
+export const saveGeminiKey = tauri.tauriSaveGeminiKey;
+export const firstRunStatus = tauri.tauriFirstRunStatus;
+export const initializeCleanFirstRun = tauri.tauriInitializeCleanFirstRun;
 
 export type {
+	ApiKeyStatus,
 	ContextEntry,
 	ContextPreview,
 	Contexts,
+	FirstRunInput,
+	FirstRunStatus,
 	PreferenceSection,
 	Preferences,
 	Profile,

@@ -13,9 +13,12 @@ async fn ask_opennivara(
     ui_selected_skill_id: Option<String>,
     pin_selected_skill: Option<bool>,
 ) -> Result<AskResponse, String> {
-    if std::env::var("GEMINI_API_KEY").is_err() {
+    if !opennivara::secrets::gemini_key_status()
+        .map(|status| status.available)
+        .unwrap_or(false)
+    {
         return Err(
-            "Missing GEMINI_API_KEY. Add it to the root .env file or set it as an environment variable."
+            "Missing Gemini API key. Add it in desktop onboarding/settings or set GEMINI_API_KEY."
                 .to_string()
         );
     }
@@ -215,7 +218,31 @@ async fn list_pinned_skills(session_id: String) -> Result<Vec<String>, String> {
 
 #[tauri::command]
 fn check_api_key() -> bool {
-    std::env::var("GEMINI_API_KEY").is_ok()
+    opennivara::secrets::gemini_key_status()
+        .map(|status| status.available)
+        .unwrap_or(false)
+}
+
+#[tauri::command]
+fn check_gemini_key() -> Result<opennivara::secrets::ApiKeyStatus, String> {
+    opennivara::secrets::gemini_key_status().map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+fn save_gemini_key(secret: String) -> Result<(), String> {
+    opennivara::secrets::save_gemini_key(&secret).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+fn first_run_status() -> Result<opennivara::first_run::FirstRunStatus, String> {
+    opennivara::first_run::first_run_status().map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+fn initialize_clean_first_run(
+    input: opennivara::first_run::FirstRunInput,
+) -> Result<opennivara::first_run::FirstRunStatus, String> {
+    opennivara::first_run::initialize_clean_first_run(input).map_err(|e| e.to_string())
 }
 
 fn memory_conn() -> Result<rusqlite::Connection, String> {
@@ -917,6 +944,10 @@ pub fn run() {
             unpin_skill,
             list_pinned_skills,
             check_api_key,
+            check_gemini_key,
+            save_gemini_key,
+            first_run_status,
+            initialize_clean_first_run,
             memory_init,
             memory_status,
             memory_validate,

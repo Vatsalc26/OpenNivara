@@ -196,7 +196,7 @@ export function ChatView({
 		} catch (err: any) {
 			const errorMessage: Message = {
 				role: "model",
-				content: `⚠️ **System Error**: ${err?.message || err || "Unable to consult with OpenNivara engine."}`,
+				content: `**System Error**: ${err?.message || err || "Unable to consult with OpenNivara engine."}`,
 				timestamp: new Date(),
 			};
 			setMessages((prev) => [...prev, errorMessage]);
@@ -266,9 +266,9 @@ export function ChatView({
 										Consult with OpenNivara
 									</h3>
 									<p className="text-xs text-zinc-400 leading-relaxed max-w-sm">
-										Your local developer companion. Ask questions about your
-										directory workspace structure, files details, response
-										styles, or tools permission tiers.
+										Ask a question, review what context would be shared, or
+										start with memory and privacy controls before sending
+										anything sensitive.
 									</p>
 								</div>
 
@@ -276,27 +276,25 @@ export function ChatView({
 								<div className="grid grid-cols-2 gap-3 w-full pt-4">
 									{[
 										{
-											label: "Inspect Workspace",
-											desc: "Scan directory maps & landmarks",
-											prompt: "Explain the active files in my workspace.",
+											label: "Start Private Chat",
+											desc: "Keep memory out of this conversation",
+											prompt:
+												"Start a private chat and explain what memory is excluded.",
 										},
 										{
-											label: "Show Response Style",
-											desc: "View active response constraints",
-											prompt:
-												"What are your currently configured response style rules?",
+											label: "Inspect Shared Context",
+											desc: "Preview what may be included",
+											prompt: "What context would be shared for this message?",
 										},
 										{
-											label: "List Enabled Tools",
-											desc: "Check terminal permission levels",
-											prompt:
-												"Show me all tools currently enabled and their risk levels.",
+											label: "Set Up Project",
+											desc: "Add context only when you choose",
+											prompt: "How do I add a project workspace in OpenNivara?",
 										},
 										{
-											label: "Explain this Crate",
-											desc: "Understand local opennivara",
-											prompt:
-												"What is this opennivara project and how do the CLI, daemon, and UI cooperate?",
+											label: "Use Memory Carefully",
+											desc: "Understand alpha memory behavior",
+											prompt: "Explain how OpenNivara memory works in alpha.",
 										},
 									].map((act, i) => (
 										<button
@@ -537,7 +535,7 @@ export function ChatView({
 							value={input}
 							onChange={(e) => setInput(e.target.value)}
 							onKeyDown={handleKeyDown}
-							placeholder="Ask OpenNivara a question about your files or workspace..."
+							placeholder="Ask OpenNivara a question..."
 							className="flex-1 min-h-[44px] max-h-32 bg-transparent border-0 ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 text-sm py-2.5 resize-none leading-relaxed"
 						/>
 						<Button
@@ -551,8 +549,8 @@ export function ChatView({
 						</Button>
 					</div>
 					<p className="text-[10px] text-center text-muted-foreground/60 mt-2 tracking-wide font-medium">
-						Tauri bridge routes requests directly to the Rust
-						`OpenNivaraEngine`. CLI chat sessions remain persistent.
+						Alpha reminder: review the context inspector before sending
+						sensitive information to Gemini.
 					</p>
 				</div>
 			</div>

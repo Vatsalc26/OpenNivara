@@ -257,6 +257,14 @@ function setupDefaultTauriMocks() {
 		},
 	});
 	mockTauriCommand("check_api_key", true);
+	mockTauriCommand("check_gemini_key", {
+		available: true,
+		source: "environment",
+		storage_note: "Gemini key is available from the test environment.",
+	});
+	mockTauriCommand("save_gemini_key", {});
+	mockTauriCommand("first_run_status", defaultFirstRunStatus(false));
+	mockTauriCommand("initialize_clean_first_run", defaultFirstRunStatus(false));
 	mockTauriCommand("marketplace_status", {
 		marketplace_dir: "C:\\mock\\marketplace",
 		installed_count: 0,
@@ -410,6 +418,26 @@ function setupDefaultTauriMocks() {
 
 // Initial default mocks setup
 setupDefaultTauriMocks();
+
+function defaultFirstRunStatus(isFirstRun: boolean) {
+	return {
+		is_first_run: isFirstRun,
+		required_state_ready: !isFirstRun,
+		profile_exists: !isFirstRun,
+		style_exists: !isFirstRun,
+		preferences_exists: !isFirstRun,
+		contexts_exists: !isFirstRun,
+		tools_exists: !isFirstRun,
+		memory_ready: !isFirstRun,
+		marketplace_ready: !isFirstRun,
+		skills_ready: !isFirstRun,
+		gemini_key: {
+			available: true,
+			source: "environment",
+			storage_note: "Gemini key is available from the test environment.",
+		},
+	};
+}
 
 function defaultLocationContext() {
 	return {

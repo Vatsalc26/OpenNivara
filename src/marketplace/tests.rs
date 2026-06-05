@@ -660,18 +660,16 @@ fn test_fresh_init_with_builtins_installs_modes_cleanly() {
     init_marketplace().unwrap();
 
     let installed = list_installed_packs().unwrap();
-    assert!(installed.installed.iter().any(|p| p.id == "coding_basics"));
-    assert!(installed.installed.iter().any(|p| p.id == "study_coach"));
+    assert!(installed.installed.is_empty());
+
+    let builtins = super::builtin::list_builtin_packs().unwrap();
+    assert!(builtins.iter().any(|p| p.id == "coding_basics"));
+    assert!(builtins.iter().any(|p| p.id == "study_coach"));
 
     let modes = read_modes().unwrap();
-    assert!(modes
-        .modes
-        .iter()
-        .any(|m| m.id == "coding" && m.enabled_pack_ids == vec!["coding_basics"]));
-    assert!(modes
-        .modes
-        .iter()
-        .any(|m| m.id == "study" && m.enabled_pack_ids == vec!["study_coach"]));
+    assert!(modes.modes.iter().any(|m| m.id == "default"));
+    assert!(!modes.modes.iter().any(|m| m.id == "coding"));
+    assert!(!modes.modes.iter().any(|m| m.id == "study"));
 
     let status = marketplace_status().unwrap();
     assert!(status.missing_pack_ids.is_empty());
@@ -882,22 +880,24 @@ fn test_repair_missing_modes_toml_restores_builtins() {
 
     init_marketplace().unwrap();
 
-    // Verify builtins are installed and modes are present
+    // Verify builtins are discoverable but not auto-installed as modes.
     assert!(get_modes_path().unwrap().exists());
     let modes = read_modes().unwrap();
-    assert!(modes.modes.iter().any(|m| m.id == "coding"));
+    assert!(modes.modes.iter().any(|m| m.id == "default"));
+    assert!(!modes.modes.iter().any(|m| m.id == "coding"));
 
     // Delete modes.toml
     fs::remove_file(get_modes_path().unwrap()).unwrap();
     assert!(!get_modes_path().unwrap().exists());
 
-    // Repair should restore modes.toml with the builtin modes since the packs are installed
+    // Repair should restore modes.toml without installing built-in packs.
     let report = marketplace_repair(false).unwrap();
     assert!(report.repaired);
     assert!(get_modes_path().unwrap().exists());
 
     let restored_modes = read_modes().unwrap();
-    assert!(restored_modes.modes.iter().any(|m| m.id == "coding"));
+    assert!(restored_modes.modes.iter().any(|m| m.id == "default"));
+    assert!(!restored_modes.modes.iter().any(|m| m.id == "coding"));
 }
 
 #[test]

@@ -220,7 +220,7 @@ pub fn init_profile() -> anyhow::Result<String> {
     let default_profile = Profile {
         schema_version: 2,
         identity: Identity {
-            display_name: "Example User".to_string(),
+            display_name: "User".to_string(),
             full_name: "".to_string(),
             gender: "".to_string(),
             pronouns: "".to_string(),
@@ -254,7 +254,7 @@ pub fn init_profile() -> anyhow::Result<String> {
             send_identity: true,
             send_location: false,
             send_gender: false,
-            send_technical: true,
+            send_technical: false,
             send_personal: false,
         },
     };
@@ -434,6 +434,31 @@ mod tests {
         let path = get_profile_path().expect("profile path");
 
         assert_eq!(path, temp_dir.path().join("profile.toml"));
+        std::env::remove_var("OPENNIVARA_TEST_CONFIG_DIR");
+    }
+
+    #[test]
+    #[serial]
+    fn init_profile_creates_neutral_privacy_first_defaults() {
+        let _lock = crate::config_paths::TEST_CONFIG_ENV_MUTEX
+            .lock()
+            .unwrap_or_else(|poisoned| poisoned.into_inner());
+        let temp_dir = tempfile::tempdir().expect("temp dir");
+        std::env::set_var("OPENNIVARA_TEST_CONFIG_DIR", temp_dir.path());
+
+        init_profile().expect("init profile");
+        let profile = read_profile().expect("read profile");
+
+        assert_eq!(profile.identity.display_name, "User");
+        assert!(profile.identity.full_name.is_empty());
+        assert!(profile.identity.gender.is_empty());
+        assert!(profile.location.city.is_empty());
+        assert!(profile.personal.occupation_or_role.is_empty());
+        assert!(profile.personal.interests.is_empty());
+        assert!(!profile.privacy.send_location);
+        assert!(!profile.privacy.send_personal);
+        assert!(!profile.privacy.send_technical);
+
         std::env::remove_var("OPENNIVARA_TEST_CONFIG_DIR");
     }
 }

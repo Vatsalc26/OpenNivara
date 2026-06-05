@@ -90,7 +90,6 @@ pub fn init_marketplace() -> anyhow::Result<String> {
         }
     }
 
-    let mut auto_installed_count = 0;
     let mut installed_pack_ids = packs::list_installed_packs()
         .map(|file| {
             file.installed
@@ -101,30 +100,15 @@ pub fn init_marketplace() -> anyhow::Result<String> {
         .unwrap_or_default();
 
     if installed_empty {
-        if let Ok(_dir) = builtin::get_builtin_packs_dir() {
-            if builtin::install_builtin_pack("coding_basics").is_ok() {
-                auto_installed_count += 1;
-            }
-            if builtin::install_builtin_pack("study_coach").is_ok() {
-                auto_installed_count += 1;
-            }
-            installed_pack_ids = packs::list_installed_packs()
-                .map(|file| {
-                    file.installed
-                        .into_iter()
-                        .map(|pack| pack.id)
-                        .collect::<Vec<_>>()
-                })
-                .unwrap_or_default();
-        }
+        installed_pack_ids.clear();
     }
 
     let modes_status = modes::init_modes_for_installed_builtins(&installed_pack_ids)?;
     themes::ensure_theme_store_files()?;
 
     Ok(format!(
-        "Successfully initialized OpenNivara Marketplace.\n- Active modes: {}\n- Auto-installed packs: {}",
-        modes_status, auto_installed_count
+        "Successfully initialized OpenNivara Marketplace.\n- Active modes: {}\n- Auto-installed packs: 0",
+        modes_status
     ))
 }
 

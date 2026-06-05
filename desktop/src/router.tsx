@@ -17,6 +17,7 @@ import {
 } from "react";
 import {
 	checkApiKey,
+	firstRunStatus,
 	getContextsPath,
 	getMapSummary,
 	getPreferencesPath,
@@ -33,8 +34,10 @@ import { AppShell } from "@/components/app/AppShell";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { ErrorBanner } from "@/components/ui/ErrorBanner";
 import { ChatView, type Message } from "@/features/chat/ChatView";
+import { HomeView } from "@/features/home/HomeView";
 import { StoreView } from "@/features/marketplace/StoreView";
 import { MemoryView } from "@/features/memory/MemoryView";
+import { OnboardingView } from "@/features/onboarding/OnboardingView";
 import { SessionsList } from "@/features/sessions/SessionsList";
 import { SettingsView } from "@/features/settings/SettingsView";
 import {
@@ -70,6 +73,23 @@ export const rootRoute = createRootRoute({
 });
 
 function RootComponent() {
+	const { data: status, isLoading } = useQuery({
+		queryKey: ["firstRunStatus"],
+		queryFn: firstRunStatus,
+	});
+
+	if (isLoading) {
+		return (
+			<div className="flex min-h-screen items-center justify-center bg-background text-sm text-muted-foreground">
+				Preparing OpenNivara...
+			</div>
+		);
+	}
+
+	if (status?.is_first_run) {
+		return <OnboardingView status={status} />;
+	}
+
 	return <Outlet />;
 }
 
@@ -85,13 +105,16 @@ function LayoutComponent() {
 	const navigate = useNavigate();
 
 	const currentPath = matches[matches.length - 1]?.pathname || "/";
-	const activeView = currentPath.startsWith("/settings")
-		? "settings"
-		: currentPath.startsWith("/store")
-			? "marketplace"
-			: currentPath.startsWith("/memory")
-				? "memory"
-				: currentPath.substring(1) || "chat";
+	const activeView =
+		currentPath === "/"
+			? "home"
+			: currentPath.startsWith("/settings")
+				? "settings"
+				: currentPath.startsWith("/store")
+					? "marketplace"
+					: currentPath.startsWith("/memory")
+						? "memory"
+						: currentPath.substring(1) || "chat";
 
 	const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
 	const [sessionMessages, setSessionMessages] = useState<Message[]>([]);
@@ -140,7 +163,11 @@ function LayoutComponent() {
 	}, [currentSessionId]);
 
 	const handleNavigate = (view: string, tab?: any) => {
-		if (view === "settings" || view === "/settings") {
+		if (view === "home" || view === "/") {
+			navigate({ to: "/" });
+		} else if (view === "chat" || view === "/chat") {
+			navigate({ to: "/chat" });
+		} else if (view === "settings" || view === "/settings") {
 			navigate({ to: `/settings/${tab || "profile"}` });
 		} else if (
 			view === "marketplace" ||
@@ -148,16 +175,18 @@ function LayoutComponent() {
 			view === "/store"
 		) {
 			navigate({ to: `/store/${tab || "themes"}` });
+		} else if (view === "memory" || view === "/memory") {
+			navigate({ to: tab ? `/memory/${tab}` : "/memory" });
 		} else {
 			const destination = view.startsWith("/") ? view : `/${view}`;
-			navigate({ to: destination === "/chat" ? "/" : destination });
+			navigate({ to: destination });
 		}
 	};
 
 	const handleNewChat = () => {
 		setCurrentSessionId(null);
 		setSessionMessages([]);
-		navigate({ to: "/" });
+		navigate({ to: "/chat" });
 	};
 
 	const handleToolDecision = (decision: ToolApprovalDecision) => {
@@ -217,10 +246,27 @@ function LayoutComponent() {
 export const indexRoute = createRoute({
 	getParentRoute: () => layoutRoute,
 	path: "/",
-	component: IndexView,
+	component: HomeRouteView,
 });
 
-function IndexView() {
+function HomeRouteView() {
+	const navigate = useNavigate();
+	const handleNavigate = (view: string, tab?: string) => {
+		if (view === "chat") {
+			navigate({ to: "/chat" });
+		} else if (view === "memory") {
+			navigate({ to: tab ? `/memory/${tab}` : "/memory" });
+		} else if (view === "store" || view === "marketplace") {
+			navigate({ to: `/store/${tab || "themes"}` });
+		} else {
+			navigate({ to: view.startsWith("/") ? view : `/${view}` });
+		}
+	};
+
+	return <HomeView onNavigate={handleNavigate} />;
+}
+
+function ChatRouteView() {
 	const context = useLayoutState();
 
 	const handleSessionCreated = (sessionId: string) => {
@@ -241,7 +287,7 @@ function IndexView() {
 export const chatRoute = createRoute({
 	getParentRoute: () => layoutRoute,
 	path: "/chat",
-	component: IndexView,
+	component: ChatRouteView,
 });
 
 export const sessionsRoute = createRoute({
@@ -261,7 +307,7 @@ function SessionsView() {
 
 	const handleSelectSession = (session: Session) => {
 		context.setCurrentSessionId(session.id);
-		navigate({ to: "/" });
+		navigate({ to: "/chat" });
 	};
 
 	return (
@@ -378,6 +424,12 @@ export const storeInstalledRoute = createRoute({
 	component: () => <StoreView defaultTab="installed" />,
 });
 
+export const storeSkillsRoute = createRoute({
+	getParentRoute: () => layoutRoute,
+	path: "/store/skills",
+	component: () => <StoreView defaultTab="skills" />,
+});
+
 export const storeItemRoute = createRoute({
 	getParentRoute: () => layoutRoute,
 	path: "/store/item/$itemId",
@@ -475,6 +527,7 @@ const routeTree = rootRoute.addChildren([
 		memoryPrivacyRoute,
 		storeRoute,
 		storeThemesRoute,
+		storeSkillsRoute,
 		storeInstalledRoute,
 		storeItemRoute,
 		settingsRoute,

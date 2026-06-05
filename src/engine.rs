@@ -598,8 +598,7 @@ impl OpenNivaraEngine {
         };
 
         // 8. Configure Gemini Endpoint details
-        let api_key = std::env::var("GEMINI_API_KEY")
-            .map_err(|_| anyhow::anyhow!("Missing GEMINI_API_KEY environment variable in .env."))?;
+        let api_key = crate::secrets::get_gemini_api_key()?;
 
         let client = reqwest::Client::new();
         let url = gemini_generate_content_url();

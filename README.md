@@ -4,7 +4,7 @@
 
 OpenNivara is an alpha-stage, desktop-first personal AI agent with a Rust CLI, local state, memory, skills, marketplace packs, and controlled local tools.
 
-OpenNivara is currently `v0.1.0-alpha.1`. Expect rough edges, incomplete hardening, and changing interfaces.
+OpenNivara is currently `v0.1.0-alpha.2`. Expect rough edges, incomplete hardening, and changing interfaces.
 
 ## What OpenNivara Is
 

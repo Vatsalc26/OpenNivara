@@ -42,6 +42,6 @@ describe("AppShell Layout Component Tests", () => {
 
 		expect(screen.getByTestId("chat-content")).toBeInTheDocument();
 		expect(screen.getByText(/Consultation/i)).toBeInTheDocument();
-		expect(screen.getByText(/Safe Shell/i)).toBeInTheDocument();
+		expect(screen.getByText(/Alpha Mode/i)).toBeInTheDocument();
 	});
 });

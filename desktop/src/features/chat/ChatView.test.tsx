@@ -64,10 +64,10 @@ describe("ChatView Unit Tests", () => {
 
 		expect(screen.getByText("Consult with OpenNivara")).toBeInTheDocument();
 		expect(
-			screen.getByPlaceholderText(
-				"Ask OpenNivara a question about your files or workspace...",
-			),
+			screen.getByPlaceholderText("Ask OpenNivara a question..."),
 		).toBeInTheDocument();
+		expect(screen.getByText("Start Private Chat")).toBeInTheDocument();
+		expect(screen.getByText("Inspect Shared Context")).toBeInTheDocument();
 	});
 
 	test("2. Typing and sending a message calls ask_opennivara tauri command", async () => {
@@ -88,7 +88,7 @@ describe("ChatView Unit Tests", () => {
 		);
 
 		const textarea = screen.getByPlaceholderText(
-			"Ask OpenNivara a question about your files or workspace...",
+			"Ask OpenNivara a question...",
 		);
 		fireEvent.change(textarea, {
 			target: { value: "Explain the project workspace structure" },
@@ -163,7 +163,7 @@ describe("ChatView Unit Tests", () => {
 		).toBeGreaterThan(1);
 
 		const textarea = screen.getByPlaceholderText(
-			"Ask OpenNivara a question about your files or workspace...",
+			"Ask OpenNivara a question...",
 		);
 		fireEvent.change(textarea, {
 			target: { value: "Make a realistic weekly plan" },
@@ -199,7 +199,7 @@ describe("ChatView Unit Tests", () => {
 		);
 
 		const textarea = screen.getByPlaceholderText(
-			"Ask OpenNivara a question about your files or workspace...",
+			"Ask OpenNivara a question...",
 		);
 		fireEvent.change(textarea, { target: { value: "Hello" } });
 

@@ -98,15 +98,7 @@ pub async fn ask_gemini(
     user_prompt: &str,
 ) -> anyhow::Result<String> {
     // 1. Load the Gemini API key from the environment
-    let api_key = std::env::var("GEMINI_API_KEY").map_err(|_| {
-        anyhow::anyhow!(
-            "Missing GEMINI_API_KEY environment variable.\n\n\
-             Please double-check that you have:\n\
-             1. Created a `.env` file in the folder where you run the CLI.\n\
-             2. Added `GEMINI_API_KEY=your_actual_key_here` to it.\n\
-             3. Or set it in your terminal environment directly."
-        )
-    })?;
+    let api_key = crate::secrets::get_gemini_api_key()?;
 
     let api_key = api_key.trim();
     if api_key.is_empty() {

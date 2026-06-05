@@ -2,6 +2,11 @@ import { safeInvoke } from "./tauriBridge";
 
 const invoke = safeInvoke;
 
+import type {
+	ApiKeyStatus,
+	FirstRunInput,
+	FirstRunStatus,
+} from "@/generated/backendTypes";
 import { StyleSchema } from "./schemas";
 
 export interface AskResponse {
@@ -343,3 +348,23 @@ export async function tauriListPinnedSkills(
 export async function tauriCheckApiKey(): Promise<boolean> {
 	return invoke<boolean>("check_api_key");
 }
+
+export async function tauriCheckGeminiKey(): Promise<ApiKeyStatus> {
+	return invoke<ApiKeyStatus>("check_gemini_key");
+}
+
+export async function tauriSaveGeminiKey(secret: string): Promise<void> {
+	return invoke<void>("save_gemini_key", { secret });
+}
+
+export async function tauriFirstRunStatus(): Promise<FirstRunStatus> {
+	return invoke<FirstRunStatus>("first_run_status");
+}
+
+export async function tauriInitializeCleanFirstRun(
+	input: FirstRunInput,
+): Promise<FirstRunStatus> {
+	return invoke<FirstRunStatus>("initialize_clean_first_run", { input });
+}
+
+export type { ApiKeyStatus, FirstRunInput, FirstRunStatus };

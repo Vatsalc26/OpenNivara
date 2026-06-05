@@ -132,84 +132,7 @@ pub fn init_preferences() -> anyhow::Result<String> {
 
     let default_preferences = PreferencesFile {
         schema_version: 2,
-        sections: vec![
-            PreferenceSection {
-                id: "coding_help".to_string(),
-                enabled: true,
-                send_policy: "triggered_strict".to_string(),
-                description: Some("Preferences for coding help".to_string()),
-                triggers: vec![
-                    "code".to_string(),
-                    "coding".to_string(),
-                    "rust".to_string(),
-                    "cargo".to_string(),
-                    "compiler".to_string(),
-                    "bug".to_string(),
-                    "error".to_string(),
-                ],
-                required_any: vec![
-                    "code".to_string(),
-                    "rust".to_string(),
-                    "cargo".to_string(),
-                    "compiler".to_string(),
-                    "bug".to_string(),
-                    "error".to_string(),
-                ],
-                negative_triggers: vec![],
-                min_score: 2,
-                likes: vec![
-                    PreferenceItem {
-                        item: "step-by-step explanations".to_string(),
-                        strength: 5,
-                    },
-                    PreferenceItem {
-                        item: "simple working code first".to_string(),
-                        strength: 5,
-                    },
-                ],
-                dislikes: vec![PreferenceItem {
-                    item: "over-engineered architecture".to_string(),
-                    strength: 4,
-                }],
-                notes: vec![
-                    "Prefer simple MVP architecture before advanced abstractions.".to_string(),
-                ],
-            },
-            PreferenceSection {
-                id: "food".to_string(),
-                enabled: true,
-                send_policy: "triggered_strict".to_string(),
-                description: Some("Food preferences".to_string()),
-                triggers: vec![
-                    "food".to_string(),
-                    "restaurant".to_string(),
-                    "eat".to_string(),
-                    "lunch".to_string(),
-                    "dinner".to_string(),
-                    "recipe".to_string(),
-                    "cook".to_string(),
-                    "meal".to_string(),
-                ],
-                required_any: vec![],
-                negative_triggers: vec![],
-                min_score: 2,
-                likes: vec![
-                    PreferenceItem {
-                        item: "spicy food".to_string(),
-                        strength: 4,
-                    },
-                    PreferenceItem {
-                        item: "quick meals".to_string(),
-                        strength: 3,
-                    },
-                ],
-                dislikes: vec![PreferenceItem {
-                    item: "very sweet food".to_string(),
-                    strength: 3,
-                }],
-                notes: vec!["Use these preferences only for food recommendations.".to_string()],
-            },
-        ],
+        sections: vec![],
     };
 
     save_preferences(&default_preferences)?;
@@ -529,5 +452,22 @@ mod tests {
         assert!(formatted.contains("- rust (strength: 5)"));
         assert!(formatted.contains("- java (strength: 2)"));
         assert!(formatted.contains("- note1"));
+    }
+
+    #[test]
+    #[serial]
+    fn init_preferences_creates_empty_clean_state() {
+        let _lock = crate::config_paths::TEST_CONFIG_ENV_MUTEX
+            .lock()
+            .unwrap_or_else(|poisoned| poisoned.into_inner());
+        let temp_dir = tempfile::tempdir().expect("temp dir");
+        std::env::set_var("OPENNIVARA_TEST_CONFIG_DIR", temp_dir.path());
+
+        init_preferences().expect("init preferences");
+        let preferences = read_preferences().expect("read preferences");
+
+        assert!(preferences.sections.is_empty());
+
+        std::env::remove_var("OPENNIVARA_TEST_CONFIG_DIR");
     }
 }
