@@ -360,3 +360,107 @@ Add tests for:
 15. `mark_failed` stores `error_message` and allows pending-turn cleanup.
 16. `delete_pending_turn` removes the resume blob while preserving the approval row.
 17. Pending approval and pending turn survive DB reopen until terminal cleanup.
+
+## Recovery-Safe Transition API Update
+
+Do not implement approval status as generic free-form updates. Use explicit transition functions.
+
+The core invariant is: once an approved tool has executed, OpenNivara must never execute that same tool call again.
+
+Required functions:
+
+```rust
+pub fn create_pending_approval_with_turn(
+    conn: &mut Connection,
+    input: CreatePendingApprovalInput,
+    turn: PendingTurnState,
+    preview: ToolPreview,
+) -> anyhow::Result<PendingApproval>;
+
+pub fn begin_execution_once(
+    conn: &mut Connection,
+    approval_id: &str,
+    session_id: &str,
+    approving_actor_id: &str,
+) -> anyhow::Result<BeginExecutionResult>;
+
+pub fn mark_tool_executed_and_update_turn(
+    conn: &mut Connection,
+    input: MarkToolExecutedInput,
+) -> anyhow::Result<PendingTurnState>;
+
+pub fn mark_tool_failed(
+    conn: &mut Connection,
+    input: MarkToolFailedInput,
+) -> anyhow::Result<()>;
+
+pub fn mark_approval_completed(
+    conn: &mut Connection,
+    approval_id: &str,
+    final_assistant_message_id: &str,
+) -> anyhow::Result<()>;
+
+pub fn mark_resume_failed(
+    conn: &Connection,
+    approval_id: &str,
+    error_message: &str,
+) -> anyhow::Result<()>;
+
+pub fn deny_approval_and_update_turn(
+    conn: &mut Connection,
+    input: DenyApprovalInput,
+) -> anyhow::Result<DenyApprovalResult>;
+
+pub fn complete_denied_turn(
+    conn: &mut Connection,
+    approval_id: &str,
+    final_assistant_message_id: &str,
+) -> anyhow::Result<()>;
+
+pub fn cleanup_completed_pending_turns(conn: &Connection) -> anyhow::Result<usize>;
+
+pub fn recover_stale_executing_approvals(
+    conn: &mut Connection,
+    stale_after: chrono::Duration,
+) -> anyhow::Result<usize>;
+```
+
+`create_pending_approval_with_turn` inserts `pending_approvals(status = pending)`, `pending_turns(phase = awaiting_approval)`, and an `approval_required` event in one transaction.
+
+`begin_execution_once` is the only function that can move `pending` to `executing`. Tool execution may start only if it returns `Started`.
+
+`BeginExecutionResult` must distinguish:
+
+- `Started { approval, turn }`
+- `NotFound`
+- `WrongSession`
+- `ActorNotAllowed`
+- `AlreadyDenied`
+- `AlreadyExecuting`
+- `AlreadyExecuted`
+- `AlreadyFailed`
+- `AlreadyCompleted`
+- `MissingPendingTurn`
+- `InvalidPhase`
+
+`mark_tool_executed_and_update_turn` is the critical crash-safe transition. It is allowed only when approval status is `executing` and pending turn phase is `awaiting_approval`. It must atomically set status `executed`, set `execution_finished_at`, set `result_summary`, set phase `tool_executed_awaiting_model`, update `resume_payload_json` with the tool result already appended, update `updated_at`, and insert `approval_executed`.
+
+`mark_resume_failed` is allowed for `executed/tool_executed_awaiting_model` and `denied/denied_awaiting_model`. It increments `resume_attempt_count`, stores `last_resume_error`, stores `last_resume_attempt_at`, and keeps the pending turn.
+
+`deny_approval_and_update_turn` is allowed only for `pending/awaiting_approval`. It atomically sets status `denied`, sets `resolved_at`, sets `resolved_by_actor_id`, sets phase `denied_awaiting_model`, appends denied tool result into `resume_payload_json`, and inserts `approval_denied`.
+
+`complete_denied_turn` deletes `pending_turn` and keeps `pending_approvals.status = denied`. Do not change denied to completed.
+
+`recover_stale_executing_approvals` should use a 10 minute default threshold and mark interrupted `executing` approvals as `failed` with `Execution was interrupted before completion could be confirmed.` Do not retry tool execution.
+
+Additional required tests:
+
+1. `mark_tool_executed_and_update_turn` atomically sets status `executed` and phase `tool_executed_awaiting_model`.
+2. once status is `executed`, tool execution cannot happen again.
+3. `mark_resume_failed` does not change `executed` status.
+4. provider continuation retry starts from stored tool result, not from tool execution.
+5. `mark_approval_completed` sets `completed_at` and deletes pending turn.
+6. denied remains denied after model explanation.
+7. `complete_denied_turn` deletes pending turn and keeps denied status.
+8. stale executing recovery marks approvals failed/interrupted.
+9. forbidden transitions are rejected.

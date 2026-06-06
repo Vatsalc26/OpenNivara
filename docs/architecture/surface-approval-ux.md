@@ -60,8 +60,7 @@ list_pending_approvals_for_session(session_id)
 get_pending_approval_details(approval_id, session_id)
 approve_pending_operation(approval_id, session_id, actor_id, surface)
 deny_pending_operation(approval_id, session_id, actor_id, surface)
-resume_approved_operation(input) -> EngineResponse
-resume_denied_operation(input) -> EngineResponse
+resume_pending_continuation(input) -> ApprovalActionResponse
 ```
 
 Approval is same-chat/session only. An approval can only be approved or denied from the originating session/chat context.
@@ -257,3 +256,49 @@ Add tests for:
 13. Approved operation resumes same turn.
 14. Denied operation resumes same turn with denied tool result.
 15. Pending approval remains visible in same chat history.
+
+## Continue UX Update
+
+Approval and continuation are separate user actions:
+
+1. Approve or deny an operation that has not run yet.
+2. Continue the final model response after an approved operation already ran.
+
+Desktop should add:
+
+- `resume_pending_continuation(approval_id, session_id)`
+- `Resume final response` button
+
+The Desktop `Resume final response` button must call `resume_pending_continuation`, not `approve_pending_operation`.
+
+CLI should add:
+
+- `opennivara approvals continue <approval_id> --session <session_id optional>`
+
+Use `continue`, not `resume`, because session resume already exists.
+
+Telegram should add:
+
+- `/continue <id>`
+
+Do not use `/resume` for approval continuation because `/resume <session_id>` already exists.
+
+Telegram behavior:
+
+- `/approve` for a pending approval approves, executes, and continues model.
+- `/approve` for an already executed approval must not rerun the tool. Reply: `This operation already executed. Use /continue <id> to resume the final response.`
+- `/continue` for an executed approval retries provider/model continuation only.
+- `/continue` for a pending approval replies: `This operation has not been approved yet. Use /approve <id> or /deny <id>.`
+- wrong Telegram chat rejects.
+
+`ApprovalView` should include status, phase, action booleans, result summary, error message, last resume error, and resume attempt count. `can_retry_tool_execution` should always be false for existing approvals.
+
+Default approval lists should show pending, executed with continuation pending, denied with continuation pending, executing if not stale, and recent failed/interrupted rows. Hide completed rows by default.
+
+Additional required tests:
+
+1. `/continue` executed approval retries provider continuation only.
+2. `/continue` pending approval tells the user to approve or deny first.
+3. Desktop Resume final response calls `resume_pending_continuation`.
+4. CLI approvals continue calls `resume_pending_continuation`.
+5. completed approvals are hidden from default pending lists.

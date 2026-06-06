@@ -164,7 +164,7 @@ ApprovalRequest
 - classification
 - summary
 - arguments_preview_json
-- status: pending | denied | executing | executed | failed
+- status: pending | denied | executing | executed | failed | completed
 - result_summary
 - error_message
 - created_at

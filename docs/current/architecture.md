@@ -1,6 +1,6 @@
 # Architecture
 
-OpenNivara is a local-first personal AI agent with three equal user surfaces: Desktop, CLI, and Telegram. All three surfaces must normalize requests into the same engine lifecycle and use the same tool policy, approval system, and audit model. The implementation contract is defined in [Core Agent Contract](../architecture/core-agent-contract.md). The same-turn approval persistence design is defined in [Approval Resume And State DB](../architecture/approval-resume-state.md).
+OpenNivara is a local-first personal AI agent with three equal user surfaces: Desktop, CLI, and Telegram. All three surfaces must normalize requests into the same engine lifecycle and use the same tool policy, approval system, and audit model. The implementation contract is defined in [Core Agent Contract](../architecture/core-agent-contract.md). The same-turn approval persistence design is defined in [Approval Resume And State DB](../architecture/approval-resume-state.md), and the crash-safe lifecycle is defined in [Recovery State Machine](../architecture/recovery-state-machine.md).
 
 Desktop is the React/Tauri app surface. Browser preview is only a fast UI development surface and is not a separate agent surface.
 

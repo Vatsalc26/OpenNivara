@@ -338,6 +338,20 @@ Not allowed automatically:
 
 If an operation failed, the model/user should create a new operation rather than silently reusing the old approval.
 
+## Forbidden Transitions
+
+Reject these transitions:
+
+- `denied` to `executing`
+- `executed` to `executing`
+- `completed` to `executing`
+- `failed` to `executing`
+- `executing` to `denied`
+- `completed` to `failed`
+- `failed` to `completed`
+
+Do not implement status as generic free-form updates. Use explicit transition functions.
+
 ## Required Tests
 
 Add tests for:

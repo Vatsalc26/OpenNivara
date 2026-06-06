@@ -328,3 +328,77 @@ PR 5 removes old policy code:
 - Remove or replace `tool_execution_policy_error`.
 - Remove source-specific policy tests.
 - Add equal-surface regression tests.
+
+## Approval Action API Update
+
+Expose these engine-level methods:
+
+```text
+approve_pending_operation(input) -> ApprovalActionResponse
+deny_pending_operation(input) -> ApprovalActionResponse
+resume_pending_continuation(input) -> ApprovalActionResponse
+```
+
+`resume_pending_continuation` is separate from approve. It never runs the tool; it only retries provider/model continuation.
+
+`ApprovalActionInput`:
+
+- `approval_id: String`
+- `session_id: String`
+- `surface: Surface`
+- `actor_id: String`
+
+`ResumeContinuationInput` has the same fields.
+
+`ApprovalActionResponse`:
+
+- approval ID
+- session ID
+- status
+- message
+- optional engine response
+- optional approval view
+
+Approve clicked:
+
+1. call `begin_execution_once`
+2. if `Started`, execute tool
+3. otherwise return current state message
+4. never execute unless `Started`
+
+Tool execution success:
+
+1. append tool result to pending turn model history
+2. call `mark_tool_executed_and_update_turn`
+3. call provider/model continuation
+4. if provider succeeds, store assistant answer and call `mark_approval_completed`
+5. if provider fails, call `mark_resume_failed`
+
+Tool execution failure:
+
+1. append tool failure result if possible
+2. call `mark_tool_failed`
+3. call provider for explanation if possible
+4. delete pending turn after explanation
+
+Deny clicked:
+
+1. append denied tool result to pending turn model history
+2. call `deny_approval_and_update_turn`
+3. call provider/model continuation
+4. if provider succeeds, store assistant answer and call `complete_denied_turn`
+5. if provider fails, call `mark_resume_failed`
+
+Continuation retry:
+
+1. allow only `executed/tool_executed_awaiting_model` or `denied/denied_awaiting_model`
+2. load stored pending turn
+3. retry provider/model continuation only
+4. never execute the tool
+
+Startup/recovery:
+
+1. run `recover_stale_executing_approvals(10 minutes)`
+2. run `cleanup_completed_pending_turns()`
+3. do not automatically retry provider continuations at startup
+4. surface recoverable continuations with "This operation already executed, but the final response is pending. Resume?"
