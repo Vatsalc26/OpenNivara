@@ -253,6 +253,10 @@ If the provider fails after the tool result was already appended:
 
 Explicit memory tools use the same envelope. `remember_this` and `create_memory` can return a pending proposal, saved memory, or `memory_disabled` error depending on `MemoryMode`. `update_memory` and `forget_memory` use the same approval, denial, success, and failure shapes as other mutating tools. `delete_memory` should not be declared until true hard-delete cleanup is implemented; until then a direct invocation should return `memory_hard_delete_not_implemented`. See [Memory Proposals And Tools](memory-proposals-and-tools.md), [Memory Retention Semantics](memory-retention-semantics.md), and [Memory Hard-Delete Cleanup Scope](memory-hard-delete-cleanup-scope.md).
 
+## Connector Tool Results
+
+Connector tools use the same envelope. External read successes return compact service results. External mutation denials use `approval_denied`. Connector credential errors use stable connector error codes and must never include raw credential material. See [Connector Tool Registry](connector-tool-registry.md), [External Operations Policy](external-operations-policy.md), and [GitHub Connector V1](github-connector-v1.md).
+
 ## Truncation
 
 Every large tool result must include explicit truncation metadata.
@@ -300,6 +304,7 @@ Do not blindly send full `ToolExecutionResult` to the model if it contains times
 5. Large outputs include explicit truncation metadata.
 6. Model-visible result is separate from `ApprovalView`, `UserFacingError`, and audit rows.
 7. Tests assert JSON shape for success, failure, denial, timeout, and truncation.
+8. Connector tool results use the same model-visible envelope and redact credentials.
 
 ## Tests
 
@@ -315,3 +320,6 @@ Required tests:
 8. provider failure after tool result does not append a fake tool result.
 9. `ModelPart::ToolResult` contains `ModelVisibleToolResult` JSON.
 10. Gemini adapter converts `ModelPart::ToolResult` to provider `function_response` correctly.
+11. Connector read success uses the standard envelope.
+12. Connector mutation denial uses `approval_denied`.
+13. Connector errors do not expose credential material.

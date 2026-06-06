@@ -114,6 +114,20 @@ Tool:
 - `command_failed`
 - `memory_disabled`
 - `memory_hard_delete_not_implemented`
+- `connector_not_connected`
+- `connector_account_disabled`
+- `connector_credential_missing`
+- `connector_credential_expired`
+- `connector_credential_revoked`
+- `connector_missing_scope`
+- `account_selection_required`
+- `external_request_failed`
+- `external_response_invalid`
+- `external_rate_limited`
+- `external_auth_failed`
+- `http_invalid_url`
+- `http_unsupported_scheme`
+- `http_response_too_large`
 
 Approval/recovery:
 

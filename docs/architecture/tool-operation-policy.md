@@ -2,7 +2,7 @@
 
 Tool tests should follow [Architecture Test Strategy](test-strategy.md). Tool errors should map into [Error Taxonomy](error-taxonomy.md) and model-visible payloads from [Model-Visible Tool Results](model-visible-tool-results.md).
 
-This document defines the operation classification layer for OpenNivara tools. The product policy is intentionally liberal: read/open/search/send/index operations run automatically, while delete, modify, external mutation, mutating/deleting shell commands, unknown shell commands, and unknown operations require per-operation approval.
+This document defines the operation classification layer for OpenNivara tools. The product policy is intentionally liberal: read/open/search/send/index operations run automatically, while delete, modify, external mutation, mutating/deleting shell commands, unknown shell commands, and unknown operations require per-operation approval. External operation details are defined in [External Operations Policy](external-operations-policy.md).
 
 The engine should not make ad hoc approval decisions. It should call a centralized operation classification API.
 
@@ -189,6 +189,7 @@ Future implemented tool mapping:
 - `open_url` -> `OperationKind::Opening`
 - `open_app` -> `OperationKind::Opening`
 - `open_file` -> `OperationKind::Opening`, unless the operation modifies or deletes
+- `http_get` -> `OperationKind::ExternalRead`
 - `write_file` -> `OperationKind::LocalModify`
 - `write_binary_file` -> `OperationKind::LocalModify`
 - `delete_file` -> `OperationKind::LocalDelete`
@@ -203,6 +204,15 @@ Memory tool mapping is defined in [Memory Proposals And Tools](memory-proposals-
 - `delete_memory` -> `OperationKind::LocalDelete`, approval required, exact-ID only, unavailable until true hard delete exists
 
 Memory proposals are not tool approvals. Proposal approval saves a suggested memory; tool approval executes one same-turn operation.
+
+Connector tool mapping is dynamic and defined by connector capabilities. See [Connectors, Accounts, And Credentials](connectors-accounts-credentials.md), [Connector Tool Registry](connector-tool-registry.md), [First Connector Scope](first-connector-scope.md), and [GitHub Connector V1](github-connector-v1.md).
+
+Connector capability rules:
+
+- `ExternalRead` capabilities run automatically.
+- `ExternalMutation` capabilities require approval.
+- connector tools are not exposed without connected account, active credential, required scopes, and enabled tool config.
+- model-provider calls to the configured provider remain automatic and are not arbitrary external mutations.
 
 ## Shell Command Policy
 
@@ -365,6 +375,7 @@ Reason examples:
 - `Command contains shell redirection, which is treated as unknown.`
 - `HTTP method POST mutates external state.`
 - `Tool declares read_only.`
+- `Capability declares external_mutation.`
 
 ## Required Tests
 
@@ -402,6 +413,10 @@ Add tests for:
 30. Approval-required tool calls build `ToolPreview` before creating approval.
 31. Memory write tools are not declared when `MemoryMode` is off.
 32. `delete_memory` is not declared until hard-delete cleanup scope is implemented.
+33. `http_get` classifies as `ExternalRead` and runs automatically.
+34. Connector `ExternalRead` capabilities run automatically.
+35. Connector `ExternalMutation` capabilities require approval.
+36. Connector tools are not declared without connected account, active credential, required scopes, and enabled config.
 
 ## Implementation Milestones
 

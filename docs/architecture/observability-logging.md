@@ -99,6 +99,11 @@ Recommended tracing events/spans:
 - `tool.execution_started`
 - `tool.execution_finished`
 - `tool.execution_failed`
+- `connector.account_resolved`
+- `connector.credential_loaded`
+- `connector.scope_check_failed`
+- `connector.request_started`
+- `connector.request_finished`
 - `approval.created`
 - `approval.approved`
 - `approval.denied`
@@ -119,6 +124,9 @@ Recommended structured fields:
 - `tool_name`
 - `classification`
 - `approval_required`
+- `connector_id`
+- `capability_id`
+- `account_id`
 - `surface`
 - `actor_id`
 - `status`
@@ -136,6 +144,11 @@ Do not log by default:
 - provider prompt text
 - provider response text
 - API keys
+- OAuth access tokens
+- OAuth refresh tokens
+- bot tokens
+- authorization headers
+- cookies
 - environment variables
 - secret-looking values
 - raw command stdout/stderr
@@ -227,6 +240,8 @@ Redact values for keys containing:
 
 - `api_key`
 - `token`
+- `access_token`
+- `refresh_token`
 - `secret`
 - `password`
 - `credential`

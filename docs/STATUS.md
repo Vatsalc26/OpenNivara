@@ -22,6 +22,10 @@ Product decisions:
 - Memory proposals stay separate from tool approvals; memory extraction runs only after a completed turn.
 - Memory proposal UX uses separate Desktop cards, CLI `memory proposals` commands, and Telegram memory commands; it does not reuse operation approval commands.
 - `forget_memory` retracts/stops using memory; `delete_memory` means true permanent hard delete and remains unavailable until cleanup scope is honest.
+- Connector/account/credential design must come before authenticated external mutation tools.
+- Connector credential metadata belongs in SQLite; raw tokens/API keys/secrets belong in OS keychain, never directly in SQLite.
+- First external tool is unauthenticated `http_get`; first authenticated connector is GitHub, starting read-only.
+- Connector tools are explicit typed tools exposed dynamically by connected account, credential status, scopes, and tool config.
 - New architecture should land through incremental module boundaries, not one large refactor.
 - Test strategy focuses existing infrastructure on approval, recovery, tools, provider, and surface scenarios.
 - Chat-visible events, durable approval audit rows, and local developer logs are separate observability layers.

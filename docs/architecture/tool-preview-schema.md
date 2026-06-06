@@ -74,6 +74,7 @@ Recommended `preview_kind` values:
 - `binary_write`
 - `file_delete`
 - `shell_command`
+- `external_read`
 - `external_mutation`
 - `unknown`
 
@@ -341,6 +342,51 @@ Opening operations are automatic, but may still produce activity previews.
 }
 ```
 
+## External Operation Previews
+
+External read previews are automatic activity records. External mutation previews become approval cards.
+
+External read:
+
+```json
+{
+  "schema_version": 1,
+  "tool_name": "github_fetch_issue",
+  "preview_kind": "external_read",
+  "operation_target": "github:owner/repo#123",
+  "summary": "OpenNivara will read GitHub issue #123.",
+  "details": {
+    "connector_id": "github",
+    "capability_id": "github.issue.read",
+    "account_display_name": "GitHub account",
+    "required_scopes": ["issues:read"],
+    "approval_required": false
+  }
+}
+```
+
+External mutation:
+
+```json
+{
+  "schema_version": 1,
+  "tool_name": "github_comment_issue",
+  "preview_kind": "external_mutation",
+  "operation_target": "github:owner/repo#123",
+  "summary": "OpenNivara wants to comment on GitHub issue #123.",
+  "details": {
+    "connector_id": "github",
+    "capability_id": "github.issue.comment",
+    "account_display_name": "GitHub account",
+    "body_preview": "Here is the proposed comment...",
+    "required_scopes": ["issues:write"],
+    "classification_reason": "Capability declares external_mutation."
+  }
+}
+```
+
+External previews must not include tokens, API keys, authorization headers, cookies, or other credential material.
+
 ## ApprovalView Mapping
 
 `ApprovalView` is built from `ToolPreview`:
@@ -402,3 +448,6 @@ Add tests for:
 18. `pending_turns` stores full args while pending.
 19. `pending_turn` deletion preserves compact approval audit.
 20. Approval UI can render from `ApprovalView` without direct tool access.
+21. External read preview is automatic and includes connector/capability metadata.
+22. External mutation preview includes connector/account/scopes/target/body.
+23. External previews redact credential material.

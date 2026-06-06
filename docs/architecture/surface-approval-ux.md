@@ -8,6 +8,8 @@ Surfaces should render typed `UserFacingError` values from [Error Taxonomy](erro
 
 Memory proposal review is not operation approval. Memory proposal UX and commands are defined in [Memory Proposals And Tools](memory-proposals-and-tools.md). Do not route memory proposal save/reject actions through `pending_approvals` or `/approve`.
 
+External mutation approvals must render connector/account/capability/scope details from [External Operations Policy](external-operations-policy.md). Surfaces must not show raw tokens, API keys, authorization headers, cookies, or credential material.
+
 ## Shared Response Contract
 
 Replace answer-only engine responses with a response that supports approval pause:
@@ -105,6 +107,8 @@ The card should show:
 - Deny button
 
 For file modifications, show diff inside expandable full details.
+
+For external mutations, show connector, account display name, target/destination, method/action, body/comment/message preview, required scopes, and classification reason.
 
 Desktop Tauri commands to add:
 
@@ -287,6 +291,8 @@ Add tests for:
 14. Denied operation resumes same turn with denied tool result.
 15. Pending approval remains visible in same chat history.
 16. Memory proposal commands do not call operation approval handlers.
+17. External mutation approval cards include connector, account, target, body/destination, scopes, and reason.
+18. External mutation approval cards redact credential material.
 
 ## Continue UX Update
 
