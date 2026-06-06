@@ -9,6 +9,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   rust-check:
     name: Rust Backend Checks
@@ -30,6 +34,20 @@ jobs:
         with:
           components: clippy, rustfmt
 
+      - name: Configure Rust Compiler Cache
+        uses: mozilla-actions/sccache-action@v0.0.9
+
+      - name: Enable Rust Compiler Cache
+        run: |
+          echo "SCCACHE_GHA_ENABLED=true" >> "$GITHUB_ENV"
+          echo "RUSTC_WRAPPER=sccache" >> "$GITHUB_ENV"
+
+      - name: Cache Cargo Dependencies
+        uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: rust-workspace
+          cache-on-failure: true
+
       - name: Install Linux Tauri Dependencies
         run: |
           sudo apt-get update
@@ -46,17 +64,6 @@ jobs:
             libxdo-dev \
             pkg-config \
             wget
-
-      - name: Cache Cargo Dependencies
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cargo/bin/
-            ~/.cargo/registry/index/
-            ~/.cargo/registry/cache/
-            ~/.cargo/git/db/
-            target/
-          key: ${{ runner.os }}-cargo-${{ hashFiles('Cargo.lock') }}
 
       - name: Run Cargo Format Check
         run: cargo fmt --all -- --check
@@ -80,6 +87,10 @@ jobs:
 
       - name: Reject Obsolete Skill Generator References
         run: bun run check:obsolete-skill-generator
+
+      - name: Show Rust Compiler Cache Stats
+        if: always()
+        run: sccache --show-stats
 
   frontend-check:
     name: Frontend Quality Checks

@@ -1,0 +1,11 @@
+version: 2
+updates:
+  - package-ecosystem: cargo
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 0
+    ignore:
+      # glib 0.18 is pulled in by Tauri 2.11.2's GTK 3 stack through gtk 0.18.
+      # Dependabot cannot resolve glib 0.20 until upstream Tauri/Wry moves that graph.
+      - dependency-name: glib
