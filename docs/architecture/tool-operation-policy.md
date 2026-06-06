@@ -214,6 +214,8 @@ Connector capability rules:
 - connector tools are not exposed without connected account, active credential, required scopes, and enabled tool config.
 - model-provider calls to the configured provider remain automatic and are not arbitrary external mutations.
 
+`write_file` V1 is defined in [write_file V1](write-file-v1.md). It supports only `create_new` and `overwrite`, is UTF-8 text-only, requires approval, and must not be declared with append/binary/patch semantics until those modes are implemented.
+
 ## Shell Command Policy
 
 Use a simple conservative shell classifier first. Do not attempt to fully parse Bash, zsh, PowerShell, cmd.exe, substitutions, redirects, scripts, and arbitrary compound commands in v1.
@@ -417,6 +419,8 @@ Add tests for:
 34. Connector `ExternalRead` capabilities run automatically.
 35. Connector `ExternalMutation` capabilities require approval.
 36. Connector tools are not declared without connected account, active credential, required scopes, and enabled config.
+37. `write_file` classifies as `LocalModify` and requires approval.
+38. `write_file` V1 exposes only `create_new` and `overwrite` modes.
 
 ## Implementation Milestones
 

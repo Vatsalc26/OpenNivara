@@ -8,6 +8,11 @@ CLI + MockProvider + write_file create_new/overwrite + approval pause/resume
 
 This is the smallest useful proof that the architecture works end to end.
 
+Detailed contracts:
+
+- `write_file` semantics are defined in [write_file V1](write-file-v1.md).
+- `MockProvider` and the test harness are defined in [MockProvider Test Harness](mock-provider-test-harness.md).
+
 ## Demo Flow
 
 User asks from CLI:
@@ -110,10 +115,13 @@ MVP write modes:
 Rules:
 
 - `create_new` fails if file exists
+- `create_new` fails if parent directory is missing
 - `overwrite` replaces an existing file
+- `overwrite` fails if file is missing
 - content is UTF-8 text
 - append is out of scope
 - binary write is out of scope
+- parent directory creation is out of scope
 
 ## MVP Preview
 
@@ -154,7 +162,8 @@ Successful execution:
     "written": true,
     "path": "/absolute/path/notes.txt",
     "mode": "create_new",
-    "bytes_written": 11
+    "bytes_written": 11,
+    "sha256": "..."
   },
   "error": null,
   "metadata": null
@@ -271,3 +280,5 @@ Required tests:
 12. completed approval deletes pending turn and keeps audit row.
 13. CLI can approve from same session/chat context.
 14. wrong session approval is rejected.
+15. MVP tests use a counting tool executor and assert `tool_execution_count("write_file")`.
+16. Provider failure/retry tests assert provider call count and stored tool-result shape.

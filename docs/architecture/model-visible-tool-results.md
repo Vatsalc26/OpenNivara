@@ -123,17 +123,20 @@ Do not include by default:
   "ok": true,
   "tool_name": "write_file",
   "tool_call_id": "toolcall_2",
-  "summary": "Overwrote src/main.rs, writing 1,234 bytes.",
+  "summary": "Created notes.txt, writing 11 bytes.",
   "result": {
     "written": true,
-    "path": "/absolute/path/src/main.rs",
-    "mode": "overwrite",
-    "bytes_written": 1234
+    "path": "/absolute/path/notes.txt",
+    "mode": "create_new",
+    "bytes_written": 11,
+    "sha256": "..."
   },
   "error": null,
   "metadata": null
 }
 ```
+
+`write_file` V1 is defined in [write_file V1](write-file-v1.md). Failures use stable error codes such as `file_already_exists`, `file_missing_for_overwrite`, `parent_directory_not_found`, `write_failed`, and `atomic_replace_failed`.
 
 `run_command`:
 
@@ -323,3 +326,5 @@ Required tests:
 11. Connector read success uses the standard envelope.
 12. Connector mutation denial uses `approval_denied`.
 13. Connector errors do not expose credential material.
+14. `write_file` success includes mode, bytes written, path, and hash.
+15. `write_file` failure uses stable error codes.

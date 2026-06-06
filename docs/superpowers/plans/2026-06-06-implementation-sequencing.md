@@ -17,6 +17,8 @@
 - Read: `docs/STATUS.md`
 - Read: `docs/architecture/implementation-roadmap.md`
 - Read: `docs/architecture/mvp-vertical-slice.md`
+- Read: `docs/architecture/write-file-v1.md`
+- Read: `docs/architecture/mock-provider-test-harness.md`
 - Read: `docs/architecture/approval-resume-state.md`
 - Read: `docs/architecture/recovery-state-machine.md`
 - Read: `docs/architecture/state-rust-api.md`
@@ -60,6 +62,8 @@ Confirm these are covered:
 - `http_get`
 - GitHub V1A/V1B
 - MVP vertical slice
+- `write_file` V1 create_new/overwrite semantics
+- scripted `MockProvider` test harness
 
 - [ ] **Step 2: Verify docs**
 
@@ -198,6 +202,8 @@ Move Gemini-native structs and HTTP calls out of engine code.
 
 Support scripted plain text, tool call, tool-result continuation, and provider failure.
 
+Follow [MockProvider Test Harness](../../architecture/mock-provider-test-harness.md): record every `ModelRequest`, provide call-count assertions, and support assertion steps for model-visible tool results.
+
 - [ ] **Step 4: Verify**
 
 Run model tests for round-trip, Gemini conversion, mock scripts, and generated `tool_call_id`.
@@ -323,6 +329,8 @@ Run tests proving duplicate approve is blocked, provider failure after tool succ
 **Files:**
 
 - Use: `docs/architecture/mvp-vertical-slice.md`
+- Use: `docs/architecture/write-file-v1.md`
+- Use: `docs/architecture/mock-provider-test-harness.md`
 - Surface: CLI only
 - Provider: `MockProvider`
 - Tool: `write_file` with `create_new` and `overwrite`
@@ -344,6 +352,12 @@ Expected: file is not written, model receives `approval_denied`, final denial ex
 Script `MockProvider` to fail after tool success, then continue.
 
 Expected: status remains `executed`, continue retries provider only, tool is not executed again, final answer completes the approval.
+
+- [ ] **Step 4: Run write_file preview checks**
+
+Call `write_file` preview for `create_new` and `overwrite`.
+
+Expected: preview never mutates, `create_new` fails if file exists, `overwrite` fails if file is missing, and overwrite preview includes unified diff/truncation metadata when needed.
 
 ## PR 12: Surface Approval UX
 

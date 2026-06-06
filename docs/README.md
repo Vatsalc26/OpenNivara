@@ -21,6 +21,8 @@ This is the canonical internal engineering documentation index.
 - [First Connector Scope](architecture/first-connector-scope.md)
 - [GitHub Connector V1](architecture/github-connector-v1.md)
 - [MVP Vertical Slice](architecture/mvp-vertical-slice.md)
+- [write_file V1](architecture/write-file-v1.md)
+- [MockProvider Test Harness](architecture/mock-provider-test-harness.md)
 - [Approval Resume And State DB](architecture/approval-resume-state.md)
 - [Recovery State Machine](architecture/recovery-state-machine.md)
 - [State Rust API](architecture/state-rust-api.md)

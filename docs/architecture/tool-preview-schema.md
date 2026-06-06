@@ -71,6 +71,7 @@ Recommended `preview_kind` values:
 - `file_exists`
 - `opening`
 - `text_write`
+- `text_diff`
 - `binary_write`
 - `file_delete`
 - `shell_command`

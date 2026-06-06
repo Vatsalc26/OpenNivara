@@ -203,6 +203,8 @@ Add `src/model/mock.rs` for deterministic tests.
 - provider error
 - generated tool call ID when a provider lacks one
 
+Detailed `MockProvider` scripting and MVP harness requirements are defined in [MockProvider Test Harness](mock-provider-test-harness.md). It is a scripted model simulator, not a fake Gemini clone, and should record every `ModelRequest`.
+
 ## Engine Shape After Gateway
 
 The engine tool loop becomes provider-neutral:
@@ -271,6 +273,9 @@ Add tests for:
 13. `PendingTurnState` JSON round-trips with native `ModelMessage`.
 14. `PendingTurnState` does not depend on Gemini `Content`.
 15. `MockProvider` supports deterministic engine tests.
+16. `MockProvider` records every `ModelRequest`.
+17. `MockProvider` can assert the latest request contains a `ModelVisibleToolResult`.
+18. MVP provider-failure script proves resume does not rerun `write_file`.
 
 ## Implementation Milestones
 

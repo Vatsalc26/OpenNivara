@@ -108,7 +108,14 @@ Tool:
 - `tool_execution_failed`
 - `tool_output_truncated`
 - `path_not_found`
+- `parent_directory_not_found`
 - `path_is_directory`
+- `file_already_exists`
+- `file_missing_for_overwrite`
+- `file_not_utf8_for_diff`
+- `write_failed`
+- `atomic_replace_failed`
+- `permission_denied`
 - `invalid_base64`
 - `command_timed_out`
 - `command_failed`

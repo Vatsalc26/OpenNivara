@@ -4,7 +4,7 @@ This document defines approval recovery behavior for crashes, provider failures,
 
 The key invariant is: once an approved tool has run, never run it again during resume or retry. Retry only the model/provider continuation.
 
-The first vertical slice that must prove this invariant is [MVP Vertical Slice](mvp-vertical-slice.md): CLI + `MockProvider` + `write_file` approval pause/resume.
+The first vertical slice that must prove this invariant is [MVP Vertical Slice](mvp-vertical-slice.md): CLI + `MockProvider` + `write_file` approval pause/resume. The deterministic provider harness is defined in [MockProvider Test Harness](mock-provider-test-harness.md).
 
 ## Core Definitions
 

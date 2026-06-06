@@ -4,7 +4,7 @@ The canonical preview contract is [Tool Preview Schema](tool-preview-schema.md).
 
 Tool previews give users enough detail to approve or deny mutating operations without dumping sensitive data into chat history or logs.
 
-The first mutating preview to implement should be the MVP `write_file` create-new preview from [MVP Vertical Slice](mvp-vertical-slice.md). It proves that preview generation is read-only before adding richer diff, binary, delete, or shell previews.
+The first mutating preview to implement should be the MVP `write_file` create-new preview from [MVP Vertical Slice](mvp-vertical-slice.md) and [write_file V1](write-file-v1.md). It proves that preview generation is read-only before adding richer diff, binary, delete, or shell previews.
 
 ## Preview Principles
 
@@ -81,6 +81,30 @@ MVP `write_file` create-new preview:
 }
 ```
 
+MVP overwrite preview:
+
+```json
+{
+  "schema_version": 1,
+  "tool_name": "write_file",
+  "preview_kind": "text_diff",
+  "operation_target": "/absolute/path/notes.txt",
+  "summary": "OpenNivara wants to overwrite notes.txt.",
+  "details": {
+    "path": "/absolute/path/notes.txt",
+    "mode": "overwrite",
+    "old_bytes": 18,
+    "new_bytes": 11,
+    "old_sha256": "...",
+    "new_sha256": "...",
+    "diff": "--- notes.txt\n+++ notes.txt\n@@ ...",
+    "diff_truncated": false
+  }
+}
+```
+
+`create_new` preview fails with `file_already_exists` if the target already exists. `overwrite` preview fails with `file_missing_for_overwrite` or `path_not_found` if the target does not exist. Preview failures create no approval.
+
 ## Shell Command Preview
 
 For shell commands, show:
@@ -115,3 +139,6 @@ Required tests:
 5. result summary omits huge stdout/stderr.
 6. MVP `write_file create_new` preview does not mutate the filesystem.
 7. MVP overwrite preview includes enough information to understand replacement.
+8. `write_file create_new` preview fails with `file_already_exists` when target exists.
+9. `write_file overwrite` preview fails when target is missing.
+10. Large `write_file` diff includes explicit truncation metadata.

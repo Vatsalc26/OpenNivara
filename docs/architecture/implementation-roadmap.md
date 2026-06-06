@@ -14,6 +14,8 @@ CLI + MockProvider + write_file create_new/overwrite + approval pause/resume
 
 This slice is defined in [MVP Vertical Slice](mvp-vertical-slice.md). It proves request/turn IDs, raw message storage, model tool calls, `LocalModify` classification, `ToolPreview`, pending approval/turn storage, CLI approval, exactly-once execution, `ModelVisibleToolResult`, provider continuation, completion cleanup, and durable audit rows.
 
+`write_file` V1 semantics are defined in [write_file V1](write-file-v1.md). The deterministic provider/test harness is defined in [MockProvider Test Harness](mock-provider-test-harness.md).
+
 Do not use `run_command`, Desktop, Telegram, connectors, or memory tools as the first vertical slice.
 
 ## PR Sequence
@@ -191,6 +193,7 @@ Scope:
 - `ToolPreviewEnvelope`
 - `ToolRegistry::preview`
 - activity previews for read tools
+- `write_file` V1 preview for `create_new` and `overwrite`
 - `ToolExecutionResult`
 - `ModelVisibleToolResult`
 - truncation helpers
@@ -201,6 +204,7 @@ Acceptance:
 - preview never mutates
 - automatic read tools get activity preview
 - model-visible tool result uses `ok/result/error` envelope
+- `write_file` preview never mutates and execution revalidates after approval
 - large output truncation is explicit
 - invalid preview creates no approval
 
