@@ -4,6 +4,8 @@ This document defines the shared approval response and command contract for Desk
 
 All surfaces are equal in policy. They use the same engine, state DB, approval model, and same-turn resume flow. They differ only in presentation.
 
+Surfaces should render typed `UserFacingError` values from [Error Taxonomy](error-taxonomy.md), not raw internal error strings.
+
 ## Shared Response Contract
 
 Replace answer-only engine responses with a response that supports approval pause:

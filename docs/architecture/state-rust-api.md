@@ -2,6 +2,8 @@
 
 This document defines the internal Rust API shape for OpenNivara state storage. It is not an HTTP API and should stay close to the current code style: focused free functions over `rusqlite::Connection`, typed inputs, typed records, and direct unit tests against temporary SQLite databases.
 
+The state module boundary is defined in [Module Boundaries](module-boundaries.md), and state integration tests should follow [Architecture Test Strategy](test-strategy.md).
+
 The current state/session code is concentrated in `src/sessions.rs`. That file owns state DB path resolution, inline schema creation, sessions, messages, active sessions, pending approvals, pinned contexts, and pinned skills. The target is a proper `src/state` module backed by embedded refinery migrations, while keeping the API simple enough for engine, desktop, CLI, and Telegram code to call directly.
 
 ## Principles

@@ -4,6 +4,8 @@ This document defines the thin model gateway/provider abstraction OpenNivara sho
 
 The goal is narrow: prevent engine state and approval resume payloads from being locked to Gemini-native `Content`, `Part`, and `function_call` structs. This is not a provider marketplace, routing layer, or local-model project yet.
 
+Provider errors should be sanitized and classified through [Error Taxonomy](error-taxonomy.md).
+
 ## Current Engine Context
 
 `src/engine.rs` currently defines Gemini-shaped structs directly:

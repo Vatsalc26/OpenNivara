@@ -15,6 +15,9 @@ Product decisions:
 - Approved tool execution is exactly once. After status reaches `executed`, retry only provider/model continuation.
 - Request IDs and turn IDs are stable cross-surface envelopes for recovery, logs, approvals, and provider calls.
 - Specta remains the shared Desktop/frontend type-generation contract.
+- User-facing errors use stable typed DTOs; surfaces should not render raw internal error strings.
+- New architecture should land through incremental module boundaries, not one large refactor.
+- Test strategy focuses existing infrastructure on approval, recovery, tools, provider, and surface scenarios.
 - Chat-visible events, durable approval audit rows, and local developer logs are separate observability layers.
 - Memory is local-first, dynamic, and has no templates.
 - Time and location context are deterministic, permissioned, and audited.

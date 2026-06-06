@@ -1,5 +1,7 @@
 # Tool Operation Policy
 
+Tool tests should follow [Architecture Test Strategy](test-strategy.md). Tool errors should map into [Error Taxonomy](error-taxonomy.md) and model-visible payloads from [Model-Visible Tool Results](model-visible-tool-results.md).
+
 This document defines the operation classification layer for OpenNivara tools. The product policy is intentionally liberal: read/open/search/send/index operations run automatically, while delete, modify, external mutation, mutating/deleting shell commands, unknown shell commands, and unknown operations require per-operation approval.
 
 The engine should not make ad hoc approval decisions. It should call a centralized operation classification API.
