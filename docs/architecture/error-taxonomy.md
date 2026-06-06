@@ -112,6 +112,7 @@ Tool:
 - `invalid_base64`
 - `command_timed_out`
 - `command_failed`
+- `memory_disabled`
 
 Approval/recovery:
 

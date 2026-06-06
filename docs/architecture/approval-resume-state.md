@@ -310,6 +310,8 @@ Store it only for the chat/session where the approval was requested. Approving t
 
 Pending turn state must use OpenNivara-native model types from [Model Provider Gateway](model-provider-gateway.md). Do not store Gemini-native `Content`, `Part`, or `function_call` structs in `resume_payload_json`.
 
+Pending turn state stores the exact assembled model history from [Prompt Context Assembly](prompt-context-assembly.md). Do not recompute context, skill selection, tool declarations, memory retrieval, workspace map brief, or conversation history on approval resume.
+
 `PendingTurnState` should include:
 
 - request envelope
@@ -371,6 +373,8 @@ The canonical resume flow is:
 19. The engine marks approval `completed` and sets `completed_at`.
 20. The engine deletes the `pending_turns` row after terminal completion is handled.
 21. The engine returns the final answer to the originating chat/surface.
+
+Memory extraction is not part of approval resume. Run memory extraction only after the final assistant answer or denial explanation is stored, as defined in [Memory Proposals And Tools](memory-proposals-and-tools.md).
 
 Atomic execution guard:
 

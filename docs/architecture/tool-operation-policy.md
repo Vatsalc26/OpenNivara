@@ -194,6 +194,16 @@ Future implemented tool mapping:
 - `delete_file` -> `OperationKind::LocalDelete`
 - `run_command` -> `OperationKind::ShellCommand`
 
+Memory tool mapping is defined in [Memory Proposals And Tools](memory-proposals-and-tools.md):
+
+- `remember_this` -> `OperationKind::LocalModify`, governed by `MemoryMode` for proposal/save behavior
+- `create_memory` -> `OperationKind::LocalModify`, governed by `MemoryMode` for proposal/save behavior
+- `update_memory` -> `OperationKind::LocalModify`, approval required
+- `forget_memory` -> `OperationKind::LocalModify` or `OperationKind::LocalDelete`, approval required
+- `delete_memory` -> `OperationKind::LocalDelete`, approval required
+
+Memory proposals are not tool approvals. Proposal approval saves a suggested memory; tool approval executes one same-turn operation.
+
 ## Shell Command Policy
 
 Use a simple conservative shell classifier first. Do not attempt to fully parse Bash, zsh, PowerShell, cmd.exe, substitutions, redirects, scripts, and arbitrary compound commands in v1.

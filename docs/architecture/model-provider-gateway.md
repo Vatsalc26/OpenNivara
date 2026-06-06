@@ -31,6 +31,8 @@ It also:
 
 Approval resume requires storing pending model turn state. If that state stores Gemini-native structs, the resume system becomes tightly coupled to Gemini and harder to evolve for OpenAI-compatible APIs, Ollama, local models, or future providers.
 
+Prompt/context assembly should produce native `ModelMessage` history as defined in [Prompt Context Assembly](prompt-context-assembly.md). Tool result payloads appended to that history should use [Model-Visible Tool Results](model-visible-tool-results.md) and the boundaries in [Tool Result Schema](tool-result-schema.md).
+
 ## Implementation Order
 
 Use this order:

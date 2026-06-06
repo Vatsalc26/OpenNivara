@@ -6,7 +6,11 @@ The engine should expose implemented enabled tools liberally, classify actual to
 
 Approval recovery semantics are defined in [Approval Recovery State Machine](recovery-state-machine.md). The most important invariant is that an approved tool must never run again after status reaches `executed`; provider/model continuation is the only retryable part.
 
-Engine errors should map to the typed user-facing contract in [Error Taxonomy](error-taxonomy.md). Model-visible tool success, denial, and failure payloads should follow [Model-Visible Tool Results](model-visible-tool-results.md).
+Engine errors should map to the typed user-facing contract in [Error Taxonomy](error-taxonomy.md). Model-visible tool success, denial, and failure payloads should follow [Model-Visible Tool Results](model-visible-tool-results.md) and the layer boundaries in [Tool Result Schema](tool-result-schema.md).
+
+Prompt/context assembly should follow [Prompt Context Assembly](prompt-context-assembly.md). Approval resume continues the stored model history; it must not recompute context, memory retrieval, skill selection, tool declarations, or conversation history.
+
+Memory extraction runs only after a final assistant answer or denial explanation is stored. Memory proposal behavior and explicit memory tools are defined in [Memory Proposals And Tools](memory-proposals-and-tools.md).
 
 ## Current Engine Context
 

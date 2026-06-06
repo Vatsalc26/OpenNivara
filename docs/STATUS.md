@@ -16,6 +16,10 @@ Product decisions:
 - Request IDs and turn IDs are stable cross-surface envelopes for recovery, logs, approvals, and provider calls.
 - Specta remains the shared Desktop/frontend type-generation contract.
 - User-facing errors use stable typed DTOs; surfaces should not render raw internal error strings.
+- Model-visible tool results use one stable `{ ok, tool_name, tool_call_id, summary, result/error, metadata }` envelope.
+- Internal tool execution results, model-visible results, UI errors, previews, pending turns, and audit rows are separate contracts.
+- Pending turns freeze assembled model history; approval resume must not recompute context, skills, tools, or history.
+- Memory proposals stay separate from tool approvals; memory extraction runs only after a completed turn.
 - New architecture should land through incremental module boundaries, not one large refactor.
 - Test strategy focuses existing infrastructure on approval, recovery, tools, provider, and surface scenarios.
 - Chat-visible events, durable approval audit rows, and local developer logs are separate observability layers.
