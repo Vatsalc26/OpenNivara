@@ -4,6 +4,12 @@ This document defines the shared approval response and command contract for Desk
 
 All surfaces are equal in policy. They use the same engine, state DB, approval model, and same-turn resume flow. They differ only in presentation.
 
+Surface-specific implementation details live in:
+
+- [CLI Approval UX](cli-approval-ux.md)
+- [Desktop Approval Card State Model](desktop-approval-card-state-model.md)
+- [Telegram Approval UX](telegram-approval-ux.md)
+
 Surfaces should render typed `UserFacingError` values from [Error Taxonomy](error-taxonomy.md), not raw internal error strings.
 
 Memory proposal review is not operation approval. Memory proposal UX and commands are defined in [Memory Proposals And Tools](memory-proposals-and-tools.md). Do not route memory proposal save/reject actions through `pending_approvals` or `/approve`.
@@ -93,7 +99,7 @@ Default actor IDs:
 
 ## Desktop UX
 
-Desktop should use an inline approval card inside the same chat, not a global modal.
+Desktop should use an inline approval card inside the same chat, not a global modal. The full state model is defined in [Desktop Approval Card State Model](desktop-approval-card-state-model.md).
 
 The card should show:
 
@@ -128,7 +134,7 @@ Update Desktop `AskResponse` to include:
 
 ## CLI UX
 
-For `opennivara ask` and `opennivara chat` v1, use inline blocking approval.
+For `opennivara ask` and `opennivara chat` v1, use inline blocking approval. The exact Clap command structure and output contract are defined in [CLI Approval UX](cli-approval-ux.md).
 
 Prompt shape:
 
@@ -147,6 +153,7 @@ Input behavior:
 - `y`: approve once and resume immediately
 - `n`: deny and resume with denied tool result
 - `details`: print full arguments JSON, then ask again
+- `q`: leave approval pending
 
 Add a top-level approval queue command group:
 
@@ -155,16 +162,22 @@ opennivara approvals list --session <session_id optional>
 opennivara approvals show <approval_id>
 opennivara approvals approve <approval_id> --session <session_id optional>
 opennivara approvals deny <approval_id> --session <session_id optional>
+opennivara approvals continue <approval_id> --session <session_id optional>
 ```
 
 Initial implementation can start with inline approval in `ask` and `chat`, then add queue commands immediately after.
 
 ## Telegram UX
 
+Telegram uses command-based approval in MVP. The exact command and formatting contract is defined in [Telegram Approval UX](telegram-approval-ux.md).
+
 Keep:
 
+- `/approvals`
+- `/approval <id>`
 - `/approve <id>`
 - `/deny <id>`
+- `/continue <id>`
 
 These commands are only for operation approvals.
 
@@ -293,6 +306,9 @@ Add tests for:
 16. Memory proposal commands do not call operation approval handlers.
 17. External mutation approval cards include connector, account, target, body/destination, scopes, and reason.
 18. External mutation approval cards redact credential material.
+19. CLI non-interactive approval-required ask prints commands and does not approve.
+20. Desktop derives actions from `ApprovalView.can_*` fields.
+21. Telegram command parser accepts `/approvals`, `/approval`, `/approve`, `/deny`, and `/continue`.
 
 ## Continue UX Update
 
@@ -339,3 +355,5 @@ Additional required tests:
 3. Desktop Resume final response calls `resume_pending_continuation`.
 4. CLI approvals continue calls `resume_pending_continuation`.
 5. completed approvals are hidden from default pending lists.
+6. Desktop executed card shows Continue response only.
+7. Telegram wrong chat cannot approve.

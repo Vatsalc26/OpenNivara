@@ -426,9 +426,9 @@ For shell commands, show:
 
 Surface-specific approval UX:
 
-- Desktop: modal/dialog attached to the same chat
-- CLI: terminal prompt in the same turn/session
-- Telegram: `/approve <id>` or `/deny <id>` in the same chat
+- Desktop: inline approval card attached to the same chat; see [Desktop Approval Card State Model](desktop-approval-card-state-model.md)
+- CLI: terminal prompt in the same turn/session plus approval commands; see [CLI Approval UX](cli-approval-ux.md)
+- Telegram: command-based same-chat approval; see [Telegram Approval UX](telegram-approval-ux.md)
 
 ## Test Coverage Requirements
 

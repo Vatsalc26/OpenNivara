@@ -26,6 +26,9 @@
 - Read: `docs/architecture/tool-operation-policy.md`
 - Read: `docs/architecture/tool-preview-schema.md`
 - Read: `docs/architecture/model-visible-tool-results.md`
+- Read: `docs/architecture/cli-approval-ux.md`
+- Read: `docs/architecture/desktop-approval-card-state-model.md`
+- Read: `docs/architecture/telegram-approval-ux.md`
 
 - [ ] **Step 1: Verify docs index**
 
@@ -64,6 +67,9 @@ Confirm these are covered:
 - MVP vertical slice
 - `write_file` V1 create_new/overwrite semantics
 - scripted `MockProvider` test harness
+- CLI approval command structure
+- Desktop approval card state model
+- Telegram approval commands
 
 - [ ] **Step 2: Verify docs**
 
@@ -372,17 +378,23 @@ Expected: preview never mutates, `create_new` fails if file exists, `overwrite` 
 
 Render approval and continuation cards from generated types.
 
+Follow `docs/architecture/desktop-approval-card-state-model.md`. The frontend derives actions from `ApprovalView` status/phase/can booleans and does not implement its own transition logic.
+
 - [ ] **Step 2: Add CLI commands**
 
 Add approval prompts and approval list/show/approve/deny/continue commands.
+
+Follow `docs/architecture/cli-approval-ux.md`. Non-interactive approval-required ask must print commands and never auto-approve. `--json` must emit shared DTOs.
 
 - [ ] **Step 3: Add Telegram commands**
 
 Wire `/approve`, `/deny`, and `/continue` to engine APIs.
 
+Follow `docs/architecture/telegram-approval-ux.md`. MVP uses commands only, same-chat approval, concise previews, and no full argument JSON dumps by default.
+
 - [ ] **Step 4: Verify**
 
-Run tests proving same chat/session can approve, wrong chat/session is rejected, executed approvals say use continue, completed is hidden by default, and frontend tests import generated types.
+Run tests proving same chat/session can approve, wrong chat/session is rejected, executed approvals say use continue, completed is hidden by default, non-interactive CLI never auto-approves, Telegram previews are truncated, and frontend tests import generated types.
 
 ## PR 13: Opening And Mutating Local Tools
 

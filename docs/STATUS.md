@@ -30,6 +30,9 @@ Product decisions:
 - First end-to-end MVP slice is CLI + `MockProvider` + `write_file` create/overwrite + approval pause/resume.
 - `write_file` V1 supports only UTF-8 `create_new` and `overwrite`; preview is required, never mutates, and execution revalidates after approval.
 - MVP approval/resume tests should use scripted `MockProvider` and a tool execution counter to prove `write_file` executes exactly once.
+- CLI is the first approval UX proof surface, with interactive TTY approval plus `opennivara approvals ...` subcommands.
+- Desktop renders backend `ApprovalView`; frontend must not invent approval transition logic.
+- Telegram uses the same backend approval APIs with same-chat command-based approval UX and no special tool permission layer.
 - GitHub V1A is read-only (`github_list_repositories`, `github_fetch_issue`, `github_search_issues`, `github_fetch_pr`, `github_fetch_file`); GitHub V1B is low-risk issue creation/comment mutation with approval.
 - New architecture should land through incremental module boundaries, not one large refactor.
 - Test strategy focuses existing infrastructure on approval, recovery, tools, provider, and surface scenarios.

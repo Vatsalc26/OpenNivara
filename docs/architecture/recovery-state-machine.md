@@ -6,6 +6,8 @@ The key invariant is: once an approved tool has run, never run it again during r
 
 The first vertical slice that must prove this invariant is [MVP Vertical Slice](mvp-vertical-slice.md): CLI + `MockProvider` + `write_file` approval pause/resume. The deterministic provider harness is defined in [MockProvider Test Harness](mock-provider-test-harness.md).
 
+Surface actions must respect the same recovery state. CLI, Desktop, and Telegram action rendering is defined in [CLI Approval UX](cli-approval-ux.md), [Desktop Approval Card State Model](desktop-approval-card-state-model.md), and [Telegram Approval UX](telegram-approval-ux.md).
+
 ## Core Definitions
 
 `executed` does not mean the whole turn is done.

@@ -279,6 +279,12 @@ Scope:
 - Telegram `/approve`, `/deny`, and `/continue`
 - approval lists/details
 
+Docs:
+
+- [CLI Approval UX](cli-approval-ux.md)
+- [Desktop Approval Card State Model](desktop-approval-card-state-model.md)
+- [Telegram Approval UX](telegram-approval-ux.md)
+
 Acceptance:
 
 - same chat/session can approve
@@ -286,6 +292,12 @@ Acceptance:
 - executed approval says to use continue
 - completed approvals are hidden by default
 - frontend tests import generated types
+- CLI non-interactive mode never auto-approves
+- CLI `--json` emits shared DTOs rather than ad hoc JSON
+- Desktop derives UI from backend `ApprovalView`
+- Desktop executed state shows Continue response only
+- Telegram uses same-chat commands only in MVP
+- Telegram does not dump full argument JSON by default
 
 ### PR 13: Opening And Mutating Local Tools
 
