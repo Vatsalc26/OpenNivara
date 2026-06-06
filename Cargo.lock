@@ -4934,6 +4934,7 @@ dependencies = [
  "cfg-if",
  "log",
  "regex",
+ "rusqlite",
  "serde",
  "siphasher",
  "thiserror 2.0.18",
