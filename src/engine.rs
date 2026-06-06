@@ -1,9 +1,10 @@
 use crate::remote_policy;
 use crate::sessions::{self, DbMessage};
+use chrono::Utc;
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub enum RequestSource {
     Cli,
     Desktop,
@@ -13,18 +14,122 @@ pub enum RequestSource {
     },
 }
 
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "snake_case")]
+pub enum Surface {
+    Cli,
+    Desktop,
+    Telegram,
+}
+
+impl RequestSource {
+    pub fn surface(&self) -> Surface {
+        match self {
+            RequestSource::Cli => Surface::Cli,
+            RequestSource::Desktop => Surface::Desktop,
+            RequestSource::Telegram { .. } => Surface::Telegram,
+        }
+    }
+
+    pub fn actor_id(&self) -> String {
+        match self {
+            RequestSource::Cli => "cli_owner".to_string(),
+            RequestSource::Desktop => "desktop_owner".to_string(),
+            RequestSource::Telegram { chat_id, .. } => format!("telegram_{chat_id}"),
+        }
+    }
+}
+
 pub struct EngineRequest {
+    pub request_id: String,
     pub source: RequestSource,
     pub session_id: Option<String>,
     pub message: String,
     pub ui_selected_skill_id: Option<String>,
     pub pin_selected_skill: bool,
+    pub client_message_id: Option<String>,
+    pub created_at: String,
 }
 
-#[allow(dead_code)]
+impl EngineRequest {
+    pub fn new(
+        source: RequestSource,
+        session_id: Option<String>,
+        message: impl Into<String>,
+    ) -> Self {
+        Self {
+            request_id: crate::runtime::ids::new_request_id(),
+            source,
+            session_id,
+            message: message.into(),
+            ui_selected_skill_id: None,
+            pin_selected_skill: false,
+            client_message_id: None,
+            created_at: Utc::now().to_rfc3339(),
+        }
+    }
+
+    pub fn with_skill_selection(
+        mut self,
+        ui_selected_skill_id: Option<String>,
+        pin_selected_skill: bool,
+    ) -> Self {
+        self.ui_selected_skill_id = ui_selected_skill_id;
+        self.pin_selected_skill = pin_selected_skill;
+        self
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub enum EngineResponseKind {
+    Answer,
+    ApprovalRequired,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct EngineResponse {
+    pub request_id: String,
+    pub turn_id: String,
     pub session_id: String,
+    pub kind: EngineResponseKind,
     pub answer: String,
+}
+
+impl EngineResponse {
+    pub fn answer(request_id: String, turn_id: String, session_id: String, answer: String) -> Self {
+        Self {
+            request_id,
+            turn_id,
+            session_id,
+            kind: EngineResponseKind::Answer,
+            answer,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct TurnEnvelope {
+    pub request_id: String,
+    pub turn_id: String,
+    pub session_id: String,
+    pub surface: Surface,
+    pub actor_id: String,
+    pub user_message_id: String,
+    pub created_at: String,
+}
+
+impl TurnEnvelope {
+    pub fn new(request: &EngineRequest, session_id: String, user_message_id: String) -> Self {
+        Self {
+            request_id: request.request_id.clone(),
+            turn_id: crate::runtime::ids::new_turn_id(),
+            session_id,
+            surface: request.source.surface(),
+            actor_id: request.source.actor_id(),
+            user_message_id,
+            created_at: Utc::now().to_rfc3339(),
+        }
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -434,7 +539,7 @@ impl OpenNivaraEngine {
             RequestSource::Telegram { chat_id, .. } => format!("Telegram ({})", chat_id),
         };
 
-        let session_id = match request.session_id {
+        let session_id = match request.session_id.clone() {
             Some(id) => {
                 if sessions::get_session(&conn, &id)?.is_some() {
                     // Update user's active session marker to this specific ID
@@ -465,7 +570,7 @@ impl OpenNivaraEngine {
         }
 
         // 3. Store the user's message in the session history database
-        sessions::store_message(
+        let user_message = sessions::store_message(
             &conn,
             &session_id,
             "user",
@@ -473,6 +578,7 @@ impl OpenNivaraEngine {
             &request.message,
             None,
         )?;
+        let turn = TurnEnvelope::new(&request, session_id.clone(), user_message.id.clone());
 
         // 4. Load configuration files (Profile, Style, Preferences, Tools)
         let tools_path = crate::tools::get_tools_path()?;
@@ -836,7 +942,12 @@ impl OpenNivaraEngine {
             None,
         )?;
 
-        Ok(EngineResponse { session_id, answer })
+        Ok(EngineResponse::answer(
+            turn.request_id,
+            turn.turn_id,
+            session_id,
+            answer,
+        ))
     }
 }
 
@@ -1097,5 +1208,66 @@ mod tests {
             Some(&config),
         )
         .is_none());
+    }
+
+    #[test]
+    fn request_source_maps_to_surface_and_actor_id() {
+        assert_eq!(RequestSource::Cli.surface(), Surface::Cli);
+        assert_eq!(RequestSource::Cli.actor_id(), "cli_owner");
+
+        assert_eq!(RequestSource::Desktop.surface(), Surface::Desktop);
+        assert_eq!(RequestSource::Desktop.actor_id(), "desktop_owner");
+
+        let telegram = RequestSource::Telegram {
+            chat_id: 42,
+            username: Some("vatsal".to_string()),
+        };
+        assert_eq!(telegram.surface(), Surface::Telegram);
+        assert_eq!(telegram.actor_id(), "telegram_42");
+    }
+
+    #[test]
+    fn engine_request_new_fills_runtime_fields() {
+        let request =
+            EngineRequest::new(RequestSource::Cli, Some("sess_existing".to_string()), "hi");
+
+        assert!(request.request_id.starts_with("req_"));
+        assert_eq!(request.source, RequestSource::Cli);
+        assert_eq!(request.session_id.as_deref(), Some("sess_existing"));
+        assert_eq!(request.message, "hi");
+        assert_eq!(request.client_message_id, None);
+        assert!(!request.created_at.is_empty());
+        assert_eq!(request.ui_selected_skill_id, None);
+        assert!(!request.pin_selected_skill);
+    }
+
+    #[test]
+    fn turn_envelope_uses_request_source_metadata() {
+        let request = EngineRequest::new(RequestSource::Desktop, None, "hello");
+        let envelope = TurnEnvelope::new(&request, "sess_123".to_string(), "msg_456".to_string());
+
+        assert_eq!(envelope.request_id, request.request_id);
+        assert!(envelope.turn_id.starts_with("turn_"));
+        assert_eq!(envelope.session_id, "sess_123");
+        assert_eq!(envelope.surface, Surface::Desktop);
+        assert_eq!(envelope.actor_id, "desktop_owner");
+        assert_eq!(envelope.user_message_id, "msg_456");
+        assert!(!envelope.created_at.is_empty());
+    }
+
+    #[test]
+    fn engine_response_answer_carries_request_and_turn_ids() {
+        let response = EngineResponse::answer(
+            "req_123".to_string(),
+            "turn_456".to_string(),
+            "sess_789".to_string(),
+            "done".to_string(),
+        );
+
+        assert_eq!(response.request_id, "req_123");
+        assert_eq!(response.turn_id, "turn_456");
+        assert_eq!(response.session_id, "sess_789");
+        assert_eq!(response.kind, EngineResponseKind::Answer);
+        assert_eq!(response.answer, "done");
     }
 }

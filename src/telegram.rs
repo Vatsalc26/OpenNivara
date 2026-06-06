@@ -1023,13 +1023,11 @@ async fn handle_engine_request(
         .await;
 
     let engine = crate::engine::OpenNivaraEngine::new();
-    let request = crate::engine::EngineRequest {
-        source: crate::engine::RequestSource::Telegram { chat_id, username },
-        session_id: None,
-        message: msg_text,
-        ui_selected_skill_id: None,
-        pin_selected_skill: false,
-    };
+    let request = crate::engine::EngineRequest::new(
+        crate::engine::RequestSource::Telegram { chat_id, username },
+        None,
+        msg_text,
+    );
 
     match engine.handle_message(request).await {
         Ok(response) => {

@@ -732,13 +732,11 @@ async fn run_app(cli: Cli) -> anyhow::Result<()> {
         Commands::Ask { question } => {
             // Direct request utilizing the unified OpenNivaraEngine so it is logged in the database
             let engine = engine::OpenNivaraEngine::new();
-            let request = engine::EngineRequest {
-                source: engine::RequestSource::Cli,
-                session_id: None, // Resolves or resumes default active CLI session
-                message: question,
-                ui_selected_skill_id: None,
-                pin_selected_skill: false,
-            };
+            let request = engine::EngineRequest::new(
+                engine::RequestSource::Cli,
+                None, // Resolves or resumes default active CLI session
+                question,
+            );
 
             println!("Consulting with OpenNivara...");
             let response = engine.handle_message(request).await?;
@@ -1535,13 +1533,11 @@ async fn run_chat_loop(
 
         println!("Consulting with OpenNivara...");
 
-        let request = engine::EngineRequest {
-            source: engine::RequestSource::Cli,
-            session_id: Some(session_id.clone()),
-            message: trimmed.to_string(),
-            ui_selected_skill_id: None,
-            pin_selected_skill: false,
-        };
+        let request = engine::EngineRequest::new(
+            engine::RequestSource::Cli,
+            Some(session_id.clone()),
+            trimmed.to_string(),
+        );
 
         match engine.handle_message(request).await {
             Ok(response) => {

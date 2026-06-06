@@ -190,8 +190,8 @@ pub fn store_message(
     source: &str,
     content: &str,
     metadata_json: Option<&str>,
-) -> anyhow::Result<()> {
-    let msg_id = Uuid::new_v4().to_string();
+) -> anyhow::Result<DbMessage> {
+    let msg_id = crate::runtime::ids::new_message_id();
     let current_time = Utc::now().to_rfc3339();
 
     // Insert message
@@ -215,7 +215,15 @@ pub fn store_message(
         params![current_time, session_id],
     )?;
 
-    Ok(())
+    Ok(DbMessage {
+        id: msg_id,
+        session_id: session_id.to_string(),
+        role: role.to_string(),
+        source: source.to_string(),
+        content: content.to_string(),
+        created_at: current_time,
+        metadata_json: metadata_json.map(str::to_string),
+    })
 }
 
 /// Sets a session as the active session for a specific user key (e.g. "cli" or "telegram_<chat_id>").
@@ -472,4 +480,76 @@ pub fn list_pinned_skills(conn: &Connection, session_id: &str) -> anyhow::Result
         pinned.push(r?);
     }
     Ok(pinned)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn in_memory_conn() -> Connection {
+        let conn = Connection::open_in_memory().expect("in-memory db");
+        conn.execute(
+            "CREATE TABLE sessions (
+                id TEXT PRIMARY KEY,
+                title TEXT,
+                created_at TEXT NOT NULL,
+                updated_at TEXT NOT NULL,
+                status TEXT NOT NULL,
+                source_created TEXT NOT NULL,
+                active INTEGER NOT NULL DEFAULT 1
+            );",
+            [],
+        )
+        .expect("sessions table");
+        conn.execute(
+            "CREATE TABLE messages (
+                id TEXT PRIMARY KEY,
+                session_id TEXT NOT NULL,
+                role TEXT NOT NULL,
+                source TEXT NOT NULL,
+                content TEXT NOT NULL,
+                created_at TEXT NOT NULL,
+                metadata_json TEXT,
+                FOREIGN KEY(session_id) REFERENCES sessions(id)
+            );",
+            [],
+        )
+        .expect("messages table");
+        conn
+    }
+
+    #[test]
+    fn store_message_returns_inserted_db_message() {
+        let conn = in_memory_conn();
+        conn.execute(
+            "INSERT INTO sessions (id, title, created_at, updated_at, status, source_created, active)
+             VALUES ('sess_test', 'Test', '2026-06-07T00:00:00Z', '2026-06-07T00:00:00Z', 'active', 'CLI', 1)",
+            [],
+        )
+        .expect("insert session");
+
+        let message = store_message(
+            &conn,
+            "sess_test",
+            "user",
+            "CLI",
+            "hello",
+            Some(r#"{"client":"test"}"#),
+        )
+        .expect("store message");
+
+        assert!(message.id.starts_with("msg_"));
+        assert_eq!(message.session_id, "sess_test");
+        assert_eq!(message.role, "user");
+        assert_eq!(message.source, "CLI");
+        assert_eq!(message.content, "hello");
+        assert_eq!(
+            message.metadata_json.as_deref(),
+            Some(r#"{"client":"test"}"#)
+        );
+
+        let loaded = get_session_messages(&conn, "sess_test").expect("messages");
+        assert_eq!(loaded.len(), 1);
+        assert_eq!(loaded[0].id, message.id);
+    }
 }

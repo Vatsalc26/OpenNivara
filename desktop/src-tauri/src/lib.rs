@@ -28,13 +28,14 @@ async fn ask_opennivara(
 
     // Call unified message handler
     let response = engine
-        .handle_message(opennivara::engine::EngineRequest {
-            source: opennivara::engine::RequestSource::Desktop,
-            session_id,
-            message,
-            ui_selected_skill_id,
-            pin_selected_skill: pin_selected_skill.unwrap_or(false),
-        })
+        .handle_message(
+            opennivara::engine::EngineRequest::new(
+                opennivara::engine::RequestSource::Desktop,
+                session_id,
+                message,
+            )
+            .with_skill_selection(ui_selected_skill_id, pin_selected_skill.unwrap_or(false)),
+        )
         .await
         .map_err(|e| e.to_string())?;
 
