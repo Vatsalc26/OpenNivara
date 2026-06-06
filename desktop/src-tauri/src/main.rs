@@ -7,7 +7,7 @@ fn main() {
     {
         std::env::set_var(
             "WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS",
-            "--disable-gpu --disable-gpu-compositing"
+            "--disable-gpu --disable-gpu-compositing",
         );
     }
 

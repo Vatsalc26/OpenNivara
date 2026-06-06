@@ -312,7 +312,7 @@ export function MemoryView({ defaultTab = "timeline" }: MemoryViewProps) {
 
 			<Tabs
 				value={activeTab}
-				onValueChange={(value) => setActiveTab(value as MemoryTab)}
+				onValueChange={(value: string) => setActiveTab(value as MemoryTab)}
 				className="p-5"
 			>
 				<TabsList className="w-full max-w-3xl">

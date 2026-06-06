@@ -34,8 +34,8 @@ Every new desktop feature should have at least one test at the lowest useful lay
 Use Bun for desktop JavaScript commands:
 
 ```powershell
-cargo test
-cargo check --manifest-path desktop\src-tauri\Cargo.toml
+cargo test --workspace
+cargo check --workspace
 Set-Location desktop
 bun run typecheck
 bun run check

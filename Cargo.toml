@@ -1,3 +1,7 @@
+[workspace]
+members = [".", "desktop/src-tauri"]
+resolver = "2"
+
 [package]
 name = "opennivara"
 version = "0.1.0-alpha.2"

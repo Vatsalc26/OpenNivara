@@ -124,7 +124,7 @@ Common checks:
 
 ```bash
 cargo fmt --all -- --check
-cargo test
+cargo test --workspace
 cd desktop
 bun run typecheck
 bun run check

@@ -19,16 +19,16 @@ bun install --frozen-lockfile
 
 ```bash
 cargo fmt --all -- --check
-cargo clippy --all-targets -- -D warnings
-cargo test
-cargo build
+cargo clippy --workspace --all-targets -- -D warnings
+cargo test --workspace
+cargo build --workspace
 ```
 
 For faster local Rust test feedback, install and use nextest:
 
 ```bash
 cargo install cargo-nextest --locked
-cargo nextest run
+cargo nextest run --workspace
 ```
 
 For coverage work, install and run cargo-llvm-cov:

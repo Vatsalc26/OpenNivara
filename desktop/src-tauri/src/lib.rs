@@ -19,7 +19,7 @@ async fn ask_opennivara(
     {
         return Err(
             "Missing Gemini API key. Add it in desktop onboarding/settings or set GEMINI_API_KEY."
-                .to_string()
+                .to_string(),
         );
     }
 
@@ -52,9 +52,12 @@ async fn list_sessions() -> Result<Vec<opennivara::sessions::Session>, String> {
 }
 
 #[tauri::command]
-async fn get_session_messages(session_id: String) -> Result<Vec<opennivara::sessions::DbMessage>, String> {
+async fn get_session_messages(
+    session_id: String,
+) -> Result<Vec<opennivara::sessions::DbMessage>, String> {
     let conn = opennivara::sessions::init_db().map_err(|e| e.to_string())?;
-    let list = opennivara::sessions::get_session_messages(&conn, &session_id).map_err(|e| e.to_string())?;
+    let list = opennivara::sessions::get_session_messages(&conn, &session_id)
+        .map_err(|e| e.to_string())?;
     Ok(list)
 }
 
@@ -136,7 +139,9 @@ async fn get_preferences() -> Result<opennivara::preferences::PreferencesFile, S
 }
 
 #[tauri::command]
-async fn save_preferences(preferences: opennivara::preferences::PreferencesFile) -> Result<(), String> {
+async fn save_preferences(
+    preferences: opennivara::preferences::PreferencesFile,
+) -> Result<(), String> {
     opennivara::preferences::save_preferences(&preferences).map_err(|e| e.to_string())
 }
 
@@ -182,7 +187,9 @@ fn skills_set_enabled(skill_id: String, enabled: bool) -> Result<(), String> {
 }
 
 #[tauri::command]
-fn skills_test_route(message: String) -> Result<opennivara::skills::selector::RouteDecision, String> {
+fn skills_test_route(
+    message: String,
+) -> Result<opennivara::skills::selector::RouteDecision, String> {
     opennivara::skills::registry::test_route(message).map_err(|e| e.to_string())
 }
 
@@ -298,15 +305,20 @@ fn memory_create_item(
 }
 
 #[tauri::command]
-fn memory_get_item(memory_id: String) -> Result<Option<opennivara::memory::types::MemoryItem>, String> {
+fn memory_get_item(
+    memory_id: String,
+) -> Result<Option<opennivara::memory::types::MemoryItem>, String> {
     let conn = memory_conn()?;
     opennivara::memory::db::get_memory_item(&conn, &memory_id).map_err(|e| e.to_string())
 }
 
 #[tauri::command]
-fn memory_list_items(limit: Option<u32>) -> Result<Vec<opennivara::memory::types::MemoryItem>, String> {
+fn memory_list_items(
+    limit: Option<u32>,
+) -> Result<Vec<opennivara::memory::types::MemoryItem>, String> {
     let conn = memory_conn()?;
-    opennivara::memory::db::list_memory_items(&conn, limit.unwrap_or(100)).map_err(|e| e.to_string())
+    opennivara::memory::db::list_memory_items(&conn, limit.unwrap_or(100))
+        .map_err(|e| e.to_string())
 }
 
 #[tauri::command]
@@ -326,7 +338,8 @@ fn memory_delete_item(memory_id: String) -> Result<(), String> {
 #[tauri::command]
 fn memory_retract_item(memory_id: String, reason: String) -> Result<(), String> {
     let conn = memory_conn()?;
-    opennivara::memory::db::retract_memory_item(&conn, &memory_id, &reason).map_err(|e| e.to_string())
+    opennivara::memory::db::retract_memory_item(&conn, &memory_id, &reason)
+        .map_err(|e| e.to_string())
 }
 
 #[tauri::command]
@@ -500,7 +513,8 @@ fn memory_extract_proposals_for_message(
 }
 
 #[tauri::command]
-fn memory_list_proposals() -> Result<Vec<opennivara::memory::types::MemoryExtractionProposal>, String> {
+fn memory_list_proposals(
+) -> Result<Vec<opennivara::memory::types::MemoryExtractionProposal>, String> {
     let conn = memory_conn()?;
     opennivara::memory::extraction::list_memory_proposals(&conn).map_err(|e| e.to_string())
 }
@@ -541,7 +555,9 @@ fn memory_embedding_status() -> opennivara::memory::embeddings::EmbeddingStatus 
 }
 
 #[tauri::command]
-fn memory_list_tasks(status: Option<String>) -> Result<Vec<opennivara::memory::tasks::MemoryTask>, String> {
+fn memory_list_tasks(
+    status: Option<String>,
+) -> Result<Vec<opennivara::memory::tasks::MemoryTask>, String> {
     let conn = memory_conn()?;
     opennivara::memory::tasks::list_tasks(&conn, status.as_deref()).map_err(|e| e.to_string())
 }
@@ -554,13 +570,16 @@ fn memory_update_task_status(memory_id: String, status: String) -> Result<(), St
 }
 
 #[tauri::command]
-fn memory_list_due_reminders(now_utc: String) -> Result<Vec<opennivara::memory::tasks::MemoryTask>, String> {
+fn memory_list_due_reminders(
+    now_utc: String,
+) -> Result<Vec<opennivara::memory::tasks::MemoryTask>, String> {
     let conn = memory_conn()?;
     opennivara::memory::reminders::list_due_reminders(&conn, &now_utc).map_err(|e| e.to_string())
 }
 
 #[tauri::command]
-fn memory_list_corrections() -> Result<Vec<opennivara::memory::corrections::MemoryCorrection>, String> {
+fn memory_list_corrections(
+) -> Result<Vec<opennivara::memory::corrections::MemoryCorrection>, String> {
     let conn = memory_conn()?;
     opennivara::memory::corrections::list_corrections(&conn).map_err(|e| e.to_string())
 }
@@ -574,10 +593,16 @@ fn memory_resolve_entity_mention(
 }
 
 #[tauri::command]
-fn runtime_get_context(timezone: Option<String>, allow_exact_location: Option<bool>) -> Result<opennivara::runtime::context::RuntimeContext, String> {
+fn runtime_get_context(
+    timezone: Option<String>,
+    allow_exact_location: Option<bool>,
+) -> Result<opennivara::runtime::context::RuntimeContext, String> {
     let conn = memory_conn()?;
-    let location = opennivara::runtime::location::get_location_context(&conn, allow_exact_location.unwrap_or(false))
-        .map_err(|e| e.to_string())?;
+    let location = opennivara::runtime::location::get_location_context(
+        &conn,
+        allow_exact_location.unwrap_or(false),
+    )
+    .map_err(|e| e.to_string())?;
     Ok(opennivara::runtime::clock::runtime_context_at(
         chrono::Utc::now(),
         timezone.as_deref(),
@@ -605,7 +630,9 @@ fn runtime_get_model_context_info(
 }
 
 #[tauri::command]
-fn location_get_context(allow_exact: Option<bool>) -> Result<opennivara::runtime::location::LocationContext, String> {
+fn location_get_context(
+    allow_exact: Option<bool>,
+) -> Result<opennivara::runtime::location::LocationContext, String> {
     let conn = memory_conn()?;
     opennivara::runtime::location::get_location_context(&conn, allow_exact.unwrap_or(false))
         .map_err(|e| e.to_string())
@@ -654,18 +681,25 @@ fn marketplace_init() -> Result<String, String> {
 }
 
 #[tauri::command]
-fn marketplace_list_installed_packs() -> Result<opennivara::marketplace::packs::InstalledPacksFile, String> {
+fn marketplace_list_installed_packs(
+) -> Result<opennivara::marketplace::packs::InstalledPacksFile, String> {
     opennivara::marketplace::packs::list_installed_packs().map_err(|e| e.to_string())
 }
 
 #[tauri::command]
-fn marketplace_preview_pack(path: String) -> Result<opennivara::marketplace::packs::PackPreview, String> {
-    opennivara::marketplace::packs::preview_pack_from_path(std::path::PathBuf::from(path)).map_err(|e| e.to_string())
+fn marketplace_preview_pack(
+    path: String,
+) -> Result<opennivara::marketplace::packs::PackPreview, String> {
+    opennivara::marketplace::packs::preview_pack_from_path(std::path::PathBuf::from(path))
+        .map_err(|e| e.to_string())
 }
 
 #[tauri::command]
-fn marketplace_install_pack(path: String) -> Result<opennivara::marketplace::packs::InstalledPack, String> {
-    opennivara::marketplace::packs::install_pack_from_path(std::path::PathBuf::from(path)).map_err(|e| e.to_string())
+fn marketplace_install_pack(
+    path: String,
+) -> Result<opennivara::marketplace::packs::InstalledPack, String> {
+    opennivara::marketplace::packs::install_pack_from_path(std::path::PathBuf::from(path))
+        .map_err(|e| e.to_string())
 }
 
 #[tauri::command]
@@ -674,17 +708,22 @@ fn marketplace_uninstall_pack(pack_id: String) -> Result<(), String> {
 }
 
 #[tauri::command]
-fn marketplace_list_builtin_packs() -> Result<Vec<opennivara::marketplace::builtin::BuiltinPackSummary>, String> {
+fn marketplace_list_builtin_packs(
+) -> Result<Vec<opennivara::marketplace::builtin::BuiltinPackSummary>, String> {
     opennivara::marketplace::builtin::list_builtin_packs().map_err(|e| e.to_string())
 }
 
 #[tauri::command]
-fn marketplace_install_builtin_pack(pack_id: String) -> Result<opennivara::marketplace::packs::InstalledPack, String> {
+fn marketplace_install_builtin_pack(
+    pack_id: String,
+) -> Result<opennivara::marketplace::packs::InstalledPack, String> {
     opennivara::marketplace::builtin::install_builtin_pack(&pack_id).map_err(|e| e.to_string())
 }
 
 #[tauri::command]
-fn marketplace_preview_installed_pack(pack_id: String) -> Result<opennivara::marketplace::packs::PackPreview, String> {
+fn marketplace_preview_installed_pack(
+    pack_id: String,
+) -> Result<opennivara::marketplace::packs::PackPreview, String> {
     opennivara::marketplace::packs::preview_installed_pack(&pack_id).map_err(|e| e.to_string())
 }
 
@@ -699,7 +738,9 @@ fn marketplace_set_active_mode(mode_id: String) -> Result<(), String> {
 }
 
 #[tauri::command]
-fn marketplace_create_mode(mode: opennivara::marketplace::modes::OpenNivaraMode) -> Result<(), String> {
+fn marketplace_create_mode(
+    mode: opennivara::marketplace::modes::OpenNivaraMode,
+) -> Result<(), String> {
     opennivara::marketplace::modes::create_mode(mode).map_err(|e| e.to_string())
 }
 
@@ -710,26 +751,32 @@ fn marketplace_add_pack_to_mode(mode_id: String, pack_id: String) -> Result<(), 
 
 #[tauri::command]
 fn marketplace_remove_pack_from_mode(mode_id: String, pack_id: String) -> Result<(), String> {
-    opennivara::marketplace::modes::remove_pack_from_mode(&mode_id, &pack_id).map_err(|e| e.to_string())
+    opennivara::marketplace::modes::remove_pack_from_mode(&mode_id, &pack_id)
+        .map_err(|e| e.to_string())
 }
 
 #[tauri::command]
-fn marketplace_get_active_theme() -> Result<Option<opennivara::marketplace::themes::OpenNivaraTheme>, String> {
+fn marketplace_get_active_theme(
+) -> Result<Option<opennivara::marketplace::themes::OpenNivaraTheme>, String> {
     opennivara::marketplace::themes::get_active_theme().map_err(|e| e.to_string())
 }
 
 #[tauri::command]
-fn marketplace_get_active_addon_theme() -> Result<Option<opennivara::marketplace::themes::OpenNivaraTheme>, String> {
+fn marketplace_get_active_addon_theme(
+) -> Result<Option<opennivara::marketplace::themes::OpenNivaraTheme>, String> {
     opennivara::marketplace::themes::get_active_addon_theme().map_err(|e| e.to_string())
 }
 
 #[tauri::command]
-fn marketplace_preview_builtin_pack(pack_id: String) -> Result<opennivara::marketplace::packs::PackPreview, String> {
+fn marketplace_preview_builtin_pack(
+    pack_id: String,
+) -> Result<opennivara::marketplace::packs::PackPreview, String> {
     opennivara::marketplace::builtin::preview_builtin_pack(&pack_id).map_err(|e| e.to_string())
 }
 
 #[tauri::command]
-fn marketplace_list_installed_themes() -> Result<Vec<opennivara::marketplace::themes::InstalledThemeSummary>, String> {
+fn marketplace_list_installed_themes(
+) -> Result<Vec<opennivara::marketplace::themes::InstalledThemeSummary>, String> {
     opennivara::marketplace::themes::list_installed_themes().map_err(|e| e.to_string())
 }
 
@@ -739,13 +786,18 @@ fn theme_store_list() -> Result<Vec<opennivara::marketplace::themes::ThemeStoreI
 }
 
 #[tauri::command]
-fn theme_install_builtin(theme_id: String) -> Result<opennivara::marketplace::themes::InstalledTheme, String> {
+fn theme_install_builtin(
+    theme_id: String,
+) -> Result<opennivara::marketplace::themes::InstalledTheme, String> {
     opennivara::marketplace::themes::install_builtin_theme(&theme_id).map_err(|e| e.to_string())
 }
 
 #[tauri::command]
-fn theme_install_from_path(path: String) -> Result<opennivara::marketplace::themes::InstalledTheme, String> {
-    opennivara::marketplace::themes::install_theme_from_path(std::path::PathBuf::from(path)).map_err(|e| e.to_string())
+fn theme_install_from_path(
+    path: String,
+) -> Result<opennivara::marketplace::themes::InstalledTheme, String> {
+    opennivara::marketplace::themes::install_theme_from_path(std::path::PathBuf::from(path))
+        .map_err(|e| e.to_string())
 }
 
 #[tauri::command]
@@ -769,7 +821,8 @@ fn theme_get_active() -> Result<Option<opennivara::marketplace::themes::OpenNiva
 }
 
 #[tauri::command]
-fn theme_get_appearance_settings() -> Result<opennivara::marketplace::themes::AppearanceSettings, String> {
+fn theme_get_appearance_settings(
+) -> Result<opennivara::marketplace::themes::AppearanceSettings, String> {
     opennivara::marketplace::themes::read_appearance_settings().map_err(|e| e.to_string())
 }
 
@@ -781,17 +834,22 @@ fn theme_list_installed() -> Result<Vec<opennivara::marketplace::themes::Install
 }
 
 #[tauri::command]
-fn theme_preview(theme_id: String) -> Result<opennivara::marketplace::themes::ThemePreview, String> {
+fn theme_preview(
+    theme_id: String,
+) -> Result<opennivara::marketplace::themes::ThemePreview, String> {
     opennivara::marketplace::themes::preview_theme(&theme_id).map_err(|e| e.to_string())
 }
 
 #[tauri::command]
-fn marketplace_get_active_command_snippets() -> Result<Vec<opennivara::marketplace::snippets::CommandSnippet>, String> {
+fn marketplace_get_active_command_snippets(
+) -> Result<Vec<opennivara::marketplace::snippets::CommandSnippet>, String> {
     opennivara::marketplace::snippets::get_active_command_snippets().map_err(|e| e.to_string())
 }
 
 #[tauri::command]
-fn marketplace_repair(dry_run: bool) -> Result<opennivara::marketplace::repair::MarketplaceRepairReport, String> {
+fn marketplace_repair(
+    dry_run: bool,
+) -> Result<opennivara::marketplace::repair::MarketplaceRepairReport, String> {
     opennivara::marketplace::repair::marketplace_repair(dry_run).map_err(|e| e.to_string())
 }
 
@@ -816,8 +874,11 @@ fn marketplace_reset(confirm: bool) -> Result<(), String> {
 }
 
 #[tauri::command]
-fn marketplace_get_pack_activation_capabilities(pack_id: String) -> Result<opennivara::marketplace::packs::PackActivationCapabilities, String> {
-    opennivara::marketplace::packs::get_pack_activation_capabilities(&pack_id).map_err(|e| e.to_string())
+fn marketplace_get_pack_activation_capabilities(
+    pack_id: String,
+) -> Result<opennivara::marketplace::packs::PackActivationCapabilities, String> {
+    opennivara::marketplace::packs::get_pack_activation_capabilities(&pack_id)
+        .map_err(|e| e.to_string())
 }
 
 #[tauri::command]
@@ -827,7 +888,13 @@ fn marketplace_add_pack_to_mode_with_activation(
     apply_theme: bool,
     apply_style: bool,
 ) -> Result<opennivara::marketplace::modes::ModeActivationResult, String> {
-    opennivara::marketplace::modes::add_pack_to_mode_with_activation(&mode_id, &pack_id, apply_theme, apply_style).map_err(|e| e.to_string())
+    opennivara::marketplace::modes::add_pack_to_mode_with_activation(
+        &mode_id,
+        &pack_id,
+        apply_theme,
+        apply_style,
+    )
+    .map_err(|e| e.to_string())
 }
 
 #[tauri::command]
@@ -839,7 +906,15 @@ fn marketplace_create_mode_from_pack(
     apply_theme: bool,
     apply_style: bool,
 ) -> Result<opennivara::marketplace::modes::OpenNivaraMode, String> {
-    opennivara::marketplace::modes::create_mode_from_pack(&pack_id, &mode_id, &mode_name, activate, apply_theme, apply_style).map_err(|e| e.to_string())
+    opennivara::marketplace::modes::create_mode_from_pack(
+        &pack_id,
+        &mode_id,
+        &mode_name,
+        activate,
+        apply_theme,
+        apply_style,
+    )
+    .map_err(|e| e.to_string())
 }
 
 #[tauri::command]
@@ -848,33 +923,57 @@ fn marketplace_update_mode_theme(mode_id: String, theme_id: Option<String>) -> R
 }
 
 #[tauri::command]
-fn marketplace_update_mode_style_pack(mode_id: String, style_pack_id: Option<String>) -> Result<(), String> {
-    opennivara::marketplace::modes::update_mode_style_pack(&mode_id, style_pack_id).map_err(|e| e.to_string())
+fn marketplace_update_mode_style_pack(
+    mode_id: String,
+    style_pack_id: Option<String>,
+) -> Result<(), String> {
+    opennivara::marketplace::modes::update_mode_style_pack(&mode_id, style_pack_id)
+        .map_err(|e| e.to_string())
 }
 
 #[tauri::command]
-fn marketplace_get_addon_settings() -> Result<opennivara::marketplace::addon_settings::AddonSettings, String> {
+fn marketplace_get_addon_settings(
+) -> Result<opennivara::marketplace::addon_settings::AddonSettings, String> {
     opennivara::marketplace::addon_settings::read_addon_settings().map_err(|e| e.to_string())
 }
 
 #[tauri::command]
-fn marketplace_save_addon_settings(settings: opennivara::marketplace::addon_settings::AddonSettings) -> Result<(), String> {
-    opennivara::marketplace::addon_settings::save_addon_settings(&settings).map_err(|e| e.to_string())
+fn marketplace_save_addon_settings(
+    settings: opennivara::marketplace::addon_settings::AddonSettings,
+) -> Result<(), String> {
+    opennivara::marketplace::addon_settings::save_addon_settings(&settings)
+        .map_err(|e| e.to_string())
 }
 
 #[tauri::command]
 fn marketplace_toggle_pack_enabled(pack_id: String, enabled: bool) -> Result<(), String> {
-    opennivara::marketplace::addon_settings::toggle_pack_enabled(&pack_id, enabled).map_err(|e| e.to_string())
+    opennivara::marketplace::addon_settings::toggle_pack_enabled(&pack_id, enabled)
+        .map_err(|e| e.to_string())
 }
 
 #[tauri::command]
-fn marketplace_toggle_contribution_enabled(pack_id: String, contribution_type: String, contribution_id: String, enabled: bool) -> Result<(), String> {
-    opennivara::marketplace::addon_settings::toggle_contribution_enabled(&pack_id, &contribution_type, &contribution_id, enabled).map_err(|e| e.to_string())
+fn marketplace_toggle_contribution_enabled(
+    pack_id: String,
+    contribution_type: String,
+    contribution_id: String,
+    enabled: bool,
+) -> Result<(), String> {
+    opennivara::marketplace::addon_settings::toggle_contribution_enabled(
+        &pack_id,
+        &contribution_type,
+        &contribution_id,
+        enabled,
+    )
+    .map_err(|e| e.to_string())
 }
 
 #[tauri::command]
-fn marketplace_set_active_theme(theme_id: Option<String>, source_pack_id: Option<String>) -> Result<(), String> {
-    opennivara::marketplace::addon_settings::set_active_theme(theme_id, source_pack_id).map_err(|e| e.to_string())
+fn marketplace_set_active_theme(
+    theme_id: Option<String>,
+    source_pack_id: Option<String>,
+) -> Result<(), String> {
+    opennivara::marketplace::addon_settings::set_active_theme(theme_id, source_pack_id)
+        .map_err(|e| e.to_string())
 }
 
 #[tauri::command]
@@ -888,7 +987,8 @@ fn marketplace_has_legacy_modes() -> bool {
 }
 
 #[tauri::command]
-fn marketplace_get_effective_settings_preview() -> Result<opennivara::marketplace::merge::EffectiveSettingsPreview, String> {
+fn marketplace_get_effective_settings_preview(
+) -> Result<opennivara::marketplace::merge::EffectiveSettingsPreview, String> {
     opennivara::marketplace::merge::get_effective_settings_preview().map_err(|e| e.to_string())
 }
 
@@ -901,14 +1001,24 @@ pub fn run() {
         .setup(|app| {
             use tauri::Manager;
             if let Ok(builtin_path) = opennivara::marketplace::builtin::get_builtin_packs_dir() {
-                std::env::set_var("OPENNIVARA_BUILTIN_PACKS_DIR", builtin_path.to_string_lossy().to_string());
+                std::env::set_var(
+                    "OPENNIVARA_BUILTIN_PACKS_DIR",
+                    builtin_path.to_string_lossy().to_string(),
+                );
             } else if let Ok(resource_dir) = app.path().resource_dir() {
                 let candidates = [
                     resource_dir.join("packs").join("builtin"),
-                    resource_dir.join("_up_").join("_up_").join("packs").join("builtin"),
+                    resource_dir
+                        .join("_up_")
+                        .join("_up_")
+                        .join("packs")
+                        .join("builtin"),
                 ];
                 if let Some(builtin_path) = candidates.iter().find(|path| path.exists()) {
-                    std::env::set_var("OPENNIVARA_BUILTIN_PACKS_DIR", builtin_path.to_string_lossy().to_string());
+                    std::env::set_var(
+                        "OPENNIVARA_BUILTIN_PACKS_DIR",
+                        builtin_path.to_string_lossy().to_string(),
+                    );
                 }
             }
             Ok(())

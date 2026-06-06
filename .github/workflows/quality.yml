@@ -39,16 +39,16 @@ jobs:
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
             target/
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          key: ${{ runner.os }}-cargo-${{ hashFiles('Cargo.lock') }}
 
       - name: Run Cargo Format Check
         run: cargo fmt --all -- --check
 
       - name: Run Cargo Clippy
-        run: cargo clippy --all-targets -- -D warnings
+        run: cargo clippy --workspace --all-targets -- -D warnings
 
       - name: Run Cargo Tests
-        run: cargo test
+        run: cargo test --workspace
 
       - name: Validate Student Essentials Skill Pack
         run: cargo run -- skillctl validate-pack india_student_essentials

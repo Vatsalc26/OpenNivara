@@ -15,8 +15,8 @@ If the browser UI opens but Rust-backed behavior does not work, confirm you are 
 ## Dependency Checks
 
 ```bash
-cargo fmt --check
-cargo test -p opennivara -- --nocapture
+cargo fmt --all -- --check
+cargo test --workspace -- --nocapture
 cd desktop
 bun run typecheck
 bun run check

@@ -8,8 +8,8 @@ Use Rust tests for backend behavior, Bun checks for React, and Tauri E2E for des
 ## Backend
 
 ```bash
-cargo fmt --check
-cargo test -p opennivara -- --nocapture
+cargo fmt --all -- --check
+cargo test --workspace -- --nocapture
 ```
 
 ## Desktop Frontend

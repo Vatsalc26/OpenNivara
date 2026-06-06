@@ -44,9 +44,9 @@ Do not add a large user-facing feature until its regression surface is described
 Run these before marking a feature complete:
 
 ```bash
-cargo fmt --check
-cargo clippy --all-targets -- -D warnings
-cargo test
+cargo fmt --all -- --check
+cargo clippy --workspace --all-targets -- -D warnings
+cargo test --workspace
 ```
 
 ```bash

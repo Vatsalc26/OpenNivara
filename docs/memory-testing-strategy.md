@@ -22,7 +22,7 @@ Recommended verification before shipping memory changes:
 ```powershell
 cargo test memory:: -- --nocapture
 cargo test bindings_are_current -- --nocapture
-cargo check --manifest-path desktop\src-tauri\Cargo.toml
+cargo check --workspace
 Set-Location desktop
 bun run typecheck
 bun run check

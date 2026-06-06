@@ -10,7 +10,7 @@ import {
 	X,
 } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
-import Markdown from "react-markdown";
+import Markdown, { type Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { askOpenNivara, listPinnedSkills } from "@/api/opennivaraClient";
 import { listSkills, type SkillSummary } from "@/api/skillClient";
@@ -62,6 +62,61 @@ function CodeBlock({
 		</div>
 	);
 }
+
+const markdownComponents: Components = {
+	code({
+		className,
+		children,
+		...props
+	}: React.ComponentProps<"code"> & { node?: unknown }) {
+		const match = /language-(\w+)/.exec(className || "");
+		const codeText = String(children).replace(/\n$/, "");
+		return match ? (
+			<CodeBlock language={match[1]} codeText={codeText} />
+		) : (
+			<code
+				className="bg-zinc-850 border border-zinc-800 px-1.5 py-0.5 rounded font-mono text-xs text-cyan-400 font-semibold"
+				{...props}
+			>
+				{children}
+			</code>
+		);
+	},
+	table({ children }: React.ComponentProps<"table">) {
+		return (
+			<div className="my-3 overflow-x-auto rounded-lg border border-border/30">
+				<table className="min-w-full divide-y divide-border/35 text-xs">
+					{children}
+				</table>
+			</div>
+		);
+	},
+	thead({ children }: React.ComponentProps<"thead">) {
+		return <thead className="bg-secondary/45">{children}</thead>;
+	},
+	tbody({ children }: React.ComponentProps<"tbody">) {
+		return <tbody className="divide-y divide-border/20">{children}</tbody>;
+	},
+	tr({ children }: React.ComponentProps<"tr">) {
+		return <tr className="hover:bg-muted/10">{children}</tr>;
+	},
+	th({ children }: React.ComponentProps<"th">) {
+		return (
+			<th className="px-4 py-2 text-left font-semibold text-foreground uppercase tracking-wider">
+				{children}
+			</th>
+		);
+	},
+	td({ children }: React.ComponentProps<"td">) {
+		return <td className="px-4 py-2 text-muted-foreground">{children}</td>;
+	},
+	ul({ children }: React.ComponentProps<"ul">) {
+		return <ul className="list-disc pl-5 space-y-1.5 my-2.5">{children}</ul>;
+	},
+	ol({ children }: React.ComponentProps<"ol">) {
+		return <ol className="list-decimal pl-5 space-y-1.5 my-2.5">{children}</ol>;
+	},
+};
 
 interface ChatViewProps {
 	currentSessionId: string | null;
@@ -373,86 +428,7 @@ export function ChatView({
 										>
 											<Markdown
 												remarkPlugins={[remarkGfm]}
-												components={{
-													code({ node, className, children, ...props }) {
-														const match = /language-(\w+)/.exec(
-															className || "",
-														);
-														const codeText = String(children).replace(
-															/\n$/,
-															"",
-														);
-														return match ? (
-															<CodeBlock
-																language={match[1]}
-																codeText={codeText}
-															/>
-														) : (
-															<code
-																className="bg-zinc-850 border border-zinc-800 px-1.5 py-0.5 rounded font-mono text-xs text-cyan-400 font-semibold"
-																{...props}
-															>
-																{children}
-															</code>
-														);
-													},
-													table({ children }) {
-														return (
-															<div className="my-3 overflow-x-auto rounded-lg border border-border/30">
-																<table className="min-w-full divide-y divide-border/35 text-xs">
-																	{children}
-																</table>
-															</div>
-														);
-													},
-													thead({ children }) {
-														return (
-															<thead className="bg-secondary/45">
-																{children}
-															</thead>
-														);
-													},
-													tbody({ children }) {
-														return (
-															<tbody className="divide-y divide-border/20">
-																{children}
-															</tbody>
-														);
-													},
-													tr({ children }) {
-														return (
-															<tr className="hover:bg-muted/10">{children}</tr>
-														);
-													},
-													th({ children }) {
-														return (
-															<th className="px-4 py-2 text-left font-semibold text-foreground uppercase tracking-wider">
-																{children}
-															</th>
-														);
-													},
-													td({ children }) {
-														return (
-															<td className="px-4 py-2 text-muted-foreground">
-																{children}
-															</td>
-														);
-													},
-													ul({ children }) {
-														return (
-															<ul className="list-disc pl-5 space-y-1.5 my-2.5">
-																{children}
-															</ul>
-														);
-													},
-													ol({ children }) {
-														return (
-															<ol className="list-decimal pl-5 space-y-1.5 my-2.5">
-																{children}
-															</ol>
-														);
-													},
-												}}
+												components={markdownComponents}
 											>
 												{msg.content}
 											</Markdown>

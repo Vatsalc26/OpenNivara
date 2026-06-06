@@ -30,13 +30,13 @@ cargo fmt --all -- --check
 ### B. Clippy Lints
 We treat lints as compiler warnings and fail on any active violations:
 ```bash
-cargo clippy -- -D warnings
+cargo clippy --workspace --all-targets -- -D warnings
 ```
 
 ### C. Backend Unit and Integration Tests
 Verify settings persistence, theme-store directories, data-only theme installation, prompt assembly boundaries, and migrations:
 ```bash
-cargo test
+cargo test --workspace
 ```
 
 ---
