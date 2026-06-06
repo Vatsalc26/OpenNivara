@@ -2,6 +2,8 @@
 
 Desktop should not invent its own approval logic.
 
+Cross-surface action consistency is defined in [Surface Consistency Matrix](surface-consistency-matrix.md).
+
 Desktop renders backend `ApprovalView` and calls backend commands. Frontend state is derived from:
 
 - `approval.status`

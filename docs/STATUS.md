@@ -33,6 +33,8 @@ Product decisions:
 - CLI is the first approval UX proof surface, with interactive TTY approval plus `opennivara approvals ...` subcommands.
 - Desktop renders backend `ApprovalView`; frontend must not invent approval transition logic.
 - Telegram uses the same backend approval APIs with same-chat command-based approval UX and no special tool permission layer.
+- Surface consistency requires Desktop, CLI, and Telegram to use the same backend allowed-action booleans and hide completed approvals by default.
+- MVP completion requires happy path, denial, provider-failure continue, duplicate approval, and non-mutating preview proof for CLI + `MockProvider` + `write_file`.
 - GitHub V1A is read-only (`github_list_repositories`, `github_fetch_issue`, `github_search_issues`, `github_fetch_pr`, `github_fetch_file`); GitHub V1B is low-risk issue creation/comment mutation with approval.
 - New architecture should land through incremental module boundaries, not one large refactor.
 - Test strategy focuses existing infrastructure on approval, recovery, tools, provider, and surface scenarios.

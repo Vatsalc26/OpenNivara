@@ -2,6 +2,8 @@
 
 Telegram is an equal surface and uses the same backend approval APIs as Desktop and CLI.
 
+Cross-surface action consistency is defined in [Surface Consistency Matrix](surface-consistency-matrix.md).
+
 Telegram has no special tool permission layer. Its responsibilities are:
 
 - chat authorization

@@ -10,6 +10,7 @@ This is the smallest useful proof that the architecture works end to end.
 
 Detailed contracts:
 
+- MVP completion acceptance is defined in [MVP Completion Acceptance Gate](mvp-completion-acceptance-gate.md).
 - `write_file` semantics are defined in [write_file V1](write-file-v1.md).
 - `MockProvider` and the test harness are defined in [MockProvider Test Harness](mock-provider-test-harness.md).
 

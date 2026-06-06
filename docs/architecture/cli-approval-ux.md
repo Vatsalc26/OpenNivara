@@ -2,6 +2,8 @@
 
 CLI is the first proof surface for approval pause/resume.
 
+Cross-surface action consistency is defined in [Surface Consistency Matrix](surface-consistency-matrix.md).
+
 It should support both:
 
 1. interactive approval inside `ask`/`chat` when stdin is a TTY

@@ -6,6 +6,7 @@ All surfaces are equal in policy. They use the same engine, state DB, approval m
 
 Surface-specific implementation details live in:
 
+- [Surface Consistency Matrix](surface-consistency-matrix.md)
 - [CLI Approval UX](cli-approval-ux.md)
 - [Desktop Approval Card State Model](desktop-approval-card-state-model.md)
 - [Telegram Approval UX](telegram-approval-ux.md)

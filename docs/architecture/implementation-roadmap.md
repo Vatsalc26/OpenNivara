@@ -12,7 +12,7 @@ The first complete proof should be:
 CLI + MockProvider + write_file create_new/overwrite + approval pause/resume
 ```
 
-This slice is defined in [MVP Vertical Slice](mvp-vertical-slice.md). It proves request/turn IDs, raw message storage, model tool calls, `LocalModify` classification, `ToolPreview`, pending approval/turn storage, CLI approval, exactly-once execution, `ModelVisibleToolResult`, provider continuation, completion cleanup, and durable audit rows.
+This slice is defined in [MVP Vertical Slice](mvp-vertical-slice.md) and gated by [MVP Completion Acceptance Gate](mvp-completion-acceptance-gate.md). It proves request/turn IDs, raw message storage, model tool calls, `LocalModify` classification, `ToolPreview`, pending approval/turn storage, CLI approval, exactly-once execution, `ModelVisibleToolResult`, provider continuation, completion cleanup, and durable audit rows.
 
 `write_file` V1 semantics are defined in [write_file V1](write-file-v1.md). The deterministic provider/test harness is defined in [MockProvider Test Harness](mock-provider-test-harness.md).
 
@@ -283,6 +283,7 @@ Docs:
 
 - [CLI Approval UX](cli-approval-ux.md)
 - [Desktop Approval Card State Model](desktop-approval-card-state-model.md)
+- [Surface Consistency Matrix](surface-consistency-matrix.md)
 - [Telegram Approval UX](telegram-approval-ux.md)
 
 Acceptance:

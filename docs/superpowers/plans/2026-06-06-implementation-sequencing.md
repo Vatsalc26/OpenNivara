@@ -17,6 +17,7 @@
 - Read: `docs/STATUS.md`
 - Read: `docs/architecture/implementation-roadmap.md`
 - Read: `docs/architecture/mvp-vertical-slice.md`
+- Read: `docs/architecture/mvp-completion-acceptance-gate.md`
 - Read: `docs/architecture/write-file-v1.md`
 - Read: `docs/architecture/mock-provider-test-harness.md`
 - Read: `docs/architecture/approval-resume-state.md`
@@ -26,6 +27,7 @@
 - Read: `docs/architecture/tool-operation-policy.md`
 - Read: `docs/architecture/tool-preview-schema.md`
 - Read: `docs/architecture/model-visible-tool-results.md`
+- Read: `docs/architecture/surface-consistency-matrix.md`
 - Read: `docs/architecture/cli-approval-ux.md`
 - Read: `docs/architecture/desktop-approval-card-state-model.md`
 - Read: `docs/architecture/telegram-approval-ux.md`
@@ -70,6 +72,8 @@ Confirm these are covered:
 - CLI approval command structure
 - Desktop approval card state model
 - Telegram approval commands
+- surface consistency matrix
+- MVP completion acceptance gate
 
 - [ ] **Step 2: Verify docs**
 
@@ -335,6 +339,7 @@ Run tests proving duplicate approve is blocked, provider failure after tool succ
 **Files:**
 
 - Use: `docs/architecture/mvp-vertical-slice.md`
+- Use: `docs/architecture/mvp-completion-acceptance-gate.md`
 - Use: `docs/architecture/write-file-v1.md`
 - Use: `docs/architecture/mock-provider-test-harness.md`
 - Surface: CLI only
@@ -378,23 +383,23 @@ Expected: preview never mutates, `create_new` fails if file exists, `overwrite` 
 
 Render approval and continuation cards from generated types.
 
-Follow `docs/architecture/desktop-approval-card-state-model.md`. The frontend derives actions from `ApprovalView` status/phase/can booleans and does not implement its own transition logic.
+Follow `docs/architecture/desktop-approval-card-state-model.md` and `docs/architecture/surface-consistency-matrix.md`. The frontend derives actions from `ApprovalView` status/phase/can booleans and does not implement its own transition logic.
 
 - [ ] **Step 2: Add CLI commands**
 
 Add approval prompts and approval list/show/approve/deny/continue commands.
 
-Follow `docs/architecture/cli-approval-ux.md`. Non-interactive approval-required ask must print commands and never auto-approve. `--json` must emit shared DTOs.
+Follow `docs/architecture/cli-approval-ux.md` and `docs/architecture/surface-consistency-matrix.md`. Non-interactive approval-required ask must print commands and never auto-approve. `--json` must emit shared DTOs.
 
 - [ ] **Step 3: Add Telegram commands**
 
 Wire `/approve`, `/deny`, and `/continue` to engine APIs.
 
-Follow `docs/architecture/telegram-approval-ux.md`. MVP uses commands only, same-chat approval, concise previews, and no full argument JSON dumps by default.
+Follow `docs/architecture/telegram-approval-ux.md` and `docs/architecture/surface-consistency-matrix.md`. MVP uses commands only, same-chat approval, concise previews, and no full argument JSON dumps by default.
 
 - [ ] **Step 4: Verify**
 
-Run tests proving same chat/session can approve, wrong chat/session is rejected, executed approvals say use continue, completed is hidden by default, non-interactive CLI never auto-approves, Telegram previews are truncated, and frontend tests import generated types.
+Run tests proving same chat/session can approve, wrong chat/session is rejected, executed approvals say use continue, completed is hidden by default, all surfaces follow the same state/action matrix, non-interactive CLI never auto-approves, Telegram previews are truncated, and frontend tests import generated types.
 
 ## PR 13: Opening And Mutating Local Tools
 

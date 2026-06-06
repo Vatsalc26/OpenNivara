@@ -4,9 +4,9 @@ This document defines approval recovery behavior for crashes, provider failures,
 
 The key invariant is: once an approved tool has run, never run it again during resume or retry. Retry only the model/provider continuation.
 
-The first vertical slice that must prove this invariant is [MVP Vertical Slice](mvp-vertical-slice.md): CLI + `MockProvider` + `write_file` approval pause/resume. The deterministic provider harness is defined in [MockProvider Test Harness](mock-provider-test-harness.md).
+The first vertical slice that must prove this invariant is [MVP Vertical Slice](mvp-vertical-slice.md): CLI + `MockProvider` + `write_file` approval pause/resume. The completion gate for that slice is [MVP Completion Acceptance Gate](mvp-completion-acceptance-gate.md). The deterministic provider harness is defined in [MockProvider Test Harness](mock-provider-test-harness.md).
 
-Surface actions must respect the same recovery state. CLI, Desktop, and Telegram action rendering is defined in [CLI Approval UX](cli-approval-ux.md), [Desktop Approval Card State Model](desktop-approval-card-state-model.md), and [Telegram Approval UX](telegram-approval-ux.md).
+Surface actions must respect the same recovery state. Cross-surface action rendering is defined in [Surface Consistency Matrix](surface-consistency-matrix.md), [CLI Approval UX](cli-approval-ux.md), [Desktop Approval Card State Model](desktop-approval-card-state-model.md), and [Telegram Approval UX](telegram-approval-ux.md).
 
 ## Core Definitions
 

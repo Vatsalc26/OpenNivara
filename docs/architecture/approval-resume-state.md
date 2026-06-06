@@ -424,6 +424,8 @@ For shell commands, show:
 - classifier reason
 - whether it is read-only, mutating, deleting, or unknown
 
+Surface-specific approval UX follows the shared action rules in [Surface Consistency Matrix](surface-consistency-matrix.md). All surfaces must render action availability from backend `ApprovalView.can_*` booleans instead of inventing transition rules.
+
 Surface-specific approval UX:
 
 - Desktop: inline approval card attached to the same chat; see [Desktop Approval Card State Model](desktop-approval-card-state-model.md)
