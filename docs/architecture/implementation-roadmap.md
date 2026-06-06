@@ -4,21 +4,38 @@ This roadmap sequences the architecture work without creating one massive refact
 
 Use small, testable, CI-green PR slices. Do not build connectors before approval/model/tool/state foundations. Do not expose mutating tools before preview plus approval pause/resume exists. Do not expose `delete_memory` until hard-delete semantics are honest.
 
-## First Vertical Slice
+## PR Status
 
-The first complete proof should be:
+PR-0 Rust workspace hygiene is complete. The repository now has an explicit root workspace containing the root `opennivara` package and `desktop/src-tauri`, uses resolver 2, keeps the Tauri crate depending on `opennivara` by path, and uses the root `Cargo.lock` as the workspace lockfile.
+
+## First Alpha Approval Vertical Slice
+
+The first complete proof is the alpha approval vertical slice:
 
 ```text
 CLI + MockProvider + write_file create_new/overwrite + approval pause/resume
 ```
 
-This slice is defined in [MVP Vertical Slice](mvp-vertical-slice.md) and gated by [MVP Completion Acceptance Gate](mvp-completion-acceptance-gate.md). It proves request/turn IDs, raw message storage, model tool calls, `LocalModify` classification, `ToolPreview`, pending approval/turn storage, CLI approval, exactly-once execution, `ModelVisibleToolResult`, provider continuation, completion cleanup, and durable audit rows.
+The existing [MVP Vertical Slice](mvp-vertical-slice.md) and [MVP Completion Acceptance Gate](mvp-completion-acceptance-gate.md) document names are historical. For implementation, treat them as the first alpha approval vertical slice and alpha approval acceptance gate. This slice proves request/turn IDs, raw message storage, model tool calls, `LocalModify` classification, `ToolPreview`, pending approval/turn storage, CLI approval, exactly-once execution, `ModelVisibleToolResult`, provider continuation, completion cleanup, and durable audit rows.
 
 `write_file` V1 semantics are defined in [write_file V1](write-file-v1.md). The deterministic provider/test harness is defined in [MockProvider Test Harness](mock-provider-test-harness.md).
 
 Do not use `run_command`, Desktop, Telegram, connectors, or memory tools as the first vertical slice.
 
 ## PR Sequence
+
+### PR 0: Rust Workspace Hygiene
+
+Status: complete.
+
+Scope completed:
+
+- root `[workspace]` includes `"."` and `"desktop/src-tauri"`
+- workspace uses resolver 2
+- root package remains `opennivara`
+- Tauri crate depends on `opennivara` by path
+- root `Cargo.lock` is authoritative
+- CI/docs use workspace-aware Cargo commands where appropriate
 
 ### PR 1: Docs Sync And Roadmap
 
@@ -27,6 +44,8 @@ Scope:
 - update [Docs Status](../STATUS.md)
 - update this roadmap
 - update [Implementation Sequencing Plan](../superpowers/plans/2026-06-06-implementation-sequencing.md)
+- record PR-0 completion
+- clarify that MVP-named docs mean the first alpha approval vertical slice
 - include newer design decisions: `completed` status, pending turn phases, `request_id`/`turn_id`, `UserFacingError`, `ModelVisibleToolResult`, `PromptAssembly`, memory tools/proposals, connector foundation, `http_get`, and GitHub V1A/V1B
 
 Do not include:
@@ -269,36 +288,27 @@ Acceptance:
 - deny creates model-visible `approval_denied` tool result
 - pending turn is deleted only after final answer/explanation
 
-### PR 12: Surface Approval UX
+### PR 12: CLI Approval UX
 
 Scope:
 
-- Desktop approval card
-- Desktop continue card
 - CLI approval commands/prompts
-- Telegram `/approve`, `/deny`, and `/continue`
 - approval lists/details
 
 Docs:
 
 - [CLI Approval UX](cli-approval-ux.md)
-- [Desktop Approval Card State Model](desktop-approval-card-state-model.md)
 - [Surface Consistency Matrix](surface-consistency-matrix.md)
-- [Telegram Approval UX](telegram-approval-ux.md)
 
 Acceptance:
 
 - same chat/session can approve
-- wrong chat/session is rejected
 - executed approval says to use continue
 - completed approvals are hidden by default
-- frontend tests import generated types
 - CLI non-interactive mode never auto-approves
 - CLI `--json` emits shared DTOs rather than ad hoc JSON
-- Desktop derives UI from backend `ApprovalView`
-- Desktop executed state shows Continue response only
-- Telegram uses same-chat commands only in MVP
-- Telegram does not dump full argument JSON by default
+- interactive TTY prompt supports approve, deny, details, and quit
+- Enter defaults to no/deny
 
 ### PR 13: Opening And Mutating Local Tools
 
@@ -327,7 +337,49 @@ Acceptance:
 - `delete_file` is file-only, no directories/globs
 - `run_command` classifier controls approval
 
-### PR 14: Memory Tools And Memory Proposal UX
+### PR 14: Desktop Approval Card
+
+Scope:
+
+- Desktop approval card
+- Desktop continue card
+- generated shared approval types in frontend tests
+
+Docs:
+
+- [Desktop Approval Card State Model](desktop-approval-card-state-model.md)
+- [Surface Consistency Matrix](surface-consistency-matrix.md)
+
+Acceptance:
+
+- Desktop derives UI from backend `ApprovalView`
+- Desktop executed state shows Continue response only
+- completed approvals are hidden by default
+- no retry operation is exposed in the alpha slice
+
+### PR 15: Telegram Approval Commands
+
+Scope:
+
+- Telegram `/approvals`
+- Telegram `/approval <id>`
+- Telegram `/approve <id>`
+- Telegram `/deny <id>`
+- Telegram `/continue <id>`
+
+Docs:
+
+- [Telegram Approval UX](telegram-approval-ux.md)
+- [Surface Consistency Matrix](surface-consistency-matrix.md)
+
+Acceptance:
+
+- same-chat approval only
+- no special Telegram tool policy layer
+- previews are concise by default
+- completed approvals are hidden by default
+
+### PR 16: Memory Tools And Memory Proposal UX
 
 Scope:
 
@@ -352,7 +404,7 @@ Acceptance:
 - forget uses retraction
 - memory proposal approval commands are separate from operation approval
 
-### PR 15: http_get
+### PR 17: http_get
 
 Scope:
 
@@ -370,7 +422,7 @@ Acceptance:
 - no credentials
 - logs redacted
 
-### PR 16: Connector Foundation
+### PR 18: Connector Foundation
 
 Scope:
 
@@ -390,7 +442,7 @@ Acceptance:
 - scopes round-trip
 - tools are not exposed without connected account/scope
 
-### PR 17: GitHub Read-Only Connector
+### PR 19: GitHub Read-Only Connector
 
 Scope:
 
@@ -413,7 +465,7 @@ Acceptance:
 - previews show account/repo/target
 - results use `ModelVisibleToolResult`
 
-### PR 18: GitHub Low-Risk Mutations
+### PR 20: GitHub Low-Risk Mutations
 
 Scope:
 
@@ -436,4 +488,4 @@ Acceptance:
 5. Build connector foundation before GitHub connector.
 6. Add SDKs only when connector implementation needs them.
 7. Keep first GitHub connector read-only before mutations.
-8. Keep first MVP vertical slice to CLI + MockProvider + `write_file`.
+8. Keep first alpha approval vertical slice to CLI + MockProvider + `write_file`.

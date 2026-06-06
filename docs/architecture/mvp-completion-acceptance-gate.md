@@ -1,14 +1,14 @@
-# MVP Completion Acceptance Gate
+# Alpha Approval Completion Acceptance Gate
 
-This is the acceptance gate for the first working approval-based MVP, not the entire product.
+This document was originally named “MVP Completion Acceptance Gate.” For implementation, treat it as the acceptance gate for the first alpha approval vertical slice, not the entire product.
 
-The first MVP vertical slice is:
+The first alpha approval vertical slice is:
 
 ```text
 CLI + MockProvider + write_file + approval pause/resume
 ```
 
-The MVP is complete when a CLI user can ask:
+The alpha approval slice is complete when a CLI user can ask:
 
 ```text
 Create notes.txt with hello world.
@@ -28,7 +28,7 @@ Then:
 10. Pending turn is cleaned up.
 11. Pending approval remains as audit history.
 
-## Required MVP Flows
+## Required Alpha Flows
 
 ### 1. Happy Path
 
@@ -111,7 +111,7 @@ Required proof:
 
 ## Backend/State Acceptance
 
-MVP is accepted when:
+The alpha approval slice is accepted when:
 
 - runtime IDs exist and are used
 - `request_id` and `turn_id` exist in engine responses
@@ -123,18 +123,18 @@ MVP is accepted when:
 
 ## Model/Provider Acceptance
 
-MVP is accepted when:
+The alpha approval slice is accepted when:
 
 - `MockProvider` scripts tool call -> final answer
 - `MockProvider` can fail after tool execution
 - `MockProvider` records `ModelRequest` history
 - `tool_call_id` is stable
 - tool result is sent back as `ModelVisibleToolResult`
-- Gemini is not required for MVP tests
+- Gemini is not required for alpha approval tests
 
 ## Tooling Acceptance
 
-MVP is accepted when:
+The alpha approval slice is accepted when:
 
 - `write_file` supports `create_new` and `overwrite`
 - `write_file` preview never mutates
@@ -146,7 +146,7 @@ MVP is accepted when:
 
 ## Approval Engine Acceptance
 
-MVP is accepted when:
+The alpha approval slice is accepted when:
 
 - `LocalModify` operation pauses before execution
 - `ApprovalView` is returned
@@ -158,7 +158,7 @@ MVP is accepted when:
 
 ## CLI Acceptance
 
-MVP is accepted when:
+The alpha approval slice is accepted when:
 
 - interactive CLI shows approval prompt
 - Enter defaults to no/deny
@@ -179,7 +179,7 @@ MVP is accepted when:
 - `write_file_overwrite_preview_includes_diff`
 - `bindings_are_current`
 
-## Not Required For MVP
+## Not Required For The Alpha Approval Slice
 
 - Desktop approval card
 - Telegram approval commands
@@ -197,4 +197,4 @@ MVP is accepted when:
 
 ## Done Statement
 
-The MVP is done when a CLI user can approve or deny a `write_file` operation, the engine can resume the same model turn, and tests prove the tool executes at most once even across duplicate approvals and provider failure/retry.
+The alpha approval slice is done when a CLI user can approve or deny a `write_file` operation, the engine can resume the same model turn, and tests prove the tool executes at most once even across duplicate approvals and provider failure/retry.

@@ -4,7 +4,7 @@
 
 **Goal:** Implement OpenNivara's agent architecture through small, testable, CI-green PR slices instead of one giant refactor.
 
-**Architecture:** Build runtime IDs, state migrations, typed state APIs, shared DTOs, model gateway, operation policy, tool preview/result contracts, and engine foundations before approval resume and mutating tools. Prove the first vertical slice with CLI + MockProvider + `write_file` before Desktop, Telegram, memory tools, connectors, or shell commands.
+**Architecture:** PR-0 Rust workspace hygiene is complete. Build runtime IDs, state migrations, typed state APIs, shared DTOs, model gateway, operation policy, tool preview/result contracts, and engine foundations before approval resume and mutating tools. Prove the first alpha approval vertical slice with CLI + MockProvider + `write_file` before Desktop, Telegram, memory tools, connectors, or shell commands.
 
 **Tech Stack:** Rust 2021, SQLite/refinery, `rusqlite`, Specta, React/Tauri Desktop, CLI, Telegram, provider-neutral model gateway, Gemini adapter, `MockProvider`, tool operation policy.
 
@@ -42,6 +42,39 @@ bun run docs:check
 
 Expected: markdown lint and internal links pass.
 
+## PR 0: Rust Workspace Hygiene
+
+**Status:** Complete.
+
+**Files:**
+
+- Modified: `Cargo.toml`
+- Modified: `Cargo.lock`
+- Deleted: `desktop/src-tauri/Cargo.lock`
+- Modified: CI/docs Cargo commands
+
+- [x] **Step 1: Make workspace explicit**
+
+Root `Cargo.toml` has `[workspace]`, members `"."` and `"desktop/src-tauri"`, and `resolver = "2"`.
+
+- [x] **Step 2: Consolidate lockfile**
+
+The root `Cargo.lock` is authoritative for the workspace. `desktop/src-tauri/Cargo.lock` was removed.
+
+- [x] **Step 3: Verify**
+
+Run:
+
+```bash
+cargo fmt --all -- --check
+cargo test --workspace
+cargo clippy --workspace --all-targets -- -D warnings
+cd desktop && bun run typecheck
+cd desktop && bun run build
+```
+
+Expected: all commands exit 0.
+
 ## PR 1: Docs Sync And Roadmap
 
 **Files:**
@@ -66,14 +99,15 @@ Confirm these are covered:
 - connector foundation
 - `http_get`
 - GitHub V1A/V1B
-- MVP vertical slice
+- PR-0 completion
+- alpha approval vertical slice terminology for the MVP-named docs
 - `write_file` V1 create_new/overwrite semantics
 - scripted `MockProvider` test harness
 - CLI approval command structure
 - Desktop approval card state model
 - Telegram approval commands
 - surface consistency matrix
-- MVP completion acceptance gate
+- alpha approval completion acceptance gate
 
 - [ ] **Step 2: Verify docs**
 
@@ -334,12 +368,12 @@ Retry provider continuation only for `executed/tool_executed_awaiting_model` or 
 
 Run tests proving duplicate approve is blocked, provider failure after tool success does not rerun the tool, denial is model-visible, and pending turn cleanup waits for final answer/explanation.
 
-## MVP Vertical Slice Checkpoint
+## Alpha Approval Vertical Slice Checkpoint
 
 **Files:**
 
-- Use: `docs/architecture/mvp-vertical-slice.md`
-- Use: `docs/architecture/mvp-completion-acceptance-gate.md`
+- Use: `docs/architecture/mvp-vertical-slice.md` as the alpha approval vertical slice contract
+- Use: `docs/architecture/mvp-completion-acceptance-gate.md` as the alpha approval acceptance gate
 - Use: `docs/architecture/write-file-v1.md`
 - Use: `docs/architecture/mock-provider-test-harness.md`
 - Surface: CLI only
@@ -370,36 +404,22 @@ Call `write_file` preview for `create_new` and `overwrite`.
 
 Expected: preview never mutates, `create_new` fails if file exists, `overwrite` fails if file is missing, and overwrite preview includes unified diff/truncation metadata when needed.
 
-## PR 12: Surface Approval UX
+## PR 12: CLI Approval UX
 
 **Files:**
 
-- Modify: Desktop approval UI
 - Modify: CLI approval commands/prompts
-- Modify: Telegram command handling
-- Test: surface approval tests
+- Test: CLI approval tests
 
-- [ ] **Step 1: Add Desktop cards**
-
-Render approval and continuation cards from generated types.
-
-Follow `docs/architecture/desktop-approval-card-state-model.md` and `docs/architecture/surface-consistency-matrix.md`. The frontend derives actions from `ApprovalView` status/phase/can booleans and does not implement its own transition logic.
-
-- [ ] **Step 2: Add CLI commands**
+- [ ] **Step 1: Add CLI commands**
 
 Add approval prompts and approval list/show/approve/deny/continue commands.
 
 Follow `docs/architecture/cli-approval-ux.md` and `docs/architecture/surface-consistency-matrix.md`. Non-interactive approval-required ask must print commands and never auto-approve. `--json` must emit shared DTOs.
 
-- [ ] **Step 3: Add Telegram commands**
+- [ ] **Step 2: Verify**
 
-Wire `/approve`, `/deny`, and `/continue` to engine APIs.
-
-Follow `docs/architecture/telegram-approval-ux.md` and `docs/architecture/surface-consistency-matrix.md`. MVP uses commands only, same-chat approval, concise previews, and no full argument JSON dumps by default.
-
-- [ ] **Step 4: Verify**
-
-Run tests proving same chat/session can approve, wrong chat/session is rejected, executed approvals say use continue, completed is hidden by default, all surfaces follow the same state/action matrix, non-interactive CLI never auto-approves, Telegram previews are truncated, and frontend tests import generated types.
+Run tests proving same session can approve, wrong session is rejected, executed approvals say use continue, completed is hidden by default, non-interactive CLI never auto-approves, and interactive Enter defaults to deny.
 
 ## PR 13: Opening And Mutating Local Tools
 
@@ -425,7 +445,41 @@ Shell classifier controls approval.
 
 Run tool tests for open automatic behavior, write/delete previews, file-only deletion, and shell classification.
 
-## PR 14: Memory Tools And Proposal UX
+## PR 14: Desktop Approval Card
+
+**Files:**
+
+- Modify: Desktop approval UI
+- Test: Desktop approval card tests
+
+- [ ] **Step 1: Add Desktop cards**
+
+Render approval and continuation cards from generated types.
+
+Follow `docs/architecture/desktop-approval-card-state-model.md` and `docs/architecture/surface-consistency-matrix.md`. The frontend derives actions from `ApprovalView` status/phase/can booleans and does not implement its own transition logic.
+
+- [ ] **Step 2: Verify**
+
+Run frontend tests proving pending, executing, executed, denied, failed, and completed states render from generated backend types.
+
+## PR 15: Telegram Approval Commands
+
+**Files:**
+
+- Modify: Telegram command handling
+- Test: Telegram command tests
+
+- [ ] **Step 1: Add Telegram commands**
+
+Wire `/approvals`, `/approval <id>`, `/approve <id>`, `/deny <id>`, and `/continue <id>` to engine APIs.
+
+Follow `docs/architecture/telegram-approval-ux.md` and `docs/architecture/surface-consistency-matrix.md`. The alpha slice uses commands only, same-chat approval, concise previews, and no full argument JSON dumps by default.
+
+- [ ] **Step 2: Verify**
+
+Run tests proving same chat can approve, wrong chat is rejected, completed approvals are hidden by default, and previews are concise.
+
+## PR 16: Memory Tools And Proposal UX
 
 **Files:**
 
@@ -450,7 +504,7 @@ Do not expose `delete_memory`.
 
 Run tests proving proposals are separate from operation approvals, `AskBeforeSaving` creates proposals, `AutoSaveLowRisk` can autosave normal high-confidence memory, and update/forget require approval.
 
-## PR 15: http_get
+## PR 17: http_get
 
 **Files:**
 
@@ -465,7 +519,7 @@ Support HTTP/HTTPS only, URL validation, timeout, max bytes, content type, final
 
 Run tests proving `http_get` is automatic `ExternalRead`, rejects unsupported schemes, includes truncation metadata, uses no credentials, and logs are redacted.
 
-## PR 16: Connector Foundation
+## PR 18: Connector Foundation
 
 **Files:**
 
@@ -489,7 +543,7 @@ Store account/credential metadata without secrets.
 
 Run tests proving metadata stores without secrets, mock credential store works, scopes round-trip, and tools are not exposed without account/scope.
 
-## PR 17: GitHub V1A Read-Only Connector
+## PR 19: GitHub V1A Read-Only Connector
 
 **Files:**
 
@@ -508,7 +562,7 @@ Implement `github_list_repositories`, `github_fetch_issue`, `github_search_issue
 
 Run tests proving `ExternalRead` automatic behavior, account/scope-gated exposure, previews show account/repo/target, and results use `ModelVisibleToolResult`.
 
-## PR 18: GitHub V1B Low-Risk Mutations
+## PR 20: GitHub V1B Low-Risk Mutations
 
 **Files:**
 

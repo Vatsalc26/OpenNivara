@@ -1,11 +1,12 @@
 # Docs Status
 
-Current as of 2026-06-06.
+Current as of 2026-06-07.
 
 The canonical current docs are linked from [README.md](README.md). Root-level legacy docs are retained as historical references until they are moved to `docs/archive/` or `docs/stale/`.
 
 Product decisions:
 
+- PR-0 Rust workspace hygiene is complete: the root `opennivara` crate and `desktop/src-tauri` are explicit workspace members, resolver 2 is enabled, and the root `Cargo.lock` is authoritative.
 - Desktop, CLI, and Telegram are equal user surfaces over the same agent engine.
 - Browser preview is for fast React iteration only.
 - Store discovers themes and skill packs; Settings owns assistant behavior.
@@ -26,15 +27,16 @@ Product decisions:
 - Connector credential metadata belongs in SQLite; raw tokens/API keys/secrets belong in OS keychain, never directly in SQLite.
 - First external tool is unauthenticated `http_get`; first authenticated connector is GitHub, starting read-only.
 - Connector tools are explicit typed tools exposed dynamically by connected account, credential status, scopes, and tool config.
-- Implementation should use small CI-green PR slices, starting with docs sync, runtime IDs, state migrations, typed state APIs, shared DTOs, model gateway, tool policy, previews/results, engine foundation, then approval pause/resume.
-- First end-to-end MVP slice is CLI + `MockProvider` + `write_file` create/overwrite + approval pause/resume.
+- Implementation should use small CI-green PR slices, starting after PR-0 with docs sync, runtime IDs, state migrations, typed state APIs, shared DTOs, model gateway, tool policy, previews/results, engine foundation, then approval pause/resume.
+- Existing docs named “MVP Vertical Slice” and “MVP Completion Acceptance Gate” now refer to the first alpha approval vertical slice.
+- First end-to-end alpha approval slice is CLI + `MockProvider` + `write_file` create/overwrite + approval pause/resume.
 - `write_file` V1 supports only UTF-8 `create_new` and `overwrite`; preview is required, never mutates, and execution revalidates after approval.
-- MVP approval/resume tests should use scripted `MockProvider` and a tool execution counter to prove `write_file` executes exactly once.
+- Alpha approval/resume tests should use scripted `MockProvider` and a tool execution counter to prove `write_file` executes exactly once.
 - CLI is the first approval UX proof surface, with interactive TTY approval plus `opennivara approvals ...` subcommands.
 - Desktop renders backend `ApprovalView`; frontend must not invent approval transition logic.
 - Telegram uses the same backend approval APIs with same-chat command-based approval UX and no special tool permission layer.
 - Surface consistency requires Desktop, CLI, and Telegram to use the same backend allowed-action booleans and hide completed approvals by default.
-- MVP completion requires happy path, denial, provider-failure continue, duplicate approval, and non-mutating preview proof for CLI + `MockProvider` + `write_file`.
+- Alpha approval slice completion requires happy path, denial, provider-failure continue, duplicate approval, and non-mutating preview proof for CLI + `MockProvider` + `write_file`.
 - GitHub V1A is read-only (`github_list_repositories`, `github_fetch_issue`, `github_search_issues`, `github_fetch_pr`, `github_fetch_file`); GitHub V1B is low-risk issue creation/comment mutation with approval.
 - New architecture should land through incremental module boundaries, not one large refactor.
 - Test strategy focuses existing infrastructure on approval, recovery, tools, provider, and surface scenarios.

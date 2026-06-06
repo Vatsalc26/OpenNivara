@@ -1,6 +1,8 @@
-# MVP Vertical Slice
+# Alpha Approval Vertical Slice
 
-The first complete working vertical slice is:
+This document was originally named “MVP Vertical Slice.” For implementation, treat it as the first alpha approval vertical slice.
+
+The first complete working alpha approval slice is:
 
 ```text
 CLI + MockProvider + write_file create_new/overwrite + approval pause/resume
@@ -10,7 +12,7 @@ This is the smallest useful proof that the architecture works end to end.
 
 Detailed contracts:
 
-- MVP completion acceptance is defined in [MVP Completion Acceptance Gate](mvp-completion-acceptance-gate.md).
+- Alpha approval completion acceptance is defined in [MVP Completion Acceptance Gate](mvp-completion-acceptance-gate.md).
 - `write_file` semantics are defined in [write_file V1](write-file-v1.md).
 - `MockProvider` and the test harness are defined in [MockProvider Test Harness](mock-provider-test-harness.md).
 
@@ -98,7 +100,7 @@ Call 2 after approval/tool result:
 
 - assistant text: `Created notes.txt with hello world.`
 
-## write_file MVP Schema
+## write_file Alpha Schema
 
 ```json
 {
@@ -108,7 +110,7 @@ Call 2 after approval/tool result:
 }
 ```
 
-MVP write modes:
+Alpha write modes:
 
 - `create_new`
 - `overwrite`
@@ -124,7 +126,7 @@ Rules:
 - binary write is out of scope
 - parent directory creation is out of scope
 
-## MVP Preview
+## Alpha Preview
 
 New file preview:
 
@@ -149,7 +151,7 @@ New file preview:
 
 Preview must not mutate the filesystem.
 
-## MVP Model-Visible Results
+## Alpha Model-Visible Results
 
 Successful execution:
 
@@ -251,9 +253,9 @@ Duplicate approval:
 - hard-delete memory
 - OAuth/account store
 
-## Locked MVP
+## Locked Alpha Slice
 
-The first vertical slice must prove:
+The first alpha approval vertical slice must prove:
 
 - approval required
 - preview generated
@@ -281,5 +283,5 @@ Required tests:
 12. completed approval deletes pending turn and keeps audit row.
 13. CLI can approve from same session/chat context.
 14. wrong session approval is rejected.
-15. MVP tests use a counting tool executor and assert `tool_execution_count("write_file")`.
+15. Alpha approval tests use a counting tool executor and assert `tool_execution_count("write_file")`.
 16. Provider failure/retry tests assert provider call count and stored tool-result shape.
