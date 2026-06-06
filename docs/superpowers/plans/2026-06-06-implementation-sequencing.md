@@ -1,300 +1,502 @@
-# Approval Resume Implementation Sequencing Plan
+# OpenNivara Implementation Sequencing Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Sequence OpenNivara's state migration, typed state API, operation policy, model gateway, engine approval flow, and surface UX work into small testable phases.
+**Goal:** Implement OpenNivara's agent architecture through small, testable, CI-green PR slices instead of one giant refactor.
 
-**Architecture:** Build stable foundations before approval resume: state migrations first, typed state APIs second, operation classification third, provider abstraction fourth, then engine refactor and approval pause/resume. Keep Desktop, CLI, and Telegram equal throughout. Use operation classification as the approval source of truth.
+**Architecture:** Build runtime IDs, state migrations, typed state APIs, shared DTOs, model gateway, operation policy, tool preview/result contracts, and engine foundations before approval resume and mutating tools. Prove the first vertical slice with CLI + MockProvider + `write_file` before Desktop, Telegram, memory tools, connectors, or shell commands.
 
-**Tech Stack:** Rust 2021, SQLite/refinery, `rusqlite`, model provider gateway, Gemini adapter, tool operation policy, Desktop/CLI/Telegram surfaces.
+**Tech Stack:** Rust 2021, SQLite/refinery, `rusqlite`, Specta, React/Tauri Desktop, CLI, Telegram, provider-neutral model gateway, Gemini adapter, `MockProvider`, tool operation policy.
 
 ---
 
-## Phase 0: Documentation
+## Existing Docs To Follow
 
 **Files:**
 
-- Modify: `docs/architecture/core-agent-contract.md`
-- Modify: `docs/architecture/approval-resume-state.md`
-- Create/modify: `docs/architecture/tool-operation-policy.md`
-- Create/modify: `docs/architecture/state-rust-api.md`
-- Create: `docs/architecture/model-provider-gateway.md`
-- Create: `docs/architecture/engine-approval-flow.md`
+- Read: `docs/STATUS.md`
+- Read: `docs/architecture/implementation-roadmap.md`
+- Read: `docs/architecture/mvp-vertical-slice.md`
+- Read: `docs/architecture/approval-resume-state.md`
+- Read: `docs/architecture/recovery-state-machine.md`
+- Read: `docs/architecture/state-rust-api.md`
+- Read: `docs/architecture/model-provider-gateway.md`
+- Read: `docs/architecture/tool-operation-policy.md`
+- Read: `docs/architecture/tool-preview-schema.md`
+- Read: `docs/architecture/model-visible-tool-results.md`
 
-- [ ] **Step 1: Confirm docs exist**
+- [ ] **Step 1: Verify docs index**
 
 Run:
 
 ```bash
-rg --files docs/architecture | rg "core-agent-contract|approval-resume-state|tool-operation-policy|state-rust-api|model-provider-gateway|engine-approval-flow"
-```
-
-Expected: all six architecture docs are listed.
-
-- [ ] **Step 2: Run docs checks**
-
-Run: `bun run docs:check`
-
-Expected: markdown lint and internal links pass.
-
-## Phase 1: State DB Embedded Migrations
-
-**Plan:** [State DB Approval Resume Implementation Plan](2026-06-05-state-db-approval-resume.md)
-
-**Goal:** Replace inline state DB schema creation with embedded refinery migrations.
-
-- [ ] **Step 1: Add `src/state` migration skeleton**
-
-Implement `src/state/mod.rs`, `db.rs`, `migrations.rs`, and V1/V2 SQL migration files.
-
-- [ ] **Step 2: Add legacy alpha backup/reset**
-
-Detect old inline DBs without refinery metadata, rename to `opennivara_state.legacy-reset-YYYYMMDD-HHMMSS.sqlite`, and run fresh migrations.
-
-- [ ] **Step 3: Verify migration tests**
-
-Run: `cargo test state::migrations state::db`
-
-Expected: fresh DB migration, legacy reset, tables, columns, indexes, and constraints pass.
-
-## Phase 2: State Rust API
-
-**Plan:** [State Rust API Implementation Plan](2026-06-05-state-rust-api.md)
-
-**Goal:** Add typed, transaction-safe state APIs over the migrated schema.
-
-- [ ] **Step 1: Add typed sessions/messages/active sessions**
-
-Implement `state::sessions`, `state::messages`, and `state::active_sessions`.
-
-- [ ] **Step 2: Add transactional approvals**
-
-Implement `create_pending_approval_with_turn`, `begin_execution_once`, `deny_approval`, `mark_executed`, `mark_failed`, and `delete_pending_turn`.
-
-- [ ] **Step 3: Verify state API tests**
-
-Run: `cargo test state`
-
-Expected: typed records, atomic approval creation, duplicate execution guard, wrong-session rejection, and pending-turn cleanup pass.
-
-## Phase 3: Tool Operation Classification
-
-**Plan:** [Tool Operation Policy Implementation Plan](2026-06-05-tool-operation-policy.md)
-
-**Goal:** Make `OperationClassification` the source of truth for approval.
-
-- [ ] **Step 1: Add operation policy types**
-
-Implement `OperationKind`, `OperationClassification`, `OperationDecision`, and `requires_approval`.
-
-- [ ] **Step 2: Mark tool definitions**
-
-Add `operation_kind` to `ToolDefinition` and mark current implemented tools as read-only.
-
-- [ ] **Step 3: Add liberal config defaults**
-
-Enable `read_file`, default `blocked_patterns = []`, make `allowed_roots = []` unrestricted, and remove unimplemented future tools from generated defaults.
-
-- [ ] **Step 4: Verify tool policy tests**
-
-Run: `cargo test tools`
-
-Expected: current tools are read-only, unknown tools require approval, shell classifier works, liberal defaults pass, and `ToolRisk` does not decide approval.
-
-## Phase 4: Provider Abstraction / Model Gateway
-
-**Plan:** [Model Provider Gateway Implementation Plan](2026-06-06-model-provider-gateway.md)
-
-**Goal:** Move Gemini-native structs and HTTP calls out of `src/engine.rs` before pending turn serialization.
-
-- [ ] **Step 1: Add native model types**
-
-Implement `ModelRole`, `ModelMessage`, `ModelPart`, `ModelToolCall`, `ModelToolDeclaration`, `ModelRequest`, `ModelResponse`, and `GenerationConfig`.
-
-- [ ] **Step 2: Add Gemini provider**
-
-Move Gemini structs and HTTP logic into `src/model/gemini.rs`, with native conversion in both directions.
-
-- [ ] **Step 3: Add mock provider**
-
-Implement deterministic provider tests for text, tool call, tool result continuation, and provider error.
-
-- [ ] **Step 4: Verify model tests**
-
-Run: `cargo test model`
-
-Expected: native type round-trips, Gemini conversion, mock provider, and pending-turn native serialization pass.
-
-## Phase 5: ToolPreview And Mutating/Open Tools
-
-**Plan:** [Tool Preview And Mutating Tools Implementation Plan](2026-06-06-tool-preview-mutating-tools.md)
-
-**Goal:** Add read-only previews, approval previews, diff schemas, compact approval storage, and the next opening/mutating tool catalog.
-
-- [ ] **Step 1: Add `ToolPreview`**
-
-Implement the serializable preview type and `ToolRegistry::preview`.
-
-- [ ] **Step 2: Add read-only activity previews**
-
-Generate optional non-blocking previews for `read_file`, `list_dir`, and `file_exists`.
-
-- [ ] **Step 3: Add mutating previews**
-
-Generate diff previews for `write_file`, metadata/hash previews for `write_binary_file`, and stat/hash previews for `delete_file`.
-
-- [ ] **Step 4: Add compact approval storage**
-
-Add `operation_target` and `reason` to `pending_approvals`, store compact preview JSON there, and keep full args in pending turn state.
-
-- [ ] **Step 5: Verify preview tests**
-
-Run: `cargo test tools state`
-
-Expected: previews are read-only, invalid preview creates no approval, diff truncation works, and compact approval preview storage passes.
-
-## Phase 6: Engine Refactor Onto Foundations
-
-**Plan:** [Engine Approval Flow Implementation Plan](2026-06-06-engine-approval-flow.md)
-
-**Goal:** Make the engine use state APIs, provider gateway, and operation classifier without full resume UX yet.
-
-- [ ] **Step 1: Normalize surface and actor**
-
-Map Desktop, CLI, and Telegram requests to `Surface` and owner `actor_id`.
-
-- [ ] **Step 2: Use state APIs**
-
-Store user messages with surface/actor and assistant messages as `assistant`.
-
-- [ ] **Step 3: Use model provider**
-
-Replace direct Gemini HTTP with `ModelProvider`.
-
-- [ ] **Step 4: Simplify tool declaration**
-
-Declare by global enabled, individual enabled, and selected skill allowlist only.
-
-- [ ] **Step 5: Verify engine foundation tests**
-
-Run: `cargo test engine`
-
-Expected: equal surfaces, provider abstraction, selected skill allowlist, and existing automatic tool behavior pass.
-
-## Phase 7: Approval Pause Storage
-
-**Goal:** Pause when an approval-required tool is requested and persist the pending turn.
-
-- [ ] **Step 1: Add `EngineResponseKind`**
-
-Support `Answer` and `ApprovalRequired`.
-
-- [ ] **Step 2: Store approval-required turn**
-
-When classification requires approval, create pending approval, pending turn, and approval-required event through the state approval API.
-
-- [ ] **Step 3: Verify pause tests**
-
-Run: `cargo test approval_required_tool_pauses_turn`
-
-Expected: DB rows exist, response includes approval ID, and pending turn contains model history with the tool call.
-
-## Phase 8: Approval Recovery State
-
-**Plan:** [Approval Recovery State Implementation Plan](2026-06-06-approval-recovery-state.md)
-
-**Goal:** Make approval resume safe across crashes, provider failures, duplicate approvals, and partial execution states.
-
-- [ ] **Step 1: Add completed status and pending turn phases**
-
-Update schema/types so `executed` is intermediate and `completed` is terminal success.
-
-- [ ] **Step 2: Add recovery transition helpers**
-
-Implement `mark_tool_executed_and_update_turn`, `mark_resume_failed`, `mark_approval_completed`, stale executing recovery, and completed cleanup.
-
-- [ ] **Step 3: Verify recovery tests**
-
-Run: `cargo test state engine`
-
-Expected: duplicate approvals do not re-execute tools, provider continuation retries are tracked, and completed cleanup preserves audit rows.
-
-## Phase 9: Approval Resume And Denial
-
-**Goal:** Resume the same model turn after approve or deny.
-
-- [ ] **Step 1: Implement approved resume**
-
-Call `begin_execution_once`, execute the stored pending tool once, append tool result, continue provider loop, store final answer, and delete pending turn.
-
-- [ ] **Step 2: Implement denial resume**
-
-Mark denied, append denial tool result, continue provider loop, store explanation, and delete pending turn.
-
-- [ ] **Step 3: Verify resume tests**
-
-Run: `cargo test resume_approved_operation deny_approval_resumes_model_turn`
-
-Expected: approved operations execute once, duplicate approval is blocked, denial is model-visible, pending turn is cleaned up, and approval audit remains.
-
-## Phase 10: Desktop/CLI/Telegram Approval UX
-
-**Goal:** Expose the same approval model across all equal surfaces.
-
-- [ ] **Step 1: Desktop UX**
-
-Add a same-chat approval dialog with preview, expandable details, approve once, and deny.
-
-- [ ] **Step 2: CLI UX**
-
-Add same-session approval prompt and resume behavior.
-
-- [ ] **Step 3: Telegram UX**
-
-Add `/approve <id>` and `/deny <id>` in the same chat/session.
-
-- [ ] **Step 4: Verify UX tests**
-
-Run: `cargo test approval_command` and relevant desktop tests.
-
-Expected: same-chat approval succeeds, wrong-session approval rejects, unauthorized actor rejects, and events appear in chat history.
-
-## Phase 11: Hardening
-
-**Goal:** Lock behavior and remove old policy remnants.
-
-- [ ] **Step 1: Search for old policy gates**
-
-Run:
-
-```bash
-rg -n "remote_policy|requires_confirmation|ToolRisk|source_created|role: \"model\"|tool_execution_policy_error" src
-```
-
-Expected: remaining hits are compatibility code, display-only UI, migrations/tests, or intentionally removed in this phase.
-
-- [ ] **Step 2: Run full verification**
-
-Run:
-
-```bash
-cargo test
 bun run docs:check
 ```
 
-Expected: Rust tests and docs checks pass.
+Expected: markdown lint and internal links pass.
 
-## Recommended PR Order
+## PR 1: Docs Sync And Roadmap
 
-1. Docs architecture decisions.
-2. State DB migrations.
-3. State Rust API.
-4. Tool operation classification and config cleanup.
-5. Provider abstraction/model gateway.
-6. ToolPreview, compact approval previews, and mutating/open tool catalog.
-7. Engine refactor onto state/model/tool policy foundations.
-8. Approval pause storage.
-9. Approval recovery state.
-10. Approval resume/deny execution.
-11. Desktop/CLI/Telegram UX.
-12. Hardening/regression cleanup.
+**Files:**
+
+- Modify: `docs/STATUS.md`
+- Modify: `docs/architecture/implementation-roadmap.md`
+- Modify: `docs/superpowers/plans/2026-06-06-implementation-sequencing.md`
+- Create/modify: `docs/architecture/mvp-vertical-slice.md`
+- Modify: `docs/architecture/github-connector-v1.md`
+
+- [ ] **Step 1: Include current decisions**
+
+Confirm these are covered:
+
+- `completed` approval status
+- pending turn phases
+- `request_id` and `turn_id`
+- `UserFacingError`
+- `ModelVisibleToolResult`
+- `PromptAssembly`
+- memory proposal/tools
+- connector foundation
+- `http_get`
+- GitHub V1A/V1B
+- MVP vertical slice
+
+- [ ] **Step 2: Verify docs**
+
+Run:
+
+```bash
+bun run docs:check
+git diff --check
+```
+
+Expected: both commands exit 0.
+
+## PR 2: Runtime IDs And Request/Turn Envelopes
+
+**Files:**
+
+- Create: `src/runtime/ids.rs`
+- Modify: `src/runtime/mod.rs`
+- Modify: engine request/response types where currently defined
+- Test: runtime ID tests and request/source mapping tests
+
+- [ ] **Step 1: Add ID helpers**
+
+Add helpers for `req_`, `turn_`, `msg_`, `sess_`, `appr_`, and `toolcall_` IDs.
+
+- [ ] **Step 2: Add surface/actor mapping**
+
+Map Desktop to `Surface::Desktop`, CLI to `Surface::Cli`, and Telegram chat IDs to `Surface::Telegram` with `actor_id = "telegram_<chat_id>"`.
+
+- [ ] **Step 3: Add turn envelope type**
+
+Add `TurnEnvelope` with `request_id`, `turn_id`, `session_id`, `surface`, `actor_id`, and `created_at`.
+
+- [ ] **Step 4: Verify**
+
+Run targeted Rust tests for ID prefixes, uniqueness, mapping, and `EngineResponse` carrying `request_id`/`turn_id`.
+
+## PR 3: State DB Migrations
+
+**Files:**
+
+- Create: `src/state/db.rs`
+- Create: `src/state/migrations.rs`
+- Create: `src/state/migrations/V1__initial_state_schema.sql`
+- Create: `src/state/migrations/V2__approval_resume.sql`
+- Test: state migration tests
+
+- [ ] **Step 1: Add migration runner**
+
+Implement embedded refinery migration startup in `open_state_db`.
+
+- [ ] **Step 2: Add V1 schema**
+
+Create sessions, messages, active sessions, pinned contexts, and pinned skills.
+
+- [ ] **Step 3: Add V2 approval schema**
+
+Create pending approvals and pending turns with `completed` status and pending turn phases.
+
+- [ ] **Step 4: Add legacy backup/reset**
+
+Back up old inline alpha DBs before creating the migrated DB.
+
+- [ ] **Step 5: Verify**
+
+Run state migration tests for fresh DB, legacy reset, constraints, and indexes.
+
+## PR 4: Typed State API
+
+**Files:**
+
+- Create: `src/state/sessions.rs`
+- Create: `src/state/messages.rs`
+- Create: `src/state/active_sessions.rs`
+- Create: `src/state/approvals.rs`
+- Create: `src/state/recovery.rs`
+- Create: `src/state/views.rs`
+- Test: state API tests
+
+- [ ] **Step 1: Add sessions/messages/active sessions APIs**
+
+Implement typed helpers that use the migrated schema and return typed records.
+
+- [ ] **Step 2: Add approval transition APIs**
+
+Implement `create_pending_approval_with_turn`, `begin_execution_once`, `deny_approval_and_update_turn`, `mark_tool_executed_and_update_turn`, `mark_tool_failed`, `mark_resume_failed`, `mark_approval_completed`, and `complete_denied_turn`.
+
+- [ ] **Step 3: Add recovery APIs**
+
+Implement `recover_stale_executing_approvals` and `cleanup_completed_pending_turns`.
+
+- [ ] **Step 4: Verify**
+
+Run state tests proving duplicate approval cannot execute twice, wrong sessions reject, `executed` does not mean `completed`, phases are enforced, and completed cleanup keeps the audit row.
+
+## PR 5: Shared Types And Specta Contract
+
+**Files:**
+
+- Modify: shared backend type definitions
+- Modify: `desktop/src/generated/backendTypes.ts`
+- Test: bindings and frontend typecheck
+
+- [ ] **Step 1: Add shared DTOs**
+
+Add `EngineResponseKind`, `EngineResponse`, `ApprovalView`, `ApprovalActionResponse`, `ApprovalStatus`, `PendingTurnPhase`, `ToolPreviewEnvelope`, `ToolExecutionResult`, `ModelVisibleToolResult`, `UserFacingError`, `ErrorKind`, and `Surface`.
+
+- [ ] **Step 2: Regenerate bindings**
+
+Run the existing Specta generation command used by the repo.
+
+- [ ] **Step 3: Verify**
+
+Run `cargo test bindings_are_current` and frontend typecheck.
+
+## PR 6: Model Gateway And MockProvider
+
+**Files:**
+
+- Create: `src/model/types.rs`
+- Create: `src/model/provider.rs`
+- Create: `src/model/gemini.rs`
+- Create: `src/model/mock.rs`
+- Modify: `src/engine.rs`
+- Test: model tests
+
+- [ ] **Step 1: Add native model types**
+
+Define `ModelMessage`, `ModelPart`, `ModelToolCall`, `ModelToolDeclaration`, `ModelRequest`, `ModelResponse`, and `GenerationConfig`.
+
+- [ ] **Step 2: Move Gemini code**
+
+Move Gemini-native structs and HTTP calls out of engine code.
+
+- [ ] **Step 3: Add MockProvider**
+
+Support scripted plain text, tool call, tool-result continuation, and provider failure.
+
+- [ ] **Step 4: Verify**
+
+Run model tests for round-trip, Gemini conversion, mock scripts, and generated `tool_call_id`.
+
+## PR 7: Tool Operation Policy And Config Defaults
+
+**Files:**
+
+- Create/modify: `src/tools/operation_policy.rs`
+- Modify: tool definition/config code
+- Test: tool policy tests
+
+- [ ] **Step 1: Add operation policy types**
+
+Add `OperationKind`, `OperationClassification`, `OperationDecision`, and `requires_approval`.
+
+- [ ] **Step 2: Add shell classifier**
+
+Classify known read-only, mutating, deleting, and unknown commands.
+
+- [ ] **Step 3: Apply liberal defaults**
+
+Set `read_file` enabled, `allowed_roots = []` unrestricted, `blocked_patterns = []`, and remove unimplemented tools from default `tools.toml`.
+
+- [ ] **Step 4: Verify**
+
+Run tool tests proving implemented tools are read-only, unknown operations require approval, shell classifier table passes, and `requires_confirmation` no longer decides approval.
+
+## PR 8: ToolPreview, ToolExecutionResult, And Model-Visible Results
+
+**Files:**
+
+- Create/modify: tool preview/result modules
+- Modify: `ToolRegistry`
+- Test: preview/result tests
+
+- [ ] **Step 1: Add preview support**
+
+Implement `ToolPreview`, `ToolPreviewEnvelope`, and `ToolRegistry::preview`.
+
+- [ ] **Step 2: Add result envelopes**
+
+Implement `ToolExecutionResult` and `ModelVisibleToolResult`.
+
+- [ ] **Step 3: Add truncation/redaction helpers**
+
+Make large output truncation explicit and keep secrets out of previews/results/logs.
+
+- [ ] **Step 4: Verify**
+
+Run tests proving previews never mutate, automatic read previews work, model-visible JSON uses `ok/result/error`, and invalid preview creates no approval.
+
+## PR 9: Engine Foundation Refactor
+
+**Files:**
+
+- Modify: `src/engine.rs`
+- Modify: state/model/tool integration call sites
+- Test: engine foundation tests
+
+- [ ] **Step 1: Use state APIs**
+
+Store raw user messages through state APIs and capture DB message IDs.
+
+- [ ] **Step 2: Use ModelProvider**
+
+Replace direct provider calls with the provider abstraction.
+
+- [ ] **Step 3: Assemble PromptAssembly**
+
+Compile prompt/context once per turn and store selected history in turn state.
+
+- [ ] **Step 4: Verify**
+
+Run engine tests proving plain answer works, automatic tool flow works, source maps to surface/actor, prior history uses user/assistant only, and context compiles once.
+
+## PR 10: Approval Pause Storage
+
+**Files:**
+
+- Modify: `src/engine.rs`
+- Modify: state approval integration
+- Test: approval pause tests
+
+- [ ] **Step 1: Return ApprovalRequired**
+
+Return `EngineResponseKind::ApprovalRequired` when a tool requires approval.
+
+- [ ] **Step 2: Store pending state**
+
+Create pending approval, pending turn, and approval-required event.
+
+- [ ] **Step 3: Verify**
+
+Run tests proving the tool does not execute, pending rows exist, frozen model history is stored, and `ApprovalView` has preview/action booleans.
+
+## PR 11: Approval Resume, Denial, And Recovery
+
+**Files:**
+
+- Modify: engine approval action APIs
+- Modify: state recovery integration
+- Test: approval resume/recovery tests
+
+- [ ] **Step 1: Implement approve**
+
+Call `begin_execution_once`, execute once, append tool result, and continue provider.
+
+- [ ] **Step 2: Implement deny**
+
+Append model-visible `approval_denied`, continue provider, and keep approval status `denied`.
+
+- [ ] **Step 3: Implement continue**
+
+Retry provider continuation only for `executed/tool_executed_awaiting_model` or `denied/denied_awaiting_model`.
+
+- [ ] **Step 4: Verify**
+
+Run tests proving duplicate approve is blocked, provider failure after tool success does not rerun the tool, denial is model-visible, and pending turn cleanup waits for final answer/explanation.
+
+## MVP Vertical Slice Checkpoint
+
+**Files:**
+
+- Use: `docs/architecture/mvp-vertical-slice.md`
+- Surface: CLI only
+- Provider: `MockProvider`
+- Tool: `write_file` with `create_new` and `overwrite`
+
+- [ ] **Step 1: Run happy path**
+
+Ask from CLI to create `notes.txt` with `hello world`.
+
+Expected: engine returns approval, CLI approves, file is written once, final answer is stored, approval becomes `completed`, pending turn is deleted, audit row remains.
+
+- [ ] **Step 2: Run denial path**
+
+Deny the same operation.
+
+Expected: file is not written, model receives `approval_denied`, final denial explanation is stored, pending turn is deleted.
+
+- [ ] **Step 3: Run provider failure/continue path**
+
+Script `MockProvider` to fail after tool success, then continue.
+
+Expected: status remains `executed`, continue retries provider only, tool is not executed again, final answer completes the approval.
+
+## PR 12: Surface Approval UX
+
+**Files:**
+
+- Modify: Desktop approval UI
+- Modify: CLI approval commands/prompts
+- Modify: Telegram command handling
+- Test: surface approval tests
+
+- [ ] **Step 1: Add Desktop cards**
+
+Render approval and continuation cards from generated types.
+
+- [ ] **Step 2: Add CLI commands**
+
+Add approval prompts and approval list/show/approve/deny/continue commands.
+
+- [ ] **Step 3: Add Telegram commands**
+
+Wire `/approve`, `/deny`, and `/continue` to engine APIs.
+
+- [ ] **Step 4: Verify**
+
+Run tests proving same chat/session can approve, wrong chat/session is rejected, executed approvals say use continue, completed is hidden by default, and frontend tests import generated types.
+
+## PR 13: Opening And Mutating Local Tools
+
+Recommended split:
+
+- PR 13A: `open_url`, `open_file`, `open_app`
+- PR 13B: `write_file`, `write_binary_file`, `delete_file`
+- PR 13C: `run_command`
+
+- [ ] **Step 1: Add opening tools**
+
+Opening tools are automatic.
+
+- [ ] **Step 2: Add write/delete tools**
+
+Write/delete tools require approval and have previews/diffs.
+
+- [ ] **Step 3: Add run_command**
+
+Shell classifier controls approval.
+
+- [ ] **Step 4: Verify**
+
+Run tool tests for open automatic behavior, write/delete previews, file-only deletion, and shell classification.
+
+## PR 14: Memory Tools And Proposal UX
+
+**Files:**
+
+- Create/modify: `src/memory/tools.rs`
+- Create/modify: `src/tools/memory.rs`
+- Modify: surface memory proposal UX
+- Test: memory tool/proposal tests
+
+- [ ] **Step 1: Add creation tools**
+
+Implement `remember_this` and `create_memory`.
+
+- [ ] **Step 2: Add update/forget tools**
+
+Implement `update_memory` and `forget_memory`; forget uses retraction.
+
+- [ ] **Step 3: Keep delete disabled**
+
+Do not expose `delete_memory`.
+
+- [ ] **Step 4: Verify**
+
+Run tests proving proposals are separate from operation approvals, `AskBeforeSaving` creates proposals, `AutoSaveLowRisk` can autosave normal high-confidence memory, and update/forget require approval.
+
+## PR 15: http_get
+
+**Files:**
+
+- Create/modify: external read tool implementation
+- Test: `http_get` tests
+
+- [ ] **Step 1: Add unauthenticated GET**
+
+Support HTTP/HTTPS only, URL validation, timeout, max bytes, content type, final URL, and truncation metadata.
+
+- [ ] **Step 2: Verify**
+
+Run tests proving `http_get` is automatic `ExternalRead`, rejects unsupported schemes, includes truncation metadata, uses no credentials, and logs are redacted.
+
+## PR 16: Connector Foundation
+
+**Files:**
+
+- Create: `src/connectors`
+- Modify: state DB migrations for connector metadata
+- Test: connector foundation tests
+
+- [ ] **Step 1: Add connector types**
+
+Add `ConnectorDefinition`, `ConnectorAccount`, `CredentialMetadata`, and scopes.
+
+- [ ] **Step 2: Add credential store**
+
+Add `CredentialStore` and `MockCredentialStore`.
+
+- [ ] **Step 3: Add metadata storage**
+
+Store account/credential metadata without secrets.
+
+- [ ] **Step 4: Verify**
+
+Run tests proving metadata stores without secrets, mock credential store works, scopes round-trip, and tools are not exposed without account/scope.
+
+## PR 17: GitHub V1A Read-Only Connector
+
+**Files:**
+
+- Create/modify: GitHub connector implementation
+- Test: GitHub read tests
+
+- [ ] **Step 1: Add GitHub definition**
+
+Expose V1A capabilities through `ConnectorToolProvider`.
+
+- [ ] **Step 2: Add read tools**
+
+Implement `github_list_repositories`, `github_fetch_issue`, `github_search_issues`, `github_fetch_pr`, and `github_fetch_file`.
+
+- [ ] **Step 3: Verify**
+
+Run tests proving `ExternalRead` automatic behavior, account/scope-gated exposure, previews show account/repo/target, and results use `ModelVisibleToolResult`.
+
+## PR 18: GitHub V1B Low-Risk Mutations
+
+**Files:**
+
+- Modify: GitHub connector implementation
+- Test: GitHub mutation approval tests
+
+- [ ] **Step 1: Add issue creation/comment tools**
+
+Implement `github_create_issue` and `github_comment_issue`.
+
+- [ ] **Step 2: Verify approval behavior**
+
+Run tests proving `ExternalMutation` requires approval, previews show account/repo/title/body/scopes, denial returns model-visible `approval_denied`, and approve executes once.
+
+## Constraints
+
+- Do not build connectors before approval/model/tool/state foundations.
+- Do not expose mutating tools before preview plus approval pause/resume exists.
+- Do not expose `delete_memory` until hard-delete semantics are honest.
+- Do not add unimplemented tools to default `tools.toml`.
+- Keep each PR independently testable and CI-green.
+- Add SDKs only when the connector implementation needs them.

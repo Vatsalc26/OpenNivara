@@ -74,16 +74,21 @@ Before authenticated connectors:
 
 See [Connectors, Accounts, And Credentials](connectors-accounts-credentials.md) and [Connector Tool Registry](connector-tool-registry.md).
 
-## Phase 2: GitHub Read-Only
+## Phase 2: GitHub V1A Read-Only
 
 Implement GitHub read-only connector tools first:
 
+- `github_list_repositories`
 - `github_fetch_issue`
 - `github_search_issues`
 - `github_fetch_pr`
 - `github_fetch_file`
+
+Delay from V1A:
+
 - `github_search_code`
-- `github_list_repositories`
+
+Reason: code search is useful but adds extra API/result complexity.
 
 All Phase 2 tools:
 
@@ -93,13 +98,18 @@ All Phase 2 tools:
 - require connected GitHub account/scopes if authenticated access is needed
 - do not expose if no connected account/scope is available
 
-## Phase 3: GitHub Low-Risk Mutations
+## Phase 3: GitHub V1B Low-Risk Mutations
 
 Add after approval flow is solid:
 
 - `github_create_issue`
 - `github_comment_issue`
+
+Delay from V1B:
+
 - `github_add_issue_labels`
+
+Reason: labels require extra validation/listing behavior and can come later.
 
 All Phase 3 tools:
 
@@ -153,6 +163,8 @@ Then consider:
 9. Do not expose unavailable/missing-scope GitHub tools.
 10. GitHub mutation previews must show account/repo/target/body/scopes.
 11. GitHub tools use `ModelVisibleToolResult`.
+12. GitHub V1A excludes code search.
+13. GitHub V1B excludes label mutation.
 
 ## Tests
 
@@ -168,3 +180,5 @@ Required tests:
 8. GitHub tools are not exposed without connected account.
 9. GitHub tools are not exposed with missing scopes.
 10. GitHub tool results use `ModelVisibleToolResult` shape.
+11. GitHub V1A tools are limited to repository list, issue read/search, PR read, and file read.
+12. GitHub V1B tools are limited to issue creation and issue comments.

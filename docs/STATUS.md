@@ -26,6 +26,9 @@ Product decisions:
 - Connector credential metadata belongs in SQLite; raw tokens/API keys/secrets belong in OS keychain, never directly in SQLite.
 - First external tool is unauthenticated `http_get`; first authenticated connector is GitHub, starting read-only.
 - Connector tools are explicit typed tools exposed dynamically by connected account, credential status, scopes, and tool config.
+- Implementation should use small CI-green PR slices, starting with docs sync, runtime IDs, state migrations, typed state APIs, shared DTOs, model gateway, tool policy, previews/results, engine foundation, then approval pause/resume.
+- First end-to-end MVP slice is CLI + `MockProvider` + `write_file` create/overwrite + approval pause/resume.
+- GitHub V1A is read-only (`github_list_repositories`, `github_fetch_issue`, `github_search_issues`, `github_fetch_pr`, `github_fetch_file`); GitHub V1B is low-risk issue creation/comment mutation with approval.
 - New architecture should land through incremental module boundaries, not one large refactor.
 - Test strategy focuses existing infrastructure on approval, recovery, tools, provider, and surface scenarios.
 - Chat-visible events, durable approval audit rows, and local developer logs are separate observability layers.

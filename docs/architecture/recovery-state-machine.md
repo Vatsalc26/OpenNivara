@@ -4,6 +4,8 @@ This document defines approval recovery behavior for crashes, provider failures,
 
 The key invariant is: once an approved tool has run, never run it again during resume or retry. Retry only the model/provider continuation.
 
+The first vertical slice that must prove this invariant is [MVP Vertical Slice](mvp-vertical-slice.md): CLI + `MockProvider` + `write_file` approval pause/resume.
+
 ## Core Definitions
 
 `executed` does not mean the whole turn is done.
@@ -371,3 +373,5 @@ Add tests for:
 13. Denied approval phase becomes `denied_awaiting_model` before model continuation.
 14. Failed approval stores `error_message`.
 15. Completed approval remains as audit row.
+16. MVP provider failure after `write_file` success leaves status `executed` and phase `tool_executed_awaiting_model`.
+17. MVP continuation retries provider only and does not rerun `write_file`.

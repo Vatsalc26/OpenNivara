@@ -12,6 +12,8 @@ Prompt/context assembly should follow [Prompt Context Assembly](prompt-context-a
 
 Memory extraction runs only after a final assistant answer or denial explanation is stored. Memory proposal behavior and explicit memory tools are defined in [Memory Proposals And Tools](memory-proposals-and-tools.md).
 
+The first end-to-end implementation proof should follow [MVP Vertical Slice](mvp-vertical-slice.md): CLI + `MockProvider` + `write_file` create/overwrite + approval pause/resume. Do not use `run_command`, Desktop, Telegram, connectors, or memory tools as the first vertical slice.
+
 ## Current Engine Context
 
 `src/engine.rs` currently owns a Gemini-specific tool-calling loop. It already:
@@ -306,6 +308,9 @@ Add tests for:
 23. Executed approval retries do not re-execute tools.
 24. Provider failure after tool success records resume failure metadata.
 25. Completed approval cleanup deletes pending turn and preserves audit row.
+26. MVP `write_file` approval-required flow executes exactly once after approval.
+27. MVP denial flow appends `approval_denied` and does not write the file.
+28. MVP provider-failure continue flow retries provider only and does not rewrite the file.
 
 ## Implementation Milestones
 

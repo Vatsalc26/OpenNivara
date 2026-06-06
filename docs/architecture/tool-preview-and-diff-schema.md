@@ -4,6 +4,8 @@ The canonical preview contract is [Tool Preview Schema](tool-preview-schema.md).
 
 Tool previews give users enough detail to approve or deny mutating operations without dumping sensitive data into chat history or logs.
 
+The first mutating preview to implement should be the MVP `write_file` create-new preview from [MVP Vertical Slice](mvp-vertical-slice.md). It proves that preview generation is read-only before adding richer diff, binary, delete, or shell previews.
+
 ## Preview Principles
 
 Tool previews should be compact, structured, and expandable.
@@ -58,6 +60,27 @@ Diff previews should include:
 
 Binary changes should not inline content. Show byte counts, hashes where useful, and a clear binary-change summary.
 
+MVP `write_file` create-new preview:
+
+```json
+{
+  "schema_version": 1,
+  "tool_name": "write_file",
+  "preview_kind": "text_write",
+  "operation_target": "/absolute/path/notes.txt",
+  "summary": "OpenNivara wants to create notes.txt.",
+  "details": {
+    "path": "/absolute/path/notes.txt",
+    "mode": "create_new",
+    "exists": false,
+    "new_bytes": 11,
+    "new_lines": 1,
+    "new_file_preview": "hello world",
+    "preview_truncated": false
+  }
+}
+```
+
 ## Shell Command Preview
 
 For shell commands, show:
@@ -90,3 +113,5 @@ Required tests:
 3. shell command preview includes classifier reason.
 4. full arguments display is redacted/summarized before rendering.
 5. result summary omits huge stdout/stderr.
+6. MVP `write_file create_new` preview does not mutate the filesystem.
+7. MVP overwrite preview includes enough information to understand replacement.
