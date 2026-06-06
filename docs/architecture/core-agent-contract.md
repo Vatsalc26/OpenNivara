@@ -2,7 +2,7 @@
 
 OpenNivara is a liberal local agent. It may inspect the user's computer, build context from local data, open local resources, and send relevant context to Gemini as part of normal operation. The approval boundary is narrow: deleting, modifying, external mutation, mutating shell commands, deleting shell commands, unknown shell commands, and unknown operations require explicit approval for that operation; automatic operations do not.
 
-This document is the implementation contract for Desktop, CLI, and Telegram. Surface-specific code may authenticate differently and render approval UX differently, but it must not bypass shared engine policy. The detailed model boundary is documented in [Model Provider Gateway](model-provider-gateway.md), the engine approval integration is documented in [Engine Approval Flow](engine-approval-flow.md), and the shared surface rendering contract is documented in [Surface Approval UX](surface-approval-ux.md).
+This document is the implementation contract for Desktop, CLI, and Telegram. Surface-specific code may authenticate differently and render approval UX differently, but it must not bypass shared engine policy. Stable request and turn IDs are documented in [Request And Turn Envelopes](request-turn-envelopes.md), the detailed model boundary is documented in [Model Provider Gateway](model-provider-gateway.md), the engine approval integration is documented in [Engine Approval Flow](engine-approval-flow.md), and the shared surface rendering/type contract is documented in [Surface Approval UX](surface-approval-ux.md) and [Shared Type Contract](shared-type-contract.md).
 
 ## Core Product Contract
 

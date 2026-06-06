@@ -5,6 +5,8 @@ This is the canonical internal engineering documentation index.
 ## Current
 
 - [Core Agent Contract](architecture/core-agent-contract.md)
+- [Request And Turn Envelopes](architecture/request-turn-envelopes.md)
+- [Shared Type Contract](architecture/shared-type-contract.md)
 - [Approval Resume And State DB](architecture/approval-resume-state.md)
 - [Recovery State Machine](architecture/recovery-state-machine.md)
 - [State Rust API](architecture/state-rust-api.md)

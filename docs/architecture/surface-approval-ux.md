@@ -15,6 +15,8 @@ pub enum EngineResponseKind {
 }
 
 pub struct EngineResponse {
+    pub request_id: String,
+    pub turn_id: String,
     pub session_id: String,
     pub kind: EngineResponseKind,
     pub answer: String,
@@ -28,17 +30,29 @@ pub struct EngineResponse {
 pub struct ApprovalView {
     pub approval_id: String,
     pub session_id: String,
+    pub request_id: String,
+    pub turn_id: String,
+    pub status: ApprovalStatus,
+    pub phase: Option<PendingTurnPhase>,
     pub operation_name: String,
-    pub classification: String,
+    pub classification: OperationClassification,
     pub summary: String,
     pub operation_target: Option<String>,
     pub reason: String,
-    pub preview_json: serde_json::Value,
-    pub full_arguments_json: serde_json::Value,
+    pub preview: ToolPreviewEnvelope,
+    pub full_arguments_json: Option<serde_json::Value>,
+    pub can_approve: bool,
+    pub can_deny: bool,
+    pub can_resume_continuation: bool,
+    pub can_retry_tool_execution: bool,
+    pub result_summary: Option<String>,
+    pub error_message: Option<String>,
+    pub last_resume_error: Option<String>,
+    pub resume_attempt_count: u32,
 }
 ```
 
-`ApprovalView` is built from `ToolPreview`, pending approval metadata, and pending turn arguments. See [Tool Preview Schema](tool-preview-schema.md).
+`ApprovalView` is built from `ToolPreview`, pending approval metadata, and pending turn arguments. See [Tool Preview Schema](tool-preview-schema.md) and [Shared Type Contract](shared-type-contract.md).
 
 When the engine returns `EngineResponseKind::ApprovalRequired`:
 

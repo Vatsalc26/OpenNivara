@@ -139,6 +139,8 @@ The same turn is paused until approval or denial.
 Pending turn state must include:
 
 - request envelope or equivalent request metadata
+- request ID
+- turn ID
 - session ID
 - user message ID
 - model history so far, including the model tool-call message
@@ -169,6 +171,8 @@ pub enum EngineResponseKind {
 }
 
 pub struct EngineResponse {
+    pub request_id: String,
+    pub turn_id: String,
     pub session_id: String,
     pub kind: EngineResponseKind,
     pub answer: String,
@@ -202,10 +206,11 @@ Suggested input:
 
 ```rust
 pub struct ResumeApprovedOperationInput {
+    pub request_id: String,
     pub approval_id: String,
     pub session_id: String,
-    pub surface: Surface,
-    pub actor_id: String,
+    pub source: RequestSource,
+    pub created_at: String,
 }
 ```
 

@@ -213,6 +213,7 @@ CREATE INDEX idx_active_sessions_session_id ON active_sessions(session_id);
 - id TEXT PRIMARY KEY
 - session_id TEXT NOT NULL
 - request_id TEXT NOT NULL
+- turn_id TEXT NOT NULL
 - user_message_id TEXT NOT NULL
 - tool_call_id TEXT NOT NULL
 - surface TEXT NOT NULL
@@ -255,6 +256,7 @@ Keep `classification` as free text in SQL. Enforce valid classification names in
 - approval_id TEXT PRIMARY KEY
 - session_id TEXT NOT NULL
 - request_id TEXT NOT NULL
+- turn_id TEXT NOT NULL
 - user_message_id TEXT NOT NULL
 - provider_id TEXT NOT NULL
 - model_id TEXT NOT NULL
@@ -291,10 +293,12 @@ V2 indexes:
 CREATE INDEX idx_pending_approvals_session_status ON pending_approvals(session_id, status);
 CREATE INDEX idx_pending_approvals_actor_status ON pending_approvals(actor_id, status);
 CREATE INDEX idx_pending_approvals_request_id ON pending_approvals(request_id);
+CREATE INDEX idx_pending_approvals_turn_id ON pending_approvals(turn_id);
 CREATE INDEX idx_pending_approvals_user_message_id ON pending_approvals(user_message_id);
 CREATE INDEX idx_pending_approvals_operation_target ON pending_approvals(operation_target);
 CREATE INDEX idx_pending_turns_session ON pending_turns(session_id);
 CREATE INDEX idx_pending_turns_request_id ON pending_turns(request_id);
+CREATE INDEX idx_pending_turns_turn_id ON pending_turns(turn_id);
 CREATE INDEX idx_pending_turns_phase ON pending_turns(phase);
 ```
 
@@ -309,6 +313,8 @@ Pending turn state must use OpenNivara-native model types from [Model Provider G
 `PendingTurnState` should include:
 
 - request envelope
+- request ID
+- turn ID
 - session ID
 - user message ID
 - OpenNivara-native model messages so far
@@ -433,9 +439,9 @@ Add strong coverage for the state DB and approval lifecycle:
 9. V2 `pending_approvals` exists with expected fields.
 10. `pending_approvals.status` rejects invalid statuses.
 11. `classification` accepts evolving free text.
-12. `pending_approvals` includes `request_id`, `user_message_id`, and `tool_call_id`.
+12. `pending_approvals` includes `request_id`, `turn_id`, `user_message_id`, and `tool_call_id`.
 13. `pending_approvals` includes `operation_target`, `reason`, `result_summary`, and `error_message`.
-14. `pending_turns` includes `provider_id`, `model_id`, and `resume_payload_json`.
+14. `pending_turns` includes `request_id`, `turn_id`, `provider_id`, `model_id`, and `resume_payload_json`.
 15. `pending_turns` uses plain JSON text.
 16. `pending_turns` can be inserted and loaded for a pending approval.
 17. Pending approval survives DB reopen.

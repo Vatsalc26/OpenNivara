@@ -91,7 +91,7 @@ pub enum ModelPart {
 }
 ```
 
-Tool calls must have IDs. If a provider does not return a tool call ID, the provider adapter must generate a stable ID before returning `ModelResponse`. The ID is required for `pending_approvals.tool_call_id` and exact resume behavior.
+Tool calls must have IDs. If a provider does not return a tool call ID, the provider adapter must generate a stable `toolcall_<uuid>` ID before returning `ModelResponse`. The ID is required for `pending_approvals.tool_call_id` and exact resume behavior. Request and turn ID ownership is defined in [Request And Turn Envelopes](request-turn-envelopes.md).
 
 Provider-facing tool declarations contain only model-callable schema:
 
@@ -129,6 +129,8 @@ Future fields may include temperature, top-p, max output tokens, safety settings
 
 ```rust
 pub struct ModelRequest {
+    pub request_id: String,
+    pub turn_id: String,
     pub provider_id: String,
     pub model_id: String,
     pub messages: Vec<ModelMessage>,

@@ -110,9 +110,11 @@ Recommended tracing events/spans:
 Recommended structured fields:
 
 - `request_id`
+- `turn_id`
 - `session_id`
 - `message_id`
 - `approval_id`
+- `resume_attempt_id`
 - `tool_call_id`
 - `tool_name`
 - `classification`
