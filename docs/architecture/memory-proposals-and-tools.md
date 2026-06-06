@@ -28,7 +28,96 @@ Memory proposal:
 - used for long-term memory review
 - approval means "save this proposed memory"
 
-Do not mix tool approvals and memory proposals into the same DB table or same UX concept.
+Do not mix tool approvals and memory proposals into the same DB table, same command namespace, or same UX concept. In particular, do not reuse operation approval `/approve` for memory proposals.
+
+Implementation boundaries are defined in [Memory Tool Boundaries](memory-tool-boundaries.md). Removal semantics are defined in [Memory Retention Semantics](memory-retention-semantics.md).
+
+## Memory Proposal UX
+
+Desktop:
+
+- show a non-blocking memory suggestion card after the assistant answer
+- later add a `Memory -> Suggestions` inbox
+
+Desktop card copy:
+
+```text
+Memory suggestion
+OpenNivara suggests remembering:
+"The user prefers concise answers."
+[Save memory] [Dismiss] [Edit]
+```
+
+CLI:
+
+- after final answer, print a short notification
+- use a memory-specific command group
+
+CLI copy:
+
+```text
+Memory suggestion created: "The user prefers concise answers."
+Run `opennivara memory proposals list` to review.
+```
+
+CLI commands:
+
+```text
+opennivara memory proposals list
+opennivara memory proposals show <proposal_id>
+opennivara memory proposals approve <proposal_id>
+opennivara memory proposals reject <proposal_id>
+```
+
+Telegram:
+
+- do not reuse `/approve`
+- use memory-specific commands
+
+Telegram commands:
+
+```text
+/memory_proposals
+/save_memory <proposal_id>
+/reject_memory <proposal_id>
+```
+
+`/save_memory` approves a memory proposal. It does not approve an operation in `pending_approvals`.
+
+## Proposal Payload
+
+Standardize `proposal_json` with a versioned payload:
+
+```rust
+pub struct MemoryProposalPayload {
+    pub schema_version: u32,
+    pub proposed_memories: Vec<ProposedMemory>,
+    pub proposed_tasks: Vec<ProposedTask>,
+    pub ambiguities: Vec<String>,
+    pub confidence: f64,
+    pub reason: String,
+}
+
+pub struct ProposedMemory {
+    pub memory_type: String,
+    pub title: String,
+    pub summary: String,
+    pub details_json: serde_json::Value,
+    pub sensitivity: String,
+    pub visibility: String,
+    pub confidence: f64,
+    pub tags: Vec<String>,
+}
+
+pub struct ProposedTask {
+    pub title: String,
+    pub summary: Option<String>,
+    pub status: String,
+    pub due_at: Option<String>,
+    pub natural_time_phrase: Option<String>,
+    pub source_quote: Option<String>,
+}
+```
 
 ## Memory Modes
 
@@ -139,9 +228,18 @@ Example args:
   "content": "The user prefers concise answers.",
   "memory_type": "preference",
   "confidence": 0.9,
-  "source_message_id": "msg_..."
+  "sensitivity": "normal",
+  "tags": ["communication"],
+  "source_message_id": "msg_123"
 }
 ```
+
+Behavior:
+
+- `Off`: return `memory_disabled`
+- `AskBeforeSaving`: create memory proposal
+- `AutoSaveLowRisk`: auto-save if `sensitivity = normal` and `confidence >= 0.8`; otherwise create proposal
+- `FullLifeJournal`: auto-save more broadly unless paused memory, private chat, or sensitive settings block it
 
 ### create_memory
 
@@ -158,9 +256,13 @@ Example args:
     "preference": "concise answers"
   },
   "sensitivity": "normal",
-  "confidence": 0.9
+  "visibility": "private",
+  "confidence": 0.9,
+  "tags": ["communication"]
 }
 ```
+
+Uses the same `MemoryMode` behavior as `remember_this`.
 
 ### update_memory
 
@@ -173,7 +275,8 @@ Example args:
   "memory_id": "mem_...",
   "patch": {
     "summary": "The user now prefers detailed answers for architecture discussions.",
-    "confidence": 0.95
+    "confidence": 0.95,
+    "tags": ["communication", "architecture"]
   },
   "reason": "User corrected their preference."
 }
@@ -181,7 +284,7 @@ Example args:
 
 ### forget_memory
 
-Soft-deletes/suppresses memory and requires operation approval. Prefer this over hard deletion for normal "forget this" behavior.
+Retracts/stops using a memory and requires operation approval. Prefer this over hard deletion for normal "forget this" behavior.
 
 Example args:
 
@@ -193,6 +296,8 @@ Example args:
 ```
 
 Query-based forgetting can come later.
+
+Initial behavior: use `retract_memory_item`.
 
 ### delete_memory
 
@@ -206,6 +311,8 @@ Example args:
   "reason": "User requested permanent deletion."
 }
 ```
+
+Delay implementation until hard-delete semantics are explicit and implemented. `delete_memory` must not be exposed as a soft delete.
 
 ## Classification
 
@@ -226,19 +333,39 @@ Example args:
 
 `forget_memory`:
 
-- `LocalModify` or `LocalDelete` depending implementation
+- `LocalModify`
 - approval required
 
 `delete_memory`:
 
 - `LocalDelete`
 - approval required
+- exact-ID only
+- unavailable until true hard delete is implemented
 
 `AutoSaveLowRisk` and `FullLifeJournal` can allow some memory creation without same-turn tool approval because the user has configured memory behavior. Explicit update/forget/delete should require approval.
 
 ## Preview Examples
 
-`remember_this` preview:
+Memory proposal preview:
+
+```json
+{
+  "schema_version": 1,
+  "preview_kind": "memory_proposal",
+  "operation_target": "proposal:prop_123",
+  "summary": "OpenNivara suggests saving a memory.",
+  "details": {
+    "proposal_id": "prop_123",
+    "title": "Prefers concise answers",
+    "summary": "The user prefers concise answers.",
+    "confidence": 0.9,
+    "sensitivity": "normal"
+  }
+}
+```
+
+`remember_this` proposal-creation preview:
 
 ```json
 {
@@ -271,7 +398,25 @@ Example args:
     "memory_id": "mem_123",
     "title": "Prefers concise answers",
     "current_summary": "The user prefers concise answers.",
-    "delete_mode": "soft_delete"
+    "delete_mode": "retract"
+  }
+}
+```
+
+`delete_memory` preview:
+
+```json
+{
+  "schema_version": 1,
+  "preview_kind": "memory_delete",
+  "operation_target": "mem_123",
+  "summary": "OpenNivara wants to permanently delete a memory.",
+  "details": {
+    "memory_id": "mem_123",
+    "title": "Prefers concise answers",
+    "current_summary": "The user prefers concise answers.",
+    "delete_mode": "hard_delete",
+    "exact_id_only": true
   }
 }
 ```
@@ -331,6 +476,41 @@ Memory disabled:
 }
 ```
 
+`forget_memory` retracted:
+
+```json
+{
+  "ok": true,
+  "tool_name": "forget_memory",
+  "tool_call_id": "toolcall_456",
+  "summary": "Retracted memory: Prefers concise answers.",
+  "result": {
+    "status": "memory_retracted",
+    "memory_id": "mem_123"
+  },
+  "error": null,
+  "metadata": null
+}
+```
+
+`delete_memory` unavailable:
+
+```json
+{
+  "ok": false,
+  "tool_name": "delete_memory",
+  "tool_call_id": "toolcall_789",
+  "summary": "delete_memory is not available yet.",
+  "result": null,
+  "error": {
+    "code": "memory_hard_delete_not_implemented",
+    "message": "Permanent memory deletion is not implemented yet. Use forget_memory to stop using the memory.",
+    "recoverable": true
+  },
+  "metadata": null
+}
+```
+
 ## Locked Decisions
 
 1. Keep automatic extraction/proposal system.
@@ -338,13 +518,18 @@ Memory disabled:
 3. `remember_this` is natural-language memory creation.
 4. `create_memory` is structured memory creation.
 5. `update_memory` edits existing memory.
-6. `forget_memory` soft-deletes/suppresses memory.
-7. `delete_memory` hard-deletes exact memory records.
+6. `forget_memory` retracts/stops using memory.
+7. `delete_memory` hard-deletes exact memory records and stays disabled until true hard delete exists.
 8. Memory creation respects `MemoryMode`.
 9. Memory update/forget/delete require approval.
 10. Memory tools use `ToolPreview` and `ModelVisibleToolResult` like other tools.
 11. Memory proposals remain separate from tool approvals.
 12. Memory extraction runs only after a completed turn, not while approval is pending.
+13. Desktop uses non-blocking memory suggestion cards and later a Memory Suggestions inbox.
+14. CLI uses `opennivara memory proposals ...` commands.
+15. Telegram uses `/save_memory` and `/reject_memory`, not `/approve`.
+16. Memory domain logic lives in `memory::tools`; model-callable bridge logic lives in `tools::memory`.
+17. Do not declare memory write tools when `MemoryMode` is off.
 
 ## Tests
 
@@ -357,10 +542,13 @@ Required tests:
 5. `remember_this` auto-saves low-risk memory in `AutoSaveLowRisk`.
 6. `remember_this` returns `memory_disabled` when memory mode is off.
 7. `update_memory` requires approval.
-8. `forget_memory` requires approval and soft-deletes/suppresses memory.
-9. `delete_memory` requires approval and hard-deletes exact memory ID.
+8. `forget_memory` requires approval and uses retract/soft-stop behavior.
+9. `delete_memory` is not declared until hard-delete implementation exists.
 10. Memory extraction does not run while approval is pending.
 11. Memory extraction runs after approved turn completes.
 12. Memory extraction runs after denied turn explanation completes.
 13. Memory extraction does not inspect compiled prompt or approval event JSON.
 14. Memory source stores session/message/turn reference where available.
+15. Memory proposal commands are separate from operation approval commands.
+16. Desktop memory suggestion card does not block chat.
+17. Telegram `/save_memory` approves memory proposal, not operation approval.

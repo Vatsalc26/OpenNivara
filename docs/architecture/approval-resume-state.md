@@ -376,6 +376,8 @@ The canonical resume flow is:
 
 Memory extraction is not part of approval resume. Run memory extraction only after the final assistant answer or denial explanation is stored, as defined in [Memory Proposals And Tools](memory-proposals-and-tools.md).
 
+Memory proposal approval is not part of this table or lifecycle. Proposal review stays in the memory subsystem and memory proposal UX. Do not reuse `pending_approvals`, `pending_turns`, or operation approval commands for memory proposals.
+
 Atomic execution guard:
 
 ```sql

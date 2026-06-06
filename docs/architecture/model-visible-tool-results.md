@@ -251,7 +251,7 @@ If the provider fails after the tool result was already appended:
 
 ## Memory Tool Results
 
-Explicit memory tools use the same envelope. `remember_this` and `create_memory` can return a pending proposal, saved memory, or `memory_disabled` error depending on `MemoryMode`. `update_memory`, `forget_memory`, and `delete_memory` use the same approval, denial, success, and failure shapes as other mutating tools. See [Memory Proposals And Tools](memory-proposals-and-tools.md).
+Explicit memory tools use the same envelope. `remember_this` and `create_memory` can return a pending proposal, saved memory, or `memory_disabled` error depending on `MemoryMode`. `update_memory` and `forget_memory` use the same approval, denial, success, and failure shapes as other mutating tools. `delete_memory` should not be declared until true hard-delete cleanup is implemented; until then a direct invocation should return `memory_hard_delete_not_implemented`. See [Memory Proposals And Tools](memory-proposals-and-tools.md), [Memory Retention Semantics](memory-retention-semantics.md), and [Memory Hard-Delete Cleanup Scope](memory-hard-delete-cleanup-scope.md).
 
 ## Truncation
 

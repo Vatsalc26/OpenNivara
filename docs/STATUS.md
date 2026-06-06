@@ -20,6 +20,8 @@ Product decisions:
 - Internal tool execution results, model-visible results, UI errors, previews, pending turns, and audit rows are separate contracts.
 - Pending turns freeze assembled model history; approval resume must not recompute context, skills, tools, or history.
 - Memory proposals stay separate from tool approvals; memory extraction runs only after a completed turn.
+- Memory proposal UX uses separate Desktop cards, CLI `memory proposals` commands, and Telegram memory commands; it does not reuse operation approval commands.
+- `forget_memory` retracts/stops using memory; `delete_memory` means true permanent hard delete and remains unavailable until cleanup scope is honest.
 - New architecture should land through incremental module boundaries, not one large refactor.
 - Test strategy focuses existing infrastructure on approval, recovery, tools, provider, and surface scenarios.
 - Chat-visible events, durable approval audit rows, and local developer logs are separate observability layers.

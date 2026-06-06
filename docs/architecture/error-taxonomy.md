@@ -113,6 +113,7 @@ Tool:
 - `command_timed_out`
 - `command_failed`
 - `memory_disabled`
+- `memory_hard_delete_not_implemented`
 
 Approval/recovery:
 

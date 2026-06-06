@@ -6,6 +6,8 @@ All surfaces are equal in policy. They use the same engine, state DB, approval m
 
 Surfaces should render typed `UserFacingError` values from [Error Taxonomy](error-taxonomy.md), not raw internal error strings.
 
+Memory proposal review is not operation approval. Memory proposal UX and commands are defined in [Memory Proposals And Tools](memory-proposals-and-tools.md). Do not route memory proposal save/reject actions through `pending_approvals` or `/approve`.
+
 ## Shared Response Contract
 
 Replace answer-only engine responses with a response that supports approval pause:
@@ -160,6 +162,8 @@ Keep:
 - `/approve <id>`
 - `/deny <id>`
 
+These commands are only for operation approvals.
+
 Approval message shape:
 
 ```text
@@ -188,6 +192,16 @@ Optional later detail command:
 
 - `/approval <id>`
 - `/show_approval <id>`
+
+Memory proposal Telegram commands are separate:
+
+```text
+/memory_proposals
+/save_memory <proposal_id>
+/reject_memory <proposal_id>
+```
+
+`/save_memory` approves a memory proposal, not a same-turn operation approval.
 
 ## Event Messages
 
@@ -272,6 +286,7 @@ Add tests for:
 13. Approved operation resumes same turn.
 14. Denied operation resumes same turn with denied tool result.
 15. Pending approval remains visible in same chat history.
+16. Memory proposal commands do not call operation approval handlers.
 
 ## Continue UX Update
 

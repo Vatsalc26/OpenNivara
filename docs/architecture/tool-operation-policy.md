@@ -194,13 +194,13 @@ Future implemented tool mapping:
 - `delete_file` -> `OperationKind::LocalDelete`
 - `run_command` -> `OperationKind::ShellCommand`
 
-Memory tool mapping is defined in [Memory Proposals And Tools](memory-proposals-and-tools.md):
+Memory tool mapping is defined in [Memory Proposals And Tools](memory-proposals-and-tools.md), [Memory Tool Boundaries](memory-tool-boundaries.md), and [Memory Retention Semantics](memory-retention-semantics.md):
 
 - `remember_this` -> `OperationKind::LocalModify`, governed by `MemoryMode` for proposal/save behavior
 - `create_memory` -> `OperationKind::LocalModify`, governed by `MemoryMode` for proposal/save behavior
 - `update_memory` -> `OperationKind::LocalModify`, approval required
-- `forget_memory` -> `OperationKind::LocalModify` or `OperationKind::LocalDelete`, approval required
-- `delete_memory` -> `OperationKind::LocalDelete`, approval required
+- `forget_memory` -> `OperationKind::LocalModify`, approval required, retracts/stops using memory
+- `delete_memory` -> `OperationKind::LocalDelete`, approval required, exact-ID only, unavailable until true hard delete exists
 
 Memory proposals are not tool approvals. Proposal approval saves a suggested memory; tool approval executes one same-turn operation.
 
@@ -336,6 +336,8 @@ Use liberal defaults:
 - `blocked_patterns = []` by default.
 - Do not block `.env`, `.ssh`, secrets, tokens, or credentials by default for read-only tools.
 - Remove unimplemented `open_app`, `open_url`, `write_file`, and `run_command` from generated default `tools.toml` until they exist.
+- Do not declare memory write tools when `MemoryMode` is off.
+- Do not declare `delete_memory` until hard-delete cleanup scope is fully implemented.
 
 Config meanings:
 
@@ -398,6 +400,8 @@ Add tests for:
 28. `ToolRisk` does not decide approval.
 29. Automatic read-only tools can generate preview/activity records without approval.
 30. Approval-required tool calls build `ToolPreview` before creating approval.
+31. Memory write tools are not declared when `MemoryMode` is off.
+32. `delete_memory` is not declared until hard-delete cleanup scope is implemented.
 
 ## Implementation Milestones
 
