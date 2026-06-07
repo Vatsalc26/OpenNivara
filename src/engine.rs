@@ -2,6 +2,7 @@ use crate::remote_policy;
 use crate::sessions::{self, DbMessage};
 use chrono::Utc;
 use serde::{Deserialize, Serialize};
+use specta::Type;
 use std::collections::HashSet;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
@@ -14,8 +15,9 @@ pub enum RequestSource {
     },
 }
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, Type, PartialEq, Eq)]
 #[serde(rename_all = "snake_case")]
+#[specta(rename_all = "snake_case")]
 pub enum Surface {
     Cli,
     Desktop,
@@ -80,19 +82,22 @@ impl EngineRequest {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Serialize, Deserialize, Type, PartialEq, Eq)]
+#[serde(rename_all = "snake_case")]
+#[specta(rename_all = "snake_case")]
 pub enum EngineResponseKind {
     Answer,
     ApprovalRequired,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, Type)]
 pub struct EngineResponse {
     pub request_id: String,
     pub turn_id: String,
     pub session_id: String,
     pub kind: EngineResponseKind,
     pub answer: String,
+    pub approval: Option<crate::state::views::ApprovalView>,
 }
 
 impl EngineResponse {
@@ -103,8 +108,20 @@ impl EngineResponse {
             session_id,
             kind: EngineResponseKind::Answer,
             answer,
+            approval: None,
         }
     }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, Type)]
+pub struct ApprovalActionResponse {
+    pub request_id: String,
+    pub approval_id: String,
+    pub session_id: String,
+    pub status: crate::state::types::ApprovalStatus,
+    pub message: String,
+    pub engine_response: Option<EngineResponse>,
+    pub approval: Option<crate::state::views::ApprovalView>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]

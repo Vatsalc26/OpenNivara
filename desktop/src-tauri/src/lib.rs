@@ -1,18 +1,10 @@
-use serde::{Deserialize, Serialize};
-
-#[derive(Serialize, Deserialize)]
-pub struct AskResponse {
-    pub session_id: String,
-    pub answer: String,
-}
-
 #[tauri::command]
 async fn ask_opennivara(
     message: String,
     session_id: Option<String>,
     ui_selected_skill_id: Option<String>,
     pin_selected_skill: Option<bool>,
-) -> Result<AskResponse, String> {
+) -> Result<opennivara::engine::EngineResponse, String> {
     if !opennivara::secrets::gemini_key_status()
         .map(|status| status.available)
         .unwrap_or(false)
@@ -27,7 +19,7 @@ async fn ask_opennivara(
     let engine = opennivara::engine::OpenNivaraEngine::new();
 
     // Call unified message handler
-    let response = engine
+    engine
         .handle_message(
             opennivara::engine::EngineRequest::new(
                 opennivara::engine::RequestSource::Desktop,
@@ -37,12 +29,7 @@ async fn ask_opennivara(
             .with_skill_selection(ui_selected_skill_id, pin_selected_skill.unwrap_or(false)),
         )
         .await
-        .map_err(|e| e.to_string())?;
-
-    Ok(AskResponse {
-        session_id: response.session_id,
-        answer: response.answer,
-    })
+        .map_err(|e| e.to_string())
 }
 
 #[tauri::command]

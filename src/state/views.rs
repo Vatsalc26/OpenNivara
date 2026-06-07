@@ -1,18 +1,31 @@
-#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
+use crate::state::types::{ApprovalStatus, PendingTurnPhase};
+use crate::tools::ToolPreviewEnvelope;
+use serde::{Deserialize, Serialize};
+use specta::Type;
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Type)]
 pub struct ApprovalView {
     pub approval_id: String,
     pub session_id: String,
+    pub request_id: String,
+    pub turn_id: String,
+    pub status: ApprovalStatus,
+    pub phase: Option<PendingTurnPhase>,
     pub operation_name: String,
     pub classification: String,
-    pub status: String,
-    pub summary: Option<String>,
+    pub summary: String,
     pub operation_target: Option<String>,
-    pub reason: Option<String>,
-    pub preview_json: serde_json::Value,
-    pub full_arguments_json: serde_json::Value,
+    pub reason: String,
+    pub preview: ToolPreviewEnvelope,
+    pub full_arguments_json: Option<serde_json::Value>,
     pub can_approve: bool,
     pub can_deny: bool,
-    pub can_continue: bool,
+    pub can_resume_continuation: bool,
+    pub can_retry_tool_execution: bool,
+    pub result_summary: Option<String>,
+    pub error_message: Option<String>,
+    pub last_resume_error: Option<String>,
+    pub resume_attempt_count: u32,
 }
 
 pub fn get_approval_view(
@@ -23,7 +36,8 @@ pub fn get_approval_view(
         return Ok(None);
     };
     let turn = crate::state::approvals::get_pending_turn_state(conn, approval_id)?;
-    Ok(Some(approval_view_from_parts(approval, turn)))
+    let phase = crate::state::approvals::get_pending_turn_phase(conn, approval_id)?;
+    Ok(Some(approval_view_from_parts(approval, turn, phase)))
 }
 
 pub fn list_approval_views_for_session(
@@ -34,7 +48,8 @@ pub fn list_approval_views_for_session(
         .into_iter()
         .map(|approval| {
             let turn = crate::state::approvals::get_pending_turn_state(conn, &approval.id)?;
-            Ok(approval_view_from_parts(approval, turn))
+            let phase = crate::state::approvals::get_pending_turn_phase(conn, &approval.id)?;
+            Ok(approval_view_from_parts(approval, turn, phase))
         })
         .collect()
 }
@@ -42,33 +57,55 @@ pub fn list_approval_views_for_session(
 fn approval_view_from_parts(
     approval: crate::state::types::PendingApproval,
     turn: Option<crate::state::types::PendingTurnState>,
+    phase: Option<PendingTurnPhase>,
 ) -> ApprovalView {
-    let preview_json = approval
+    let preview_details = approval
         .arguments_preview_json
         .as_deref()
         .and_then(|json| serde_json::from_str(json).ok())
         .unwrap_or(serde_json::Value::Null);
     let full_arguments_json = turn
         .map(|turn| turn.pending_tool_call)
-        .unwrap_or(serde_json::Value::Null);
-    let can_approve = approval.status == "pending";
-    let can_deny = approval.status == "pending";
-    let can_continue = matches!(approval.status.as_str(), "denied" | "executed");
+        .filter(|value| !value.is_null());
+    let status = ApprovalStatus::from_db_value(&approval.status).unwrap_or(ApprovalStatus::Failed);
+    let can_approve = status == ApprovalStatus::Pending;
+    let can_deny = status == ApprovalStatus::Pending;
+    let can_resume_continuation =
+        matches!(status, ApprovalStatus::Denied | ApprovalStatus::Executed);
+    let summary = approval
+        .summary
+        .unwrap_or_else(|| format!("{} requires approval.", approval.operation_name));
+    let preview = ToolPreviewEnvelope {
+        schema_version: 1,
+        tool_name: approval.operation_name.clone(),
+        preview_kind: "generic".to_string(),
+        operation_target: approval.operation_target.clone(),
+        summary: summary.clone(),
+        details: preview_details,
+    };
 
     ApprovalView {
         approval_id: approval.id,
         session_id: approval.session_id,
+        request_id: approval.request_id,
+        turn_id: approval.turn_id,
+        status,
+        phase,
         operation_name: approval.operation_name,
         classification: approval.classification,
-        status: approval.status,
-        summary: approval.summary,
+        summary,
         operation_target: approval.operation_target,
-        reason: approval.reason,
-        preview_json,
+        reason: approval.reason.unwrap_or_default(),
+        preview,
         full_arguments_json,
         can_approve,
         can_deny,
-        can_continue,
+        can_resume_continuation,
+        can_retry_tool_execution: false,
+        result_summary: approval.result_summary,
+        error_message: approval.error_message,
+        last_resume_error: approval.last_resume_error,
+        resume_attempt_count: approval.resume_attempt_count.try_into().unwrap_or(0),
     }
 }
 
@@ -152,10 +189,14 @@ mod tests {
             .unwrap();
 
         assert_eq!(view.approval_id, approval.id);
-        assert_eq!(view.preview_json["path"], "notes.txt");
-        assert_eq!(view.full_arguments_json["arguments"]["content"], "hello");
+        assert_eq!(view.preview.details["path"], "notes.txt");
+        assert_eq!(
+            view.full_arguments_json.unwrap()["arguments"]["content"],
+            "hello"
+        );
         assert!(view.can_approve);
         assert!(view.can_deny);
-        assert!(!view.can_continue);
+        assert!(!view.can_resume_continuation);
+        assert!(!view.can_retry_tool_execution);
     }
 }

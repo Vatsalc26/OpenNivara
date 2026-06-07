@@ -350,6 +350,14 @@ pub fn get_pending_turn_state(
     Ok(load_pending_turn(conn, approval_id)?.map(|(_, turn)| turn))
 }
 
+pub fn get_pending_turn_phase(
+    conn: &Connection,
+    approval_id: &str,
+) -> anyhow::Result<Option<PendingTurnPhase>> {
+    Ok(load_pending_turn(conn, approval_id)?
+        .and_then(|(phase, _)| PendingTurnPhase::from_db_value(&phase)))
+}
+
 pub fn list_pending_approvals_for_session(
     conn: &Connection,
     session_id: &str,

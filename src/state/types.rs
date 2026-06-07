@@ -1,3 +1,5 @@
+use specta::Type;
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub enum Surface {
     Desktop,
@@ -36,7 +38,9 @@ impl MessageRole {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize, Type)]
+#[serde(rename_all = "snake_case")]
+#[specta(rename_all = "snake_case")]
 pub enum ApprovalStatus {
     Pending,
     Denied,
@@ -57,9 +61,23 @@ impl ApprovalStatus {
             Self::Completed => "completed",
         }
     }
+
+    pub fn from_db_value(value: &str) -> Option<Self> {
+        match value {
+            "pending" => Some(Self::Pending),
+            "denied" => Some(Self::Denied),
+            "executing" => Some(Self::Executing),
+            "executed" => Some(Self::Executed),
+            "failed" => Some(Self::Failed),
+            "completed" => Some(Self::Completed),
+            _ => None,
+        }
+    }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize, Type)]
+#[serde(rename_all = "snake_case")]
+#[specta(rename_all = "snake_case")]
 pub enum PendingTurnPhase {
     AwaitingApproval,
     ToolExecutedAwaitingModel,
@@ -72,6 +90,15 @@ impl PendingTurnPhase {
             Self::AwaitingApproval => "awaiting_approval",
             Self::ToolExecutedAwaitingModel => "tool_executed_awaiting_model",
             Self::DeniedAwaitingModel => "denied_awaiting_model",
+        }
+    }
+
+    pub fn from_db_value(value: &str) -> Option<Self> {
+        match value {
+            "awaiting_approval" => Some(Self::AwaitingApproval),
+            "tool_executed_awaiting_model" => Some(Self::ToolExecutedAwaitingModel),
+            "denied_awaiting_model" => Some(Self::DeniedAwaitingModel),
+            _ => None,
         }
     }
 }

@@ -4,15 +4,13 @@ const invoke = safeInvoke;
 
 import type {
 	ApiKeyStatus,
+	EngineResponse,
 	FirstRunInput,
 	FirstRunStatus,
 } from "@/generated/backendTypes";
 import { StyleSchema } from "./schemas";
 
-export interface AskResponse {
-	session_id: string;
-	answer: string;
-}
+export type AskResponse = EngineResponse;
 
 export interface Session {
 	id: string;

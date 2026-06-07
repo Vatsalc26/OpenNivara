@@ -145,8 +145,12 @@ describe("tauriClient command contracts", () => {
 
 	test("chat, sessions, tools, and config paths call their backend commands", async () => {
 		mockTauriCommand("ask_opennivara", (args: any) => ({
+			request_id: "req_test",
+			turn_id: "turn_test",
 			session_id: args.sessionId ?? "new_session",
+			kind: "answer",
 			answer: `answer:${args.message}`,
+			approval: null,
 		}));
 		mockTauriCommand("list_sessions", [
 			{
@@ -189,8 +193,12 @@ describe("tauriClient command contracts", () => {
 		mockTauriCommand("check_api_key", true);
 
 		expect(await tauriAskOpenNivara("hello", "s1")).toEqual({
+			request_id: "req_test",
+			turn_id: "turn_test",
 			session_id: "s1",
+			kind: "answer",
 			answer: "answer:hello",
+			approval: null,
 		});
 		expect(await tauriListSessions()).toHaveLength(1);
 		expect(await tauriGetSessionMessages("s1")).toHaveLength(1);

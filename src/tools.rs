@@ -1,6 +1,65 @@
 use serde::{Deserialize, Serialize};
+use specta::Type;
 use std::fs;
 use std::path::{Path, PathBuf};
+
+#[derive(Debug, Clone, Serialize, Deserialize, Type, PartialEq)]
+pub struct ToolPreviewEnvelope {
+    pub schema_version: u32,
+    pub tool_name: String,
+    pub preview_kind: String,
+    pub operation_target: Option<String>,
+    pub summary: String,
+    pub details: serde_json::Value,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, Type, PartialEq, Eq)]
+#[serde(rename_all = "snake_case")]
+#[specta(rename_all = "snake_case")]
+pub enum ToolExecutionStatus {
+    Succeeded,
+    Failed,
+    Denied,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, Type, PartialEq, Eq)]
+pub struct ToolOutputTruncation {
+    pub original_bytes: u32,
+    pub returned_bytes: u32,
+    pub reason: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, Type, PartialEq)]
+pub struct ToolExecutionResult {
+    pub tool_name: String,
+    pub tool_call_id: String,
+    pub status: ToolExecutionStatus,
+    pub result_json: Option<serde_json::Value>,
+    pub result_summary: Option<String>,
+    pub error_code: Option<String>,
+    pub error_message: Option<String>,
+    pub truncation: Option<ToolOutputTruncation>,
+    pub started_at: String,
+    pub finished_at: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, Type, PartialEq, Eq)]
+pub struct ModelVisibleToolError {
+    pub code: String,
+    pub message: String,
+    pub recoverable: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, Type, PartialEq)]
+pub struct ModelVisibleToolResult {
+    pub ok: bool,
+    pub tool_name: String,
+    pub tool_call_id: String,
+    pub summary: String,
+    pub result: Option<serde_json::Value>,
+    pub error: Option<ModelVisibleToolError>,
+    pub metadata: Option<serde_json::Value>,
+}
 
 /// High-level struct representing the tools configuration.
 #[derive(Debug, Serialize, Deserialize, Clone)]

@@ -267,7 +267,8 @@ pub struct SessionSummary {
     pub title: String,
     pub updated_at: String,
     pub status: String,
-    pub source_created: String,
+    pub surface_created: String,
+    pub actor_id_created: Option<String>,
     pub active: bool,
 }
 
@@ -282,6 +283,23 @@ pub struct ToolSecuritySummary {
 pub fn generated_typescript() -> anyhow::Result<String> {
     let conf = Default::default();
     let exports = [
+        // Runtime / engine / approval contracts
+        ts::export::<crate::engine::Surface>(&conf)?,
+        ts::export::<crate::engine::EngineResponseKind>(&conf)?,
+        ts::export::<crate::engine::EngineResponse>(&conf)?,
+        ts::export::<crate::engine::ApprovalActionResponse>(&conf)?,
+        ts::export::<crate::state::views::ApprovalView>(&conf)?,
+        ts::export::<crate::state::types::ApprovalStatus>(&conf)?,
+        ts::export::<crate::state::types::PendingTurnPhase>(&conf)?,
+        ts::export::<crate::tools::ToolPreviewEnvelope>(&conf)?,
+        ts::export::<crate::tools::ToolExecutionStatus>(&conf)?,
+        ts::export::<crate::tools::ToolOutputTruncation>(&conf)?,
+        ts::export::<crate::tools::ToolExecutionResult>(&conf)?,
+        ts::export::<crate::tools::ModelVisibleToolError>(&conf)?,
+        ts::export::<crate::tools::ModelVisibleToolResult>(&conf)?,
+        ts::export::<crate::error::ErrorKind>(&conf)?,
+        ts::export::<crate::error::UserFacingError>(&conf)?,
+        // Existing profile/style/preferences/context/theme/session contracts
         ts::export::<ProfileIdentity>(&conf)?,
         ts::export::<ProfileLocation>(&conf)?,
         ts::export::<ProfileLanguages>(&conf)?,
@@ -392,5 +410,26 @@ mod tests {
                 bindings_path()
             );
         }
+    }
+
+    #[test]
+    fn bindings_include_shared_approval_and_engine_contracts() {
+        let generated = generated_typescript().expect("generate bindings");
+
+        for expected in [
+            "export type EngineResponse",
+            "export type EngineResponseKind = \"answer\" | \"approval_required\"",
+            "export type ApprovalView",
+            "export type ToolPreviewEnvelope",
+            "export type UserFacingError",
+            "export type ErrorKind",
+            "export type ApprovalStatus = \"pending\" | \"denied\" | \"executing\" | \"executed\" | \"failed\" | \"completed\"",
+            "export type PendingTurnPhase = \"awaiting_approval\" | \"tool_executed_awaiting_model\" | \"denied_awaiting_model\"",
+            "surface_created",
+            "actor_id_created",
+        ] {
+            assert!(generated.contains(expected), "missing {expected}");
+        }
+        assert!(!generated.contains("source_created"));
     }
 }
