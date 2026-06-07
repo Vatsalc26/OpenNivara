@@ -25,6 +25,7 @@ mod state;
 mod style;
 mod telegram;
 mod tool_operation_policy;
+mod tool_preview;
 mod tools;
 mod workspace_map;
 

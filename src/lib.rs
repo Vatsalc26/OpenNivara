@@ -27,6 +27,7 @@ pub mod state;
 pub mod style;
 pub mod telegram;
 pub mod tool_operation_policy;
+pub mod tool_preview;
 pub mod tools;
 pub mod workspace_map;
 
