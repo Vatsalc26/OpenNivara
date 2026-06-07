@@ -7,6 +7,7 @@ pub mod context;
 pub mod context_selector;
 pub mod daemon;
 pub mod engine;
+pub mod engine_foundation;
 pub mod error;
 pub mod first_run;
 pub mod llm;

@@ -11,6 +11,10 @@
 			"!**/*.css",
 			"!src/generated/backendTypes.ts",
 			"!public/mockServiceWorker.js",
+			"!node_modules-*",
+			"!**/node_modules-*",
+			"!src-tauri/target",
+			"!**/src-tauri/target",
 			"!!**/dist",
 			"!!**/test-results",
 			"!!**/playwright-report"

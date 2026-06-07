@@ -20,7 +20,7 @@ impl ModelRole {
 
     pub fn from_provider_role(role: &str) -> Self {
         match role {
-            "model" => Self::Model,
+            "assistant" | "model" => Self::Model,
             "function" | "tool" => Self::Tool,
             _ => Self::User,
         }

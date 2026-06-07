@@ -8,6 +8,9 @@ const host = process.env.TAURI_DEV_HOST;
 
 export default defineConfig({
 	plugins: [react(), tailwindcss()],
+	optimizeDeps: {
+		entries: ["index.html", "src/**/*.{ts,tsx}"],
+	},
 	resolve: {
 		alias: {
 			"@": path.resolve(__dirname, "./src"),
@@ -26,7 +29,7 @@ export default defineConfig({
 				}
 			: undefined,
 		watch: {
-			ignored: ["**/src-tauri/**"],
+			ignored: [/[\\/]src-tauri[\\/]/, /[\\/]node_modules(?:-[^\\/]+)?[\\/]/],
 		},
 	},
 });

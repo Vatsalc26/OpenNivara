@@ -61,12 +61,26 @@ Never commit `.env`, local TOML state, SQLite databases, logs, generated artifac
 Run the actual desktop application in development:
 
 ```bash
+bun install --cwd desktop
+bun run --cwd desktop tauri:dev
+```
+
+Equivalent commands from inside `desktop/`:
+
+```bash
 cd desktop
-bun install --frozen-lockfile
+bun install
 bun run tauri:dev
 ```
 
 `bun run dev` starts Vite for browser/frontend iteration only. It does not run the full desktop app and should not be used to validate Rust-backed desktop behavior.
+
+On Windows, if `bun install` prints many `Failed to link ... EUNKNOWN` errors, stop any running desktop dev server, remove `desktop/node_modules`, and run the install again:
+
+```powershell
+Remove-Item -Recurse -Force desktop\node_modules
+bun install --cwd desktop
+```
 
 For a production frontend build:
 

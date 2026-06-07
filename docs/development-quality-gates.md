@@ -43,7 +43,28 @@ cargo test --workspace
 
 ## 3. React Frontend Quality Checks
 
-Run these commands from the `desktop/` directory:
+Install desktop dependencies and start the real Tauri desktop app from the repo root:
+
+```bash
+bun install --cwd desktop
+bun run --cwd desktop tauri:dev
+```
+
+The equivalent workflow from inside `desktop/` is:
+
+```bash
+bun install
+bun run tauri:dev
+```
+
+On Windows, if Bun prints many `Failed to link ... EUNKNOWN` errors during install, stop any running desktop dev server, delete `desktop/node_modules`, and retry:
+
+```powershell
+Remove-Item -Recurse -Force desktop\node_modules
+bun install --cwd desktop
+```
+
+Run the following frontend quality commands from the `desktop/` directory:
 
 ### A. Code Style and Lints
 We use **Biome** for lightning-fast linting and formatting verification:

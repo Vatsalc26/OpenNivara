@@ -450,9 +450,20 @@ impl OpenNivaraEngine {
         Ok(context_preview_from_compiler(compiled))
     }
 
-    /// Handles a new message from CLI or Telegram, resolving sessions, managing database state,
-    /// constructing multi-turn context, invoking Gemini 2.5 Flash, executing tools safely, and returning the result.
+    /// Handles a new message with the configured Gemini provider.
     pub async fn handle_message(&self, request: EngineRequest) -> anyhow::Result<EngineResponse> {
+        let api_key = crate::secrets::get_gemini_api_key()?;
+        let provider = crate::model::gemini::GeminiProvider::new(api_key);
+        self.handle_message_with_provider(request, &provider).await
+    }
+
+    /// Handles a new message from CLI or Telegram, resolving sessions, managing database state,
+    /// constructing multi-turn context, invoking the provided model, executing tools safely, and returning the result.
+    pub async fn handle_message_with_provider<P: ModelProvider>(
+        &self,
+        request: EngineRequest,
+        provider: &P,
+    ) -> anyhow::Result<EngineResponse> {
         // 1. Initialize and connect to the sessions database
         let conn = sessions::init_db()?;
 
@@ -627,10 +638,6 @@ impl OpenNivaraEngine {
         } else {
             Some(HashSet::new())
         };
-
-        // 8. Configure model provider
-        let api_key = crate::secrets::get_gemini_api_key()?;
-        let provider = crate::model::gemini::GeminiProvider::new(api_key);
 
         let max_rounds = tools_config
             .as_ref()
