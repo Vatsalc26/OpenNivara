@@ -3,6 +3,8 @@ use specta::Type;
 use std::fs;
 use std::path::{Path, PathBuf};
 
+use crate::tool_operation_policy::{OperationDecision, OperationKind};
+
 #[derive(Debug, Clone, Serialize, Deserialize, Type, PartialEq)]
 pub struct ToolPreviewEnvelope {
     pub schema_version: u32,
@@ -103,6 +105,7 @@ pub struct ToolDefinition {
     pub description: String,
     pub parameters: serde_json::Value,
     pub risk_level: ToolRisk,
+    pub operation_kind: OperationKind,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
@@ -142,6 +145,7 @@ impl ToolRegistry {
                     "properties": {}
                 }),
                 risk_level: ToolRisk::Low,
+                operation_kind: OperationKind::ReadOnly,
             },
             ToolDefinition {
                 name: "list_dir".to_string(),
@@ -159,6 +163,7 @@ impl ToolRegistry {
                     "required": ["path"]
                 }),
                 risk_level: ToolRisk::Low,
+                operation_kind: OperationKind::ReadOnly,
             },
             ToolDefinition {
                 name: "file_exists".to_string(),
@@ -174,6 +179,7 @@ impl ToolRegistry {
                     "required": ["path"]
                 }),
                 risk_level: ToolRisk::Low,
+                operation_kind: OperationKind::ReadOnly,
             },
             ToolDefinition {
                 name: "read_file".to_string(),
@@ -190,6 +196,7 @@ impl ToolRegistry {
                     "required": ["path"]
                 }),
                 risk_level: ToolRisk::Medium,
+                operation_kind: OperationKind::ReadOnly,
             },
         ];
 
@@ -203,6 +210,7 @@ impl ToolRegistry {
                         "properties": {}
                     }),
                     risk_level: ToolRisk::Low,
+                    operation_kind: OperationKind::ReadOnly,
                 },
                 ToolDefinition {
                     name: "map_tree".to_string(),
@@ -217,6 +225,7 @@ impl ToolRegistry {
                         }
                     }),
                     risk_level: ToolRisk::Low,
+                    operation_kind: OperationKind::ReadOnly,
                 },
                 ToolDefinition {
                     name: "map_search".to_string(),
@@ -232,6 +241,7 @@ impl ToolRegistry {
                         "required": ["query"]
                     }),
                     risk_level: ToolRisk::Low,
+                    operation_kind: OperationKind::ReadOnly,
                 },
                 ToolDefinition {
                     name: "map_get_node".to_string(),
@@ -247,6 +257,7 @@ impl ToolRegistry {
                         "required": ["path"]
                     }),
                     risk_level: ToolRisk::Low,
+                    operation_kind: OperationKind::ReadOnly,
                 },
             ]);
         }
@@ -358,6 +369,19 @@ impl ToolRegistry {
         }
     }
 
+    pub fn classify_tool_call(&self, name: &str, args: &serde_json::Value) -> OperationDecision {
+        self.definition(name).map_or_else(
+            || crate::tool_operation_policy::classify_unknown_tool(name),
+            |definition| {
+                crate::tool_operation_policy::classify_tool_operation(
+                    &definition.name,
+                    definition.operation_kind,
+                    args,
+                )
+            },
+        )
+    }
+
     fn settings_for(&self, name: &str, config: &ToolsConfig) -> ToolSettings {
         config
             .tools
@@ -437,8 +461,9 @@ pub fn validate_and_resolve_path(
         }
     }
 
-    // 4. Verify that the path resides within at least one allowed root
-    let mut is_allowed = false;
+    // 4. Verify that the path resides within at least one allowed root.
+    // Empty allowed roots are intentionally unrestricted for local-first read-only tools.
+    let mut is_allowed = allowed_roots.is_empty();
     for root in allowed_roots {
         let root_path = if Path::new(root).is_absolute() {
             Path::new(root).to_path_buf()
@@ -462,6 +487,33 @@ pub fn validate_and_resolve_path(
     Ok(cleaned_path)
 }
 
+pub const DEFAULT_TOOLS_TOML: &str = r#"[general]
+enabled = true
+max_tool_rounds = 3
+show_tool_activity = true
+
+[paths]
+allowed_roots = []
+blocked_patterns = []
+
+[tools.get_current_dir]
+enabled = true
+requires_confirmation = false
+
+[tools.list_dir]
+enabled = true
+requires_confirmation = false
+
+[tools.file_exists]
+enabled = true
+requires_confirmation = false
+
+[tools.read_file]
+enabled = true
+requires_confirmation = false
+max_bytes = 20000
+"#;
+
 /// Finds the OS-specific path where the tools.toml should reside.
 pub fn get_tools_path() -> anyhow::Result<PathBuf> {
     Ok(crate::config_paths::config_dir()?.join("tools.toml"))
@@ -484,63 +536,7 @@ pub fn init_tools() -> anyhow::Result<String> {
             .map_err(|e| anyhow::anyhow!("Failed to create tools parent directories: {}", e))?;
     }
 
-    let default_tools_toml = r#"[general]
-enabled = true
-max_tool_rounds = 3
-show_tool_activity = true
-
-[paths]
-allowed_roots = [
-  "."
-]
-
-blocked_patterns = [
-  ".env",
-  ".ssh",
-  "id_rsa",
-  "id_ed25519",
-  "secrets",
-  "secret",
-  "token",
-  "password",
-  "credentials"
-]
-
-[tools.get_current_dir]
-enabled = true
-requires_confirmation = false
-
-[tools.list_dir]
-enabled = true
-requires_confirmation = false
-
-[tools.file_exists]
-enabled = true
-requires_confirmation = false
-
-[tools.read_file]
-enabled = false
-requires_confirmation = true
-max_bytes = 20000
-
-[tools.open_app]
-enabled = false
-requires_confirmation = true
-
-[tools.open_url]
-enabled = false
-requires_confirmation = true
-
-[tools.write_file]
-enabled = false
-requires_confirmation = true
-
-[tools.run_command]
-enabled = false
-requires_confirmation = true
-"#;
-
-    fs::write(&path, default_tools_toml)
+    fs::write(&path, DEFAULT_TOOLS_TOML)
         .map_err(|e| anyhow::anyhow!("Failed to write default tools.toml: {}", e))?;
 
     Ok(format!(
