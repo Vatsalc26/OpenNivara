@@ -11,6 +11,7 @@ mod first_run;
 mod llm;
 mod marketplace;
 mod memory;
+mod model;
 mod output;
 mod preferences;
 mod profile;

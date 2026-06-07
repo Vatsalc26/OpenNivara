@@ -5,6 +5,9 @@ use serde::{Deserialize, Serialize};
 use specta::Type;
 use std::collections::HashSet;
 
+use crate::model::provider::ModelProvider;
+use crate::model::types::{ModelMessage, ModelRequest, ModelRole, ModelToolDeclaration};
+
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub enum RequestSource {
     Cli,
@@ -285,18 +288,6 @@ fn tool_execution_policy_error(
     None
 }
 
-fn gemini_generate_content_url() -> &'static str {
-    "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent"
-}
-
-fn sanitize_provider_error(message: &str, api_key: &str) -> String {
-    let trimmed_key = api_key.trim();
-    if trimmed_key.is_empty() {
-        return message.to_string();
-    }
-    message.replace(trimmed_key, "[REDACTED_API_KEY]")
-}
-
 fn context_preview_from_compiler(
     compiled: crate::memory::types::ContextCompilerOutput,
 ) -> ContextPreview {
@@ -352,15 +343,8 @@ fn current_workspace_context() -> Option<String> {
         .map(|path| format!("Workspace map database available at {}.", path.display()))
 }
 
-fn content_from_text(role: &str, text: String) -> Content {
-    Content {
-        role: role.to_string(),
-        parts: vec![Part {
-            text: Some(text),
-            function_call: None,
-            function_response: None,
-        }],
-    }
+fn content_from_text(role: &str, text: String) -> ModelMessage {
+    ModelMessage::text(ModelRole::from_provider_role(role), text)
 }
 
 fn build_history_with_compiled_current(
@@ -368,7 +352,7 @@ fn build_history_with_compiled_current(
     current_user_message: &str,
     compiled_current_prompt: String,
     max_previous_messages: usize,
-) -> Vec<Content> {
+) -> Vec<ModelMessage> {
     let prior_end = conversational_msgs
         .last()
         .filter(|msg| msg.role == "user" && msg.content == current_user_message)
@@ -377,83 +361,12 @@ fn build_history_with_compiled_current(
     let prior_msgs = &conversational_msgs[..prior_end];
     let start_idx = prior_msgs.len().saturating_sub(max_previous_messages);
 
-    let mut history: Vec<Content> = prior_msgs[start_idx..]
+    let mut history: Vec<ModelMessage> = prior_msgs[start_idx..]
         .iter()
         .map(|msg| content_from_text(&msg.role, msg.content.clone()))
         .collect();
     history.push(content_from_text("user", compiled_current_prompt));
     history
-}
-
-// Re-using Gemini structures from llm or defining them here for complete independence
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct Content {
-    pub role: String,
-    pub parts: Vec<Part>,
-}
-
-#[derive(Debug, Serialize, Deserialize, Clone)]
-#[serde(rename_all = "camelCase")]
-pub struct Part {
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub text: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub function_call: Option<FunctionCall>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub function_response: Option<FunctionResponse>,
-}
-
-#[derive(Debug, Serialize, Deserialize, Clone)]
-#[serde(rename_all = "camelCase")]
-pub struct FunctionCall {
-    pub name: String,
-    pub args: serde_json::Value,
-}
-
-#[derive(Debug, Serialize, Deserialize, Clone)]
-#[serde(rename_all = "camelCase")]
-pub struct FunctionResponse {
-    pub name: String,
-    pub response: serde_json::Value,
-}
-
-#[derive(Debug, Serialize)]
-struct GeminiRequest {
-    contents: Vec<Content>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    tools: Option<Vec<Tool>>,
-}
-
-#[derive(Debug, Serialize, Clone)]
-struct Tool {
-    #[serde(rename = "functionDeclarations")]
-    function_declarations: Vec<FunctionDeclaration>,
-}
-
-#[derive(Debug, Serialize, Clone)]
-struct FunctionDeclaration {
-    name: String,
-    description: String,
-    parameters: serde_json::Value,
-    #[serde(skip)]
-    risk_level: crate::tools::ToolRisk,
-}
-
-#[derive(Debug, Deserialize)]
-struct GeminiResponse {
-    candidates: Option<Vec<Candidate>>,
-    error: Option<ApiErrorDetail>,
-}
-
-#[derive(Debug, Deserialize)]
-struct Candidate {
-    content: Option<Content>,
-}
-
-#[derive(Debug, Deserialize)]
-struct ApiErrorDetail {
-    code: Option<i32>,
-    message: Option<String>,
 }
 
 impl Default for OpenNivaraEngine {
@@ -643,7 +556,7 @@ impl OpenNivaraEngine {
             .as_ref()
             .map(|c| c.general.enabled)
             .unwrap_or(false);
-        let mut tools_declaration = None;
+        let mut tools_declaration = Vec::new();
 
         if tools_enabled {
             let has_map = if let Ok(db_path) = crate::workspace_map::get_db_path() {
@@ -651,7 +564,6 @@ impl OpenNivaraEngine {
             } else {
                 false
             };
-            let mut decls = Vec::new();
             let registry = crate::tools::ToolRegistry::new(has_map);
             let selected_skill_tool_allowlist = selected_skill_tool_allowlist(
                 &preview.selected_skills,
@@ -660,7 +572,7 @@ impl OpenNivaraEngine {
                     .as_ref()
                     .expect("tools_config is present when tools_enabled is true"),
             );
-            let functions: Vec<FunctionDeclaration> = registry
+            let functions: Vec<_> = registry
                 .declared_definitions(
                     tools_config
                         .as_ref()
@@ -668,16 +580,10 @@ impl OpenNivaraEngine {
                     selected_skill_tool_allowlist.as_ref(),
                 )
                 .into_iter()
-                .map(|definition| FunctionDeclaration {
-                    name: definition.name,
-                    description: definition.description,
-                    parameters: definition.parameters,
-                    risk_level: definition.risk_level,
-                })
                 .collect();
 
             // Filter declarations by source policy before exposing tools to Gemini.
-            let filtered_functions: Vec<FunctionDeclaration> = functions
+            let filtered_functions: Vec<ModelToolDeclaration> = functions
                 .into_iter()
                 .filter(|f| {
                     if let Some(ref t_config) = telegram_config {
@@ -694,13 +600,15 @@ impl OpenNivaraEngine {
                     }
                     true
                 })
+                .map(|definition| ModelToolDeclaration {
+                    name: definition.name,
+                    description: definition.description,
+                    parameters: definition.parameters,
+                })
                 .collect();
 
             if !filtered_functions.is_empty() {
-                decls.push(Tool {
-                    function_declarations: filtered_functions,
-                });
-                tools_declaration = Some(decls);
+                tools_declaration = filtered_functions;
             }
         }
         let selected_skill_tool_allowlist = if let Some(ref config) = tools_config {
@@ -720,11 +628,9 @@ impl OpenNivaraEngine {
             Some(HashSet::new())
         };
 
-        // 8. Configure Gemini Endpoint details
+        // 8. Configure model provider
         let api_key = crate::secrets::get_gemini_api_key()?;
-
-        let client = reqwest::Client::new();
-        let url = gemini_generate_content_url();
+        let provider = crate::model::gemini::GeminiProvider::new(api_key);
 
         let max_rounds = tools_config
             .as_ref()
@@ -738,72 +644,19 @@ impl OpenNivaraEngine {
 
         // 9. Tool Calling Dialogue loop
         let answer = loop {
-            let request_payload = GeminiRequest {
-                contents: history.clone(),
-                tools: tools_declaration.clone(),
-            };
-
-            let response = client
-                .post(url)
-                .header("x-goog-api-key", api_key.trim())
-                .json(&request_payload)
-                .send()
-                .await
-                .map_err(|e| anyhow::anyhow!("Gemini API connection error: {}", e))?;
-
-            let status = response.status();
-            let response_text = response
-                .text()
-                .await
-                .map_err(|e| anyhow::anyhow!("Failed to read response body: {}", e))?;
-
-            let api_response: GeminiResponse =
-                serde_json::from_str(&response_text).map_err(|e| {
-                    anyhow::anyhow!(
-                        "Failed to parse Gemini API JSON response: {}\nRaw Response: {}",
-                        e,
-                        sanitize_provider_error(&response_text, &api_key)
-                    )
-                })?;
-
-            if let Some(err) = api_response.error {
-                return Err(anyhow::anyhow!(
-                    "Gemini API Error ({}): {}",
-                    err.code.unwrap_or(0),
-                    sanitize_provider_error(&err.message.unwrap_or_default(), &api_key)
-                ));
-            }
-
-            if !status.is_success() {
-                return Err(anyhow::anyhow!(
-                    "Gemini API returned unsuccessful status {}: {}",
-                    status,
-                    sanitize_provider_error(&response_text, &api_key)
-                ));
-            }
-
-            let candidate = api_response
-                .candidates
-                .as_ref()
-                .and_then(|c| c.first())
-                .ok_or_else(|| anyhow::anyhow!("Gemini response contains no candidates."))?;
-
-            let content = candidate
-                .content
-                .as_ref()
-                .ok_or_else(|| anyhow::anyhow!("Gemini response candidate contains no content."))?;
+            let model_response = provider
+                .generate(ModelRequest {
+                    messages: history.clone(),
+                    tools: tools_declaration.clone(),
+                })
+                .await?;
+            let content = model_response.message;
 
             // Push model dialogue turn to temporary thread history
             history.push(content.clone());
 
             // Inspect if a tool function call was requested
-            let mut requested_call = None;
-            for part in &content.parts {
-                if let Some(call) = &part.function_call {
-                    requested_call = Some(call.clone());
-                    break;
-                }
-            }
+            let requested_call = content.first_tool_call().cloned();
 
             if let Some(call) = requested_call {
                 if current_round >= max_rounds {
@@ -815,19 +668,13 @@ impl OpenNivaraEngine {
                         }
                     }
 
-                    history.push(Content {
-                        role: "function".to_string(),
-                        parts: vec![Part {
-                            text: None,
-                            function_call: None,
-                            function_response: Some(FunctionResponse {
-                                name: call.name.clone(),
-                                response: serde_json::json!({
-                                    "error": format!("Tool execution halted: maximum rounds limit ({}) was reached.", max_rounds)
-                                }),
-                            }),
-                        }],
-                    });
+                    history.push(ModelMessage::tool_result(
+                        call.tool_call_id,
+                        call.name,
+                        serde_json::json!({
+                            "error": format!("Tool execution halted: maximum rounds limit ({}) was reached.", max_rounds)
+                        }),
+                    ));
                     current_round += 1;
                     continue;
                 }
@@ -839,23 +686,17 @@ impl OpenNivaraEngine {
                     &request.source,
                     tools_config.as_ref(),
                 ) {
-                    history.push(Content {
-                        role: "function".to_string(),
-                        parts: vec![Part {
-                            text: None,
-                            function_call: None,
-                            function_response: Some(FunctionResponse {
-                                name: call.name.clone(),
-                                response: policy_error,
-                            }),
-                        }],
-                    });
+                    history.push(ModelMessage::tool_result(
+                        call.tool_call_id,
+                        call.name,
+                        policy_error,
+                    ));
                     current_round += 1;
                     continue;
                 }
 
                 // Log or print activity
-                let args_str = serde_json::to_string(&call.args).unwrap_or_default();
+                let args_str = serde_json::to_string(&call.arguments).unwrap_or_default();
                 match &request.source {
                     RequestSource::Cli => {
                         if show_activity {
@@ -888,8 +729,11 @@ impl OpenNivaraEngine {
                     false
                 };
                 let mut tool_result = if let Some(ref t_config) = tools_config {
-                    crate::tools::ToolRegistry::new(has_map)
-                        .execute(&call.name, &call.args, t_config)
+                    crate::tools::ToolRegistry::new(has_map).execute(
+                        &call.name,
+                        &call.arguments,
+                        t_config,
+                    )
                 } else {
                     serde_json::json!({ "error": "Local tools are not initialized." })
                 };
@@ -914,32 +758,18 @@ impl OpenNivaraEngine {
                 }
 
                 // Feed response back to conversation loop history
-                history.push(Content {
-                    role: "function".to_string(),
-                    parts: vec![Part {
-                        text: None,
-                        function_call: None,
-                        function_response: Some(FunctionResponse {
-                            name: call.name.clone(),
-                            response: tool_result,
-                        }),
-                    }],
-                });
+                history.push(ModelMessage::tool_result(
+                    call.tool_call_id,
+                    call.name,
+                    tool_result,
+                ));
 
                 current_round += 1;
                 continue;
             }
 
             // Expose conversational text reply
-            let mut final_text = None;
-            for part in &content.parts {
-                if let Some(text) = &part.text {
-                    final_text = Some(text.clone());
-                    break;
-                }
-            }
-
-            match final_text {
+            match content.first_text() {
                 Some(text) => break text.trim().to_string(),
                 None => {
                     return Err(anyhow::anyhow!(
@@ -1156,23 +986,19 @@ mod tests {
         );
 
         assert_eq!(history.len(), 3);
-        assert_eq!(history[0].role, "user");
-        assert_eq!(history[1].role, "model");
-        assert_eq!(history[2].role, "user");
+        assert_eq!(history[0].role, ModelRole::User);
+        assert_eq!(history[1].role, ModelRole::Model);
+        assert_eq!(history[2].role, ModelRole::User);
         assert_eq!(
-            history[2].parts[0].text.as_deref(),
+            history[2].first_text(),
             Some("compiled prompt with Current User Message: current question")
         );
-        assert!(!history[0].parts[0]
-            .text
-            .as_deref()
-            .unwrap()
-            .contains("compiled prompt"));
+        assert!(!history[0].first_text().unwrap().contains("compiled prompt"));
     }
 
     #[test]
     fn gemini_endpoint_does_not_put_api_key_in_url() {
-        let url = gemini_generate_content_url();
+        let url = crate::model::gemini::gemini_generate_content_url();
 
         assert!(!url.contains("?key="));
         assert!(!url.contains("raw-secret"));

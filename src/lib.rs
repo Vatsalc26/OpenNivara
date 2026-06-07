@@ -12,6 +12,7 @@ pub mod first_run;
 pub mod llm;
 pub mod marketplace;
 pub mod memory;
+pub mod model;
 pub mod output;
 pub mod preferences;
 pub mod profile;
